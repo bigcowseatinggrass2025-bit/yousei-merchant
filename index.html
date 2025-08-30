@@ -2255,13 +2255,13 @@ function handleTradeSuccess(playerIndex) {
     addEvent(`${player.name} 成功了一次交易`);
     
     // 随机触发环境事件（30%概率）- 独立触发，不影响其他系统
-    if (Math.random() < 0.3) {
+    if (Math.random() < 0.35) {
         triggerRandomEvent(playerIndex);
     }
     
     // 随机触发神秘商人（15%概率）- 触发时会阻止彩票选择
     let merchantTriggered = false;
-    if (Math.random() < 0.15) {
+    if (Math.random() < 0.25) {
         triggerMysteriousMerchant(playerIndex);
         merchantTriggered = true;
     }
@@ -2877,4 +2877,5 @@ confirmPurchaseBtn.addEventListener('click', function() {
     </script>
 
 </body>
+
 </html>
