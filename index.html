@@ -1243,14 +1243,7 @@
     <button id="musicToggle" class="btn-warning">背景音樂: 開啟</button>
     <button id="soundToggle" class="btn-warning">音效: 開啟</button>
     
-    <!-- 新增音量控制按钮 -->
-    <div class="volume-controls" style="display: flex; gap: 5px; margin-top: 10px; align-items: center;">
-        <button id="volumeDown" class="btn-warning" style="padding: 5px 10px; font-size: 12px;">－</button>
-        <input type="range" id="volumeSlider" min="0" max="100" value="100" style="width: 80px;">
-        <button id="volumeUp" class="btn-warning" style="padding: 5px 10px; font-size: 12px;">＋</button>
-        <button id="volumeMute" class="btn-warning" style="padding: 5px 10px; font-size: 12px;">静音</button>
-    </div>
-</div>
+
             
             <div class="input-group">
                 <label for="player-color">選擇顏色</label>
@@ -1465,60 +1458,7 @@ const bgMusic = document.getElementById('bgMusic');
 const musicToggle = document.getElementById('musicToggle');
 const soundToggle = document.getElementById('soundToggle');
 
-// 获取音量控制元素
-const volumeSlider = document.getElementById('volumeSlider');
-const volumeDown = document.getElementById('volumeDown');
-const volumeUp = document.getElementById('volumeUp');
-const volumeMute = document.getElementById('volumeMute');
 
-// 音量控制功能
-volumeSlider.addEventListener('input', function() {
-    bgMusic.volume = this.value / 100;
-    updateVolumeButtons();
-});
-
-volumeDown.addEventListener('click', function() {
-    bgMusic.volume = Math.max(0, bgMusic.volume - 0.1);
-    volumeSlider.value = bgMusic.volume * 100;
-    updateVolumeButtons();
-});
-
-volumeUp.addEventListener('click', function() {
-    bgMusic.volume = Math.min(1, bgMusic.volume + 0.1);
-    volumeSlider.value = bgMusic.volume * 100;
-    updateVolumeButtons();
-});
-
-volumeMute.addEventListener('click', function() {
-    if (bgMusic.volume > 0) {
-        // 保存当前音量并静音
-        bgMusic.dataset.lastVolume = bgMusic.volume;
-        bgMusic.volume = 0;
-        volumeSlider.value = 0;
-        this.textContent = '取消静音';
-    } else {
-        // 恢复上次的音量
-        bgMusic.volume = parseFloat(bgMusic.dataset.lastVolume || 0.7);
-        volumeSlider.value = bgMusic.volume * 100;
-        this.textContent = '静音';
-    }
-    updateVolumeButtons();
-});
-
-// 更新音量按钮状态
-function updateVolumeButtons() {
-    volumeDown.disabled = bgMusic.volume <= 0;
-    volumeUp.disabled = bgMusic.volume >= 1;
-    
-    if (bgMusic.volume === 0) {
-        volumeMute.textContent = '取消静音';
-    } else {
-        volumeMute.textContent = '静音';
-    }
-}
-
-// 初始化音量控制
-updateVolumeButtons();
 			
 // 背景音乐控制
 musicToggle.addEventListener('click', function() {
@@ -3061,5 +3001,6 @@ confirmPurchaseBtn.addEventListener('click', function() {
 </body>
 
 </html>
+
 
 
