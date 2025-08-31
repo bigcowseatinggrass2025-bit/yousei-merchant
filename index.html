@@ -2834,20 +2834,20 @@
                 savePlayers();
                 addEvent(`${player.name} 成功了一次交易`);
                 
-                // 随机触发环境事件（45%概率）- 独立触发，不影响其他系统
-                if (Math.random() < 0.45) {
+                // 随机触发环境事件（50%概率）- 独立触发，不影响其他系统
+                if (Math.random() < 0.50) {
                     triggerRandomEvent(playerIndex);
                 }
                 
-                // 随机触发神秘商人（15%概率）- 触发时会阻止彩票选择
+                // 随机触发神秘商人（25%概率）- 触发时会阻止彩票选择
                 let merchantTriggered = false;
-                if (Math.random() < 0.35) {
+                if (Math.random() < 0.25) {
                     triggerMysteriousMerchant(playerIndex);
                     merchantTriggered = true;
                 }
                 
-                // 随机触发神兽觉醒（10%概率）
-                if (Math.random() < 0.10 && player.activeGuardian && !player.guardianEvolved) {
+                // 随机触发神兽觉醒（5%概率）
+                if (Math.random() < 0.05 && player.activeGuardian && !player.guardianEvolved) {
                     // 同时设置可以进化和满足交易次数条件
                     player.canEvolve = true;
                     player.guardianTrades = 10; // 直接设置为满足进化条件
@@ -3768,3 +3768,4 @@
 </body>
 
 </html>
+
