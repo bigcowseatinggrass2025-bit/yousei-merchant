@@ -1,0 +1,3507 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幽街商人 - 桌遊計分器</title>
+	    /* ==================== CSS 变量和基础样式CSS规则 ==================== */
+    <style>
+        /* CSS 变量定义 */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #1abc9c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --rarity-normal: #ffffff;
+            --rarity-magic: #8888ff;
+            --rarity-rare: #ffff00;
+            --rarity-epic: #ff44ff;
+            --rarity-legendary: #ff8800;
+            --rarity-divine: #ffcc00;
+            --ghost-color: #3498db;
+            --fairy-color: #9b59b6;
+            --king-color: #2c3e50;
+            --special-event-color: #8e44ad;
+            --guardian-bull: #8B4513;
+            --guardian-tiger: #9E9E9E;
+            --guardian-dragon: #008080;
+            --guardian-phoenix: #FF4500;
+            --guardian-turtle: #006400;
+        }
+
+
+/* 强化觉醒护法的发光效果 */
+.player-card.has-guardian.evolved {
+    animation: evolved-glow-intense 1.5s infinite alternate;
+    border-width: 3px;
+    position: relative;
+    overflow: visible;
+    z-index: 2;
+}
+
+/* 更强烈的发光效果 */
+@keyframes evolved-glow-intense {
+    from { 
+        box-shadow: 0 0 20px var(--guardian-color),
+                   0 0 40px rgba(255, 255, 255, 0.8),
+                   0 0 60px var(--guardian-color);
+    }
+    to { 
+        box-shadow: 0 0 40px var(--guardian-color),
+                   0 0 80px rgba(255, 255, 255, 1),
+                   0 0 120px var(--guardian-color),
+                   0 0 160px var(--guardian-color);
+    }
+}
+
+/* 添加脉动效果 */
+@keyframes pulse-glow {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.03);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+}
+
+/* 添加粒子效果容器 */
+.particle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* 粒子样式 */
+.particle {
+    position: absolute;
+    background: radial-gradient(circle, var(--particle-color) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: particle-float 3s infinite linear;
+}
+
+@keyframes particle-float {
+    0% {
+        transform: translateY(100%) translateX(0);
+        opacity: 0;
+        width: 2px;
+        height: 2px;
+    }
+    10% {
+        opacity: 0.7;
+    }
+    90% {
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateY(-100%) translateX(var(--translate-x));
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+    }
+}
+
+/* 神兽觉醒按钮特效增强 */
+.evolution-trigger-btn.evolved {
+    animation: evolved-btn-glow 1s infinite alternate;
+    background: linear-gradient(135deg, #ff6b6b, #c0392b, #ff6b6b);
+    background-size: 200% 100%;
+    animation: evolved-btn-glow 1.5s infinite alternate, gradient-shift 2s infinite alternate;
+}
+
+@keyframes evolved-btn-glow {
+    from { 
+        box-shadow: 0 0 5px #ff6b6b,
+                   0 0 10px #ff0000;
+    }
+    to { 
+        box-shadow: 0 0 15px #ff6b6b,
+                   0 0 25px #ff0000,
+                   0 0 35px #ff6b6b;
+    }
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+/* 添加神兽觉醒标识 */
+.guardian-evolved-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    background: gold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 10;
+    animation: badge-pulse 2s infinite;
+    box-shadow: 0 0 15px gold;
+}
+
+@keyframes badge-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+/* 添加边框流动光效 */
+.glow-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.glow-border::before {
+    content: '';
+    position: absolute;
+    top: -150%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to bottom right,
+        transparent,
+        transparent,
+        transparent,
+        var(--guardian-color),
+        transparent,
+        transparent,
+        transparent
+    );
+    animation: border-glow-flow 3s infinite linear;
+    transform: rotate(45deg);
+}
+
+@keyframes border-glow-flow {
+    0% {
+        top: -150%;
+    }
+    100% {
+        top: 150%;
+    }
+}
+
+        /* 基础样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-image: url('https://imgur.com/HRitVLT.jpg');
+            background-size: 100% 100%;
+            background-position: 70% center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin: 20px auto !important;
+            transform: translateX(-350px);
+        }
+        
+        /* 头部样式 */
+        header {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px;
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        /* 玩家设置区域 */
+        .player-setup {
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: var(--light-color);
+            border-bottom: 2px solid #bdc3c7;
+        }
+        
+        .input-group {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+        
+        /* 按钮样式 */
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #27ae60;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        
+        .btn-warehouse {
+            background: linear-gradient(135deg, #6b3fa0, #4a235a);
+            color: white;
+            margin-top: 5px;
+            width: 100%;
+            display: none;
+            border: 2px solid #8e44ad;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            animation: warehouse-glow 2s infinite alternate;
+        }
+        
+        .btn-warehouse:hover {
+            background: linear-gradient(135deg, #7d4fb2, #5c2c6d);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4);
+        }
+        
+        /* 走马灯样式 */
+        .marquee-container {
+            padding: 15px 20px;
+            background: #2c3e50;
+            color: white;
+            border-bottom: 2px solid #1a2530;
+            overflow: hidden;
+            position: relative;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .marquee-content {
+            position: absolute;
+            white-space: nowrap;
+            animation: marquee 30s linear infinite;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding-left: 100%;
+        }
+        
+        .marquee-content.priority {
+            animation: marquee-priority 30s linear forwards;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .marquee-content.special {
+            animation: marquee-priority 30s linear forwards;
+            color: #d8bfd8;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(142, 68, 173, 0.8);
+        }
+        
+        /* 难度选择按钮样式 */
+        .difficulty-toggle {
+            position: fixed;
+            bottom: 60px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(44, 62, 80, 0.8);
+            padding: 8px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .difficulty-toggle span {
+            padding: 4px 8px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        
+        .difficulty-toggle .easy {
+            background: var(--success-color);
+        }
+        
+        .difficulty-toggle .hard {
+            background: var(--danger-color);
+        }
+        
+        .difficulty-toggle .active {
+            font-weight: bold;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+        }
+        
+        /* 主内容区域 */
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .players-container {
+            flex: 2;
+            min-width: 300px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        /* 玩家卡片样式 */
+        .player-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+            border-left: 5px solid var(--secondary-color);
+            position: relative;
+        }
+        
+        .player-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .player-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .player-stats {
+            margin-bottom: 15px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        
+        .lottery-history {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px dashed #ddd;
+        }
+        
+        .lottery-history span {
+            display: inline-block;
+            margin: 3px;
+            padding: 5px 10px;
+            background: var(--info-color);
+            color: white;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .trade-btn {
+            margin-top: auto;
+            padding: 15px;
+            font-size: 1.2rem;
+            background: var(--success-color);
+        }
+        
+        .trade-btn:hover {
+            background: #27ae60;
+        }
+        
+        /* 事件容器样式 */
+        .events-container {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .events-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--info-color);
+        }
+        
+        .events-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .event-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid var(--info-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .event-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .event-global {
+            border-left-color: var(--warning-color);
+            background: #fffaf0;
+        }
+        
+        .event-individual {
+            border-left-color: var(--danger-color);
+            background: #fff5f5;
+        }
+        
+        .event-lottery {
+            border-left-color: #9b59b6;
+            background: #f8f0ff;
+        }
+        
+        .event-special {
+            border-left-color: var(--special-event-color);
+            background: #f4eef8;
+            color: var(--special-event-color);
+        }
+        
+        /* 進化模態框樣式 */
+        .evolution-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .evolution-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+        }
+        
+        .evolution-info {
+            display: flex;
+            margin: 20px 0;
+            gap: 15px;
+        }
+        
+        .evolution-cost, .evolution-benefits {
+            flex: 1;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
+        }
+        
+        .evolution-cost h3, .evolution-benefits h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        
+        /* 進化按鈕樣式 */
+        .evolution-btn {
+            background: linear-gradient(135deg, #ff6b6b, #c0392b);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            animation: evolution-glow 2s infinite alternate;
+            width: 100%;
+        }
+        
+        @keyframes evolution-glow {
+            from { box-shadow: 0 0 10px #ff6b6b; }
+            to { box-shadow: 0 0 20px #ff6b6b, 0 0 30px #ff0000; }
+        }
+        
+        /* 已進化的護法效果 */
+        .guardian-effect.evolved {
+            animation: evolved-glow 1.5s infinite alternate;
+        }
+        
+        @keyframes evolved-glow {
+            from { 
+                box-shadow: 0 0 10px var(--guardian-color), 
+                           0 0 20px rgba(255, 255, 255, 0.8);
+            }
+            to { 
+                box-shadow: 0 0 20px var(--guardian-color), 
+                           0 0 40px rgba(255, 255, 255, 1),
+                           0 0 60px var(--guardian-color);
+            }
+        }
+        
+        /* 模态框样式 */
+        .lottery-modal, .guess-modal, .merchant-modal, .warehouse-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .lottery-content, .guess-content, .merchant-content, .warehouse-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--danger-color);
+        }
+        
+        /* 彩票号码样式 */
+        .lottery-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .number-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .number-circle.selected {
+            background: var(--success-color);
+            transform: scale(1.1);
+        }
+        
+        .number-circle.taken {
+            background: #95a5a6;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .number-circle:hover:not(.taken) {
+            transform: scale(1.1);
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            margin: 10px 0;
+            font-weight: bold;
+            min-height: 20px;
+        }
+        
+        .draw-animation {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 100px;
+            align-items: center;
+        }
+        
+        .draw-number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--warning-color);
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            box-shadow: 0 0 15px rgba(243, 156, 18, 0.5);
+        }
+        
+        .winner-display {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0fff0;
+            border-radius: 10px;
+            border: 2px solid var(--success-color);
+        }
+        
+        /* 彩票标题颜色变换效果 */
+        .lottery-content h2 {
+            background: linear-gradient(
+                90deg, 
+                #ff0000, #ff8000, #ffff00, #80ff00, 
+                #00ff00, #00ff80, #00ffff, #0080ff, 
+                #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000
+            );
+            background-size: 1200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: rainbowText 8s linear infinite;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* 神秘商人样式 */
+        .merchant-content {
+            background: rgba(43, 45, 66, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            color: #f1f1f1;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        /* 仓库样式 */
+        .warehouse-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(52, 152, 219, 0.5);
+        }
+
+        .warehouse-content h2 {
+            background: linear-gradient(90deg, #3498db, #2c3e50);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 5px 0;
+        }
+
+        /* 神秘商人标题幻彩灯光效果 */
+        .merchant-content h2 {
+            background: linear-gradient(90deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000);
+            background-size: 1200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: rainbowText 8s linear infinite;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            margin-bottom: 15px;
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 5px 0;
+        }
+
+        /* 卡片容器 */
+        .merchant-cards, .warehouse-cards {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .merchant-cards {
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        }
+        
+        .warehouse-cards {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
+        
+        .merchant-card, .warehouse-card {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .warehouse-card {
+            padding: 12px;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .merchant-card:hover, .warehouse-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .merchant-card.selected, .warehouse-card.selected {
+            border-color: var(--success-color);
+            background-color: #f0fff0;
+            transform: scale(1.05);
+        }
+        
+        .merchant-card .card-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .warehouse-card .card-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .merchant-card .card-cost {
+            color: var(--warning-color);
+            font-size: 0.9rem;
+        }
+        
+        .merchant-card .card-desc {
+            font-size: 0.8rem;
+            color: #f0f0f0;
+            margin-top: 5px;
+        }
+        
+        .warehouse-card .card-desc {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            line-height: 1.2;
+        }
+        
+        .warehouse-card .card-prices {
+            margin-top: 5px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        .warehouse-card .card-circles {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin: 5px 0;
+        }
+        
+        /* 神兽觉醒按钮样式 */
+        .evolution-trigger-btn {
+            background: linear-gradient(135deg, #ff6b6b, #c0392b);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            animation: evolution-pulse 2s infinite;
+        }
+        
+        @keyframes evolution-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 10px #ff6b6b; }
+            100% { transform: scale(1); }
+        }
+        
+        .evolution-trigger-btn:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+            animation: none;
+        }
+        
+        .warehouse-card .goods-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.6rem;
+            font-weight: bold;
+        }
+        
+        /* 玩家卡片区域 */
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .player-card-item {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin: 3px;
+            border: 1px solid #ddd;
+            font-weight: bold;
+        }
+        
+        .player-card-item.normal {
+            background: var(--rarity-normal);
+            color: #222;
+            border-color: #ccc;
+        }
+        
+        .player-card-item.magic {
+            background: var(--rarity-magic);
+            color: white;
+            border-color: #6666cc;
+        }
+        
+        .player-card-item.rare {
+            background: var(--rarity-rare);
+            color: #664400;
+            border-color: #cccc00;
+        }
+        
+        .player-card-item.epic {
+            background: var(--rarity-epic);
+            color: white;
+            border-color: #cc00cc;
+        }
+        
+        .player-card-item.legendary {
+            background: var(--rarity-legendary);
+            color: #fff0e0;
+            border-color: #ffaa00;
+            animation: subtle-glow 3s infinite alternate;
+        }
+        
+        .player-card-item.divine {
+            background: var(--rarity-divine);
+            color: #333;
+            border-color: #cc9900;
+            animation: divine-black-glow 2s infinite alternate;
+        }
+        
+        .player-card-item.ghost {
+            background: var(--ghost-color);
+            color: white;
+            border-color: #2980b9;
+            animation: ghost-glow 2s infinite alternate;
+        }
+        
+        .player-card-item.fairy {
+            background: var(--fairy-color);
+            color: white;
+            border-color: #8e44ad;
+            animation: fairy-glow 2s infinite alternate;
+        }
+        
+        .player-card-item.king {
+            background: var(--king-color);
+            color: white;
+            border-color: #1c2833;
+            animation: king-glow 2s infinite alternate;
+        }
+        
+        .player-card-item:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+        
+        .player-cards-section {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px dashed #ddd;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            text-align: center;
+            color: white;
+            padding: 15px;
+            background: rgba(44, 62, 80, 0.8);
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        
+        /* 護法效果樣式 */
+        .guardian-effect {
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 8px;
+            animation: guardian-glow 1.5s infinite alternate;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+        
+        .guardian-effect-bull {
+            background: rgba(139, 69, 19, 0.2);
+            border: 1px solid #8B4513;
+            box-shadow: 0 0 10px rgba(139, 69, 19, 0.5);
+            color: #8B4513;
+            --guardian-color: #8B4513;
+        }
+        
+        .guardian-effect-tiger {
+            background: rgba(158, 158, 158, 0.2);
+            border: 1px solid #9E9E9E;
+            box-shadow: 0 0 10px rgba(158, 158, 158, 0.5);
+            color: #2c3e50;
+            --guardian-color: #9E9E9E;
+        }
+        
+        .guardian-effect-dragon {
+            background: rgba(0, 128, 128, 0.2);
+            border: 1px solid #008080;
+            box-shadow: 0 0 10px rgba(0, 128, 128, 0.5);
+            color: #008080;
+            --guardian-color: #008080;
+        }
+        
+        .guardian-effect-phoenix {
+            background: rgba(255, 69, 0, 0.2);
+            border: 1px solid #FF4500;
+            box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+            color: #FF4500;
+            --guardian-color: #FF4500;
+        }
+        
+        .guardian-effect-turtle {
+            background: rgba(0, 100, 0, 0.2);
+            border: 1px solid #006400;
+            box-shadow: 0 0 10px rgba(0, 100, 0, 0.5);
+            color: #006400;
+            --guardian-color: #006400;
+        }
+        
+        .guardian-text {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        /* 货物颜色 */
+        .goods-fanhuo { background: #27ae60; } /* 番货 - 绿色 */
+        .goods-wenwan { background: #9b59b6; } /* 文玩 - 紫色 */
+        .goods-yishou { background: #2980b9; } /* 异兽 - 深蓝色 */
+        .goods-yantie { background: #3498db; } /* 盐铁 - 浅蓝色 */
+        .goods-huoqi { background: #e74c3c; }  /* 火器 - 红色 */
+        .goods-qiwu { background: #f39c12; }   /* 奇物 - 橙色 */
+        
+        /* 解除护法按钮 */
+        .remove-guardian-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        .remove-guardian-btn:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+        }
+        
+        /* 護法降临效果 */
+        .guardian-arrival {
+            position: fixed;
+            top: -100vh;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center center;
+            z-index: 9999;
+            transition: top 8s ease-in-out;
+            display: none;
+            opacity: 1;
+        }
+
+        .guardian-arrival.active {
+            top: 0;
+        }
+
+        .guardian-arrival.fade-out {
+            opacity: 0;
+            transition: opacity 5s ease-in-out;
+        }
+
+        .guardian-arrival.bull {
+            background-image: url('https://imgur.com/fKa3ebt.jpg');
+        }
+
+        .guardian-arrival.tiger {
+            background-image: url('https://imgur.com/COJnCXH.jpg');
+        }
+
+        .guardian-arrival.dragon {
+            background-image: url('https://imgur.com/iDs3ZIS.jpg');
+        }
+
+        .guardian-arrival.phoenix {
+            background-image: url('https://imgur.com/bmygtSe.jpg');
+        }
+
+        .guardian-arrival.turtle {
+            background-image: url('https://imgur.com/mdSIIkz.jpg');
+        }
+		    /* 新增：進化圖片映射 */
+        .guardian-arrival.evolved.bull {
+            background-image: url('https://imgur.com/Ph8b0iC.jpg');
+        }
+        .guardian-arrival.evolved.dragon {
+            background-image: url('https://imgur.com/u78PMgP.jpg');
+        }
+        .guardian-arrival.evolved.tiger {
+            background-image: url('https://example.com/aaaa.jpg');
+        }
+        .guardian-arrival.evolved.phoenix {
+            background-image: url('https://imgur.com/Tt7n0gC.jpg');
+        }
+		.guardian-arrival.evolved.turtle {
+            background-image: url('https://imgur.com/9Ize9WC.jpg');
+        }
+        
+        /* 黑色遮罩效果 */
+        .black-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 9998;
+            display: none;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .black-overlay.active {
+            opacity: 1;
+        }
+
+        .black-overlay.fade-out {
+            opacity: 0;
+        }
+
+        /* 确保护法降临层在黑色遮罩之上 */
+        .guardian-arrival {
+            z-index: 9999; /* 确保这个值比.black-overlay大 */
+        }
+        
+        /* 动画关键帧 */
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        @keyframes marquee-priority {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        @keyframes warehouse-glow {
+            from {
+                box-shadow: 0 0 5px #8e44ad,
+                           0 0 10px rgba(142, 68, 173, 0.3),
+                           0 0 15px rgba(142, 68, 173, 0.2);
+            }
+            to {
+                box-shadow: 0 0 15px #8e44ad,
+                           0 0 25px rgba(142, 68, 173, 0.5),
+                           0 0 35px rgba(142, 68, 173, 0.4),
+                           0 0 45px rgba(142, 68, 173, 0.3);
+            }
+        }
+        
+        @keyframes flash {
+            0%, 100% { 
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+                transform: scale(1.05);
+            }
+        }
+        
+        @keyframes subtle-glow {
+            from { box-shadow: 0 0 3px var(--rarity-legendary); }
+            to { box-shadow: 0 0 8px var(--rarity-legendary); }
+        }
+
+        @keyframes divine-black-glow {
+            from { 
+                box-shadow: 0 0 5px var(--rarity-divine),
+                           0 0 10px rgba(0, 0, 0, 0.3);
+                transform: scale(1);
+            }
+            to { 
+                box-shadow: 0 0 15px var(--rarity-divine),
+                           0 0 30px rgba(0, 0, 0, 0.8),
+                           0 0 45px var(--rarity-divine);
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes ghost-glow {
+            from { box-shadow: 0 0 5px var(--ghost-color); }
+            to { box-shadow: 0 0 15px var(--ghost-color), 0 0 25px #3498db; }
+        }
+
+        @keyframes fairy-glow {
+            from { box-shadow: 0 0 5px var(--fairy-color); }
+            to { box-shadow: 0 0 15px var(--fairy-color), 0 0 25px #9b59b6; }
+        }
+
+        @keyframes king-glow {
+            from { box-shadow: 0 0 5px var(--king-color); }
+            to { box-shadow: 0 0 15px var(--king-color), 0 0 25px #2c3e50; }
+        }
+		// 创建粒子效果
+function createParticleEffect(cardElement, guardianColor) {
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'particle-container';
+    
+    // 创建多个粒子
+    for (let i = 0; i < 15; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.setProperty('--particle-color', guardianColor);
+        particle.style.setProperty('--translate-x', `${Math.random() * 40 - 20}px`);
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.animationDelay = `${Math.random() * 3}s`;
+        particleContainer.appendChild(particle);
+    }
+    
+    cardElement.appendChild(particleContainer);
+    
+    // 添加流动光效边框
+    const glowBorder = document.createElement('div');
+    glowBorder.className = 'glow-border';
+    cardElement.appendChild(glowBorder);
+    
+    // 添加觉醒标识
+    const evolvedBadge = document.createElement('div');
+    evolvedBadge.className = 'guardian-evolved-badge';
+    evolvedBadge.innerHTML = '神';
+    cardElement.appendChild(evolvedBadge);
+}
+
+        /* 商人卡片光影效果 */
+        .merchant-card.normal {
+            border: 2px solid var(--rarity-normal);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+        }
+
+        .merchant-card.magic {
+            border: 2px solid var(--rarity-magic);
+            background: linear-gradient(135deg, rgba(136, 136, 255, 0.1), rgba(136, 136, 255, 0.3));
+            animation: magic-glow 2s infinite alternate;
+        }
+
+        .merchant-card.rare {
+            border: 2px solid var(--rarity-rare);
+            background: linear-gradient(135deg, rgba(255, 255, 0, 0.1), rgba(255, 255, 0, 0.3));
+            animation: rare-glow 2s infinite alternate;
+        }
+
+        .merchant-card.epic {
+            border: 2px solid var(--rarity-epic);
+            background: linear-gradient(135deg, rgba(255, 68, 255, 0.1), rgba(255, 68, 255, 0.3));
+            animation: epic-glow 1.5s infinite alternate;
+        }
+
+        .merchant-card.legendary {
+            border: 2px solid var(--rarity-legendary);
+            background: linear-gradient(135deg, rgba(255, 136, 0, 0.1), rgba(255, 136, 0, 0.3));
+            animation: legendary-glow 1s infinite alternate;
+        }
+
+        .merchant-card.divine {
+            border: 2px solid var(--rarity-divine);
+            background: linear-gradient(135deg, rgba(255, 204, 0, 0.1), rgba(255, 204, 0, 0.3));
+            animation: divine-glow 0.8s infinite alternate;
+        }
+
+        /* 幽街货卡光影效果 */
+        .warehouse-card.ghost {
+            border: 2px solid var(--ghost-color);
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.3));
+            animation: ghost-glow 2s infinite alternate;
+        }
+
+        .warehouse-card.fairy {
+            border: 2px solid var(--fairy-color);
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(155, 89, 182, 0.3));
+            animation: fairy-glow 1.5s infinite alternate;
+        }
+
+        .warehouse-card.king {
+            border: 2px solid var(--king-color);
+            background: linear-gradient(135deg, rgba(44, 62, 80, 0.1), rgba(44, 62, 80, 0.3));
+            animation: king-glow 1s infinite alternate;
+        }
+
+        /* 魔法卡绿色光效 */
+        @keyframes magic-glow {
+            from { box-shadow: 0 0 5px var(--rarity-magic); }
+            to { box-shadow: 0 0 15px #00ff00, 0 0 25px var(--rarity-magic); }
+        }
+
+        /* 稀有卡蓝色光效 */
+        @keyframes rare-glow {
+            from { box-shadow: 0 0 5px var(--rarity-rare); }
+            to { box-shadow: 0 0 15px #0066ff, 0 0 25px var(--rarity-rare); }
+        }
+
+        /* 史诗卡紫色光效 */
+        @keyframes epic-glow {
+            from { box-shadow: 0 0 5px var(--rarity-epic); }
+            to { box-shadow: 0 0 15px #cc00ff, 0 0 25px var(--rarity-epic), 0 0 35px #cc00ff; }
+        }
+
+        /* 传奇卡橙色光效 */
+        @keyframes legendary-glow {
+            from { box-shadow: 0 0 5px var(--rarity-legendary); }
+            to { box-shadow: 0 0 15px var(--rarity-legendary), 
+                           0 0 25px #ff5500, 
+                           0 0 35px var(--rarity-legendary); }
+        }
+
+        /* 神圣卡金色光效 */
+        @keyframes divine-glow {
+            from { box-shadow: 0 0 5px var(--rarity-divine); }
+            to { box-shadow: 0 0 15px var(--rarity-divine), 
+                           0 0 25px #ffcc00, 
+                           0 0 35px var(--rarity-divine),
+                           0 0 45px #ffcc00; }
+        }
+
+        /* 选中的卡片效果 */
+        .merchant-card.selected {
+            transform: scale(1.05);
+            animation: selected-glow 0.5s infinite alternate;
+        }
+
+        @keyframes selected-glow {
+            from { box-shadow: 0 0 10px var(--success-color); }
+            to { box-shadow: 0 0 20px var(--success-color), 0 0 30px #00ff00; }
+        }
+        
+        /* 護法發光動畫 */
+        @keyframes guardian-glow {
+            from {
+                box-shadow: 0 0 5px var(--guardian-color);
+            }
+            to {
+                box-shadow: 0 0 15px var(--guardian-color),
+                           0 0 20px var(--guardian-color);
+            }
+        }
+
+        /* 玩家卡片護法效果 */
+        .player-card.has-guardian {
+            animation: card-glow 3s infinite alternate;
+            border: 2px solid var(--guardian-color);
+        }
+
+        @keyframes card-glow {
+            from {
+                box-shadow: 0 0 10px var(--guardian-color),
+                           0 0 20px rgba(255, 255, 255, 0.3);
+            }
+            to {
+                box-shadow: 0 0 25px var(--guardian-color),
+                           0 0 40px var(--guardian-color),
+                           0 0 60px rgba(255, 255, 255, 0.6),
+                           0 0 80px var(--guardian-color);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .player-card {
+                min-width: 100%;
+            }
+            
+            .events-container {
+                min-width: 100%;
+            }
+            
+            .lottery-numbers {
+                gap: 5px;
+            }
+            
+            .number-circle {
+                width: 35px;
+                height: 35px;
+                font-size: 0.8rem;
+            }
+            
+            .merchant-cards {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            }
+            
+            .warehouse-cards {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
+        
+        @keyframes rainbowText {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+    </style>
+</head>
+    <!-- ==================== 遮罩和特效层 === HTML 结构部分================= -->
+<body>
+    <!-- 黑色遮罩 -->
+    <div id="black-overlay" class="black-overlay"></div>
+    
+    <!-- 护法降临效果层 -->
+    <div id="guardian-arrival" class="guardian-arrival"></div>
+    
+    <!-- 神兽觉醒特效 -->
+    <div class="evolution-effect" id="evolution-effect">
+        <div class="evolution-glow"></div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>幽街商人</h1>
+            <p class="subtitle">燈昏巷靜 貨暖人閒</p>
+            <p class="subtitle">幽街商人桌遊專用-沉浸輔助程式</p>
+        </header>
+        
+<div class="player-setup">
+    <div class="input-group">
+        <label for="player-name">玩家名稱</label>
+        <input type="text" id="player-name" placeholder="輸入玩家名稱" class="elegant-input">
+    </div>
+    
+    <div class="input-group">
+        <label for="player-color">選擇代表顏色</label>
+        <div class="color-picker-container">
+            <input type="color" id="player-color" value="#3498db">
+            <span class="color-preview" id="color-preview"></span>
+        </div>
+    </div>
+    
+    <div class="input-group audio-controls">
+        <label>音效設定</label>
+        <div class="audio-buttons">
+            <button id="musicToggle" class="btn-audio">
+                <span class="audio-icon">🎵</span>
+                <span class="audio-text">背景音樂: 開啟</span>
+            </button>
+            <button id="soundToggle" class="btn-audio">
+                <span class="audio-icon">🔊</span>
+                <span class="audio-text">音效: 開啟</span>
+            </button>
+        </div>
+    </div>
+    
+    <div class="action-buttons">
+        <button id="add-player" class="btn-primary elegant-btn">添加玩家</button>
+        <button id="reset-game" class="btn-danger elegant-btn">重置遊戲</button>
+    </div>
+</div>
+        
+        <!-- 走马灯区域 -->
+        <div class="marquee-container">
+            <div class="marquee-content" id="marquee-text">
+                歡迎使用幽街商人專用-沉浸輔助程式！請添加玩家準備開始交易吧。
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="players-container" id="players-list">
+                <!-- 玩家卡片将在这里动态生成 -->
+            </div>
+            
+            <div class="events-container">
+                <h2 class="events-title">事件日誌</h2>
+                <div class="events-list" id="events-list">
+                    <div class="event-item">
+                        <strong>系統消息!：</strong> 遊戲開始！新增玩家並開始交易之旅吧。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 彩票选择模态框 -->
+    <div class="lottery-modal" id="lottery-modal">
+        <div class="lottery-content">
+            <span class="close-modal" id="close-lottery">&times;</span>
+            <h2>選擇您的心水幸運彩卷號碼</h2>
+            <p>請從1-50中選擇一個彩卷號碼：</p>
+            <div class="lottery-numbers" id="lottery-numbers">
+                <!-- 号码将在这里动态生成 -->
+            </div>
+            <div class="error-message" id="lottery-error"></div>
+            <button id="confirm-lottery" class="btn-success">確定選擇</button>
+        </div>
+    </div>
+    
+    <!-- 彩票开奖模态框 -->
+    <div class="lottery-modal" id="draw-modal">
+        <div class="lottery-content">
+            <h2>彩票開獎 - 第<span id="lottery-round">1</span>期</h2>
+            <p>累 計 獎 金: <span id="jackpot-amount">30</span>銀兩</p>
+            <div class="draw-animation" id="draw-animation">
+                <div class="draw-number">?</div>
+            </div>
+            <div class="winner-display" id="winner-display">
+                <!-- 中奖信息将在这里显示 -->
+            </div>
+            <button id="close-draw" class="btn-primary">-關閉-</button>
+        </div>
+    </div>
+    
+    <!-- 竞猜环节模态框 -->
+    <div class="guess-modal" id="guess-modal">
+        <div class="guess-content">
+            <span class="close-modal" id="close-guess">&times;</span>
+            <h2>-寶箱銀兩-競猜環節</h2>
+            <p>交易次數已達競猜條件！觸發寶箱競猜!</p>
+            <div class="event-item event-global">
+                <strong>競猜提示：</strong> 现在！各位商人们請互相取出一定量的銀兩,
+                在桌上拳頭握緊,然後進行猜測對方的銀兩數目！！(銀兩數量只能整數10,30,50...)
+            </div>
+            <button id="close-guess-btn" class="btn-primary">-關閉-</button>
+        </div>
+    </div>
+    
+    <!-- 神秘商人模态框 -->
+    <div class="merchant-modal" id="merchant-modal">
+        <div class="merchant-content">
+            <span class="close-modal" id="close-merchant">&times;</span>
+            <h2>神秘商人</h2>
+            <p>你...遇到了從天而降的神秘商人！現在可以用銀兩,貨物,手牌交換特殊卡片</p>
+            <div class="merchant-cards" id="merchant-cards">
+                <!-- 卡片将在这里动态生成 -->
+            </div>
+            <div class="error-message" id="merchant-error"></div>
+            <button id="confirm-purchase" class="btn-success">確定購買</button>
+        </div>
+    </div>
+    
+    <!-- 仓库模态框 -->
+    <div class="warehouse-modal" id="warehouse-modal">
+        <div class="warehouse-content">
+            <span class="close-modal" id="close-warehouse">&times;</span>
+            <h2>幽街貨物倉庫</h2>
+            <p>您獲得的幽街貨物交易卡</p>
+            <div class="warehouse-cards" id="warehouse-cards">
+                <!-- 幽街货卡将在这里动态生成 -->
+            </div>
+            <div class="error-message" id="warehouse-error"></div>
+            <button id="use-goods-card" class="btn-success">使用選中的貨卡</button>
+            <button id="close-warehouse-btn" class="btn-primary">關閉倉庫</button>
+        </div>
+    </div>
+    
+    <!-- 使用卡片确认模态框 -->
+    <div class="lottery-modal" id="use-card-modal">
+        <div class="lottery-content">
+            <h2>使用卡片</h2>
+            <p id="use-card-desc">確定要使用這張卡片嗎？請給予其他商人查看卡片內容方便執行！</p>
+            <div class="error-message" id="use-card-error"></div>
+            <button id="confirm-use-card" class="btn-success">確定使用嗎?</button>
+            <button id="cancel-use-card" class="btn-danger">-取消-</button>
+        </div>
+    </div>
+    
+    <!-- 進化確認模態框 -->
+    <div class="evolution-modal" id="evolution-modal">
+        <div class="evolution-content">
+            <span class="close-modal" id="close-evolution">&times;</span>
+            <h2>護法神獸覺醒</h2>
+            <p id="evolution-desc">確定要進化您的護法神獸嗎？</p>
+            
+            <div class="evolution-info">
+                <div class="evolution-cost">
+                    <h3>進化消耗</h3>
+                    <div id="evolution-cost-list">
+                        <!-- 消耗材料將在這裡動態生成 -->
+                    </div>
+                </div>
+                
+                <div class="evolution-benefits">
+                    <h3>進化效果</h3>
+                    <div id="evolution-benefits-list">
+                        <!-- 進化好處將在這裡動態生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="error-message" id="evolution-error"></div>
+            <button id="confirm-evolution" class="btn-success">確認進化</button>
+            <button id="cancel-evolution" class="btn-danger">取消</button>
+        </div>
+    </div>
+    
+    <!-- 难度选择按钮 -->
+    <div class="difficulty-toggle" id="difficulty-toggle">
+        <span class="easy active" data-difficulty="easy">簡</span>
+        <span class="hard" data-difficulty="hard">難</span>
+    </div>
+    
+    <!-- Footer（独立于偏移容器） -->
+    <footer>
+        <p>© 2025 幽街商人桌遊-沉浸輔助程序- 為您的桌遊體驗增添樂趣 v2.0</p>
+    </footer>
+        <!-- ==================== 音频元素 ==Audio部分 ================== -->
+    <!-- 音频元素 -->
+    <audio id="tradeSound">
+        <source src="https://www.soundjay.com/misc/sounds/coins-to-table-2.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="buttonSound">
+        <source src="https://www.soundjay.com/buttons/sounds/button-30.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bullSound">
+        <source src="https://www.soundjay.com/nature/sounds/lake-waves-lapping-gently-against-rocks-01.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="tigerSound">
+        <source src="https://www.soundjay.com/nature/sounds/wind-howl-01.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="dragonSound">
+        <source src="https://www.soundjay.com/nature/sounds/rain-03.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="phoenixSound">
+           <source src="sounds/background.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="turtleSound">
+        <source src="https://www.soundjay.com/nature/sounds/lake-waves-lapping-gently-on-the-beach-01.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="lotterySound">
+        <source src="https://www.soundjay.com/misc/sounds/magic-chime-04.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="cardUseSound">
+        <source src="https://www.soundjay.com/misc/sounds/shuffling-cards-1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bgMusic" loop>
+        <source src=""sounds/background.mp3" type="audio/mpeg">" type="audio/mpeg">
+    </audio>
+    <audio id="getGoodsSound">
+        <source src="https://www.soundjay.com/misc/sounds/magic-chime-02.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="lotteryWinSound">
+        <source src="https://www.soundjay.com/misc/sounds/coins-drop-1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="selectCardSound">
+        <source src="https://www.soundjay.com/buttons/sounds/button-35.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="merchantAppearSound">
+        <source src="https://www.soundjay.com/misc/sounds/wind-chime-1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="warehouseOpenSound">
+        <source src="https://www.soundjay.com/misc/sounds/magic-chime-07.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="evolutionSound">
+        <source src="https://www.soundjay.com/misc/sounds/magic-chime-03.mp3" type="audio/mpeg">
+    </audio>
+	<audio id="evolutionBgMusic">
+  <source src="https://example.com/evolution-bg-music.mp3" type="audio/mpeg">
+</audio>
+
+    <script>
+	    /* ==================== JavaScript 游戏逻辑 游戏逻辑代码==================== */
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const playerNameInput = document.getElementById('player-name');
+            const playerColorInput = document.getElementById('player-color');
+            const addPlayerBtn = document.getElementById('add-player');
+            const resetGameBtn = document.getElementById('reset-game');
+            const playersList = document.getElementById('players-list');
+            const eventsList = document.getElementById('events-list');
+            const lotteryModal = document.getElementById('lottery-modal');
+            const lotteryNumbers = document.getElementById('lottery-numbers');
+            const confirmLotteryBtn = document.getElementById('confirm-lottery');
+            const closeLotteryBtn = document.getElementById('close-lottery');
+            const lotteryError = document.getElementById('lottery-error');
+            const drawModal = document.getElementById('draw-modal');
+            const drawAnimation = document.getElementById('draw-animation');
+            const winnerDisplay = document.getElementById('winner-display');
+            const closeDrawBtn = document.getElementById('close-draw');
+            const guessModal = document.getElementById('guess-modal');
+            const closeGuessBtn = document.getElementById('close-guess');
+            const closeGuessBtn2 = document.getElementById('close-guess-btn');
+            const marqueeText = document.getElementById('marquee-text');
+            const lotteryRoundEl = document.getElementById('lottery-round');
+            const jackpotAmountEl = document.getElementById('jackpot-amount');
+			
+
+            
+            // 音效控制
+            let soundEnabled = true;
+            let musicEnabled = true;
+            const bgMusic = document.getElementById('bgMusic');
+            const musicToggle = document.getElementById('musicToggle');
+            const soundToggle = document.getElementById('soundToggle');
+            
+            // 背景音乐控制
+            musicToggle.addEventListener('click', function() {
+                musicEnabled = !musicEnabled;
+                if (musicEnabled) {
+                    bgMusic.play();
+                    this.textContent = '背景音樂: 開啟';
+                } else {
+                    bgMusic.pause();
+                    this.textContent = '背景音樂: 關閉';
+                }
+            });
+            
+            // 音效控制
+            soundToggle.addEventListener('click', function() {
+                soundEnabled = !soundEnabled;
+                this.textContent = soundEnabled ? '音效: 開啟' : '音效: 關閉';
+            });
+            
+            // 播放音效的函数
+            function playSound(soundId) {
+                if (!soundEnabled) return;
+                
+                const sound = document.getElementById(soundId);
+                if (sound) {
+                    sound.currentTime = 0;
+                    sound.play().catch(e => console.log("音效播放失败:", e));
+                }
+            }
+            
+            // 自动播放背景音乐（需要用户交互后）
+            document.addEventListener('click', function initMusic() {
+                if (musicEnabled) {
+                    bgMusic.play().catch(e => console.log("背景音乐播放失败:", e));
+                }
+                document.removeEventListener('click', initMusic);
+            }, { once: true });
+            
+            // 为所有按钮添加点击音效
+            document.addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON' && soundEnabled) {
+                    playSound('buttonSound');
+                }
+            });
+            
+            // 神秘商人相关元素
+            const merchantModal = document.getElementById('merchant-modal');
+            const merchantCardsEl = document.getElementById('merchant-cards');
+            const confirmPurchaseBtn = document.getElementById('confirm-purchase');
+            const closeMerchantBtn = document.getElementById('close-merchant');
+            const merchantError = document.getElementById('merchant-error');
+            
+            // 仓库相关元素
+            const warehouseModal = document.getElementById('warehouse-modal');
+            const warehouseCardsEl = document.getElementById('warehouse-cards');
+            const useGoodsCardBtn = document.getElementById('use-goods-card');
+            const closeWarehouseBtn = document.getElementById('close-warehouse');
+            const closeWarehouseBtn2 = document.getElementById('close-warehouse-btn');
+            const warehouseError = document.getElementById('warehouse-error');
+            
+            // 使用卡片相关元素
+            const useCardModal = document.getElementById('use-card-modal');
+            const useCardDesc = document.getElementById('use-card-desc');
+            const confirmUseCardBtn = document.getElementById('confirm-use-card');
+            const cancelUseCardBtn = document.getElementById('cancel-use-card');
+            const useCardError = document.getElementById('use-card-error');
+            
+            // 进化相关元素
+            const evolutionModal = document.getElementById('evolution-modal');
+            const evolutionDesc = document.getElementById('evolution-desc');
+            const evolutionCostList = document.getElementById('evolution-cost-list');
+            const evolutionBenefitsList = document.getElementById('evolution-benefits-list');
+            const evolutionError = document.getElementById('evolution-error');
+            const confirmEvolutionBtn = document.getElementById('confirm-evolution');
+            const cancelEvolutionBtn = document.getElementById('cancel-evolution');
+            const closeEvolutionBtn = document.getElementById('close-evolution');
+            
+            // 游戏数据
+            let players = JSON.parse(localStorage.getItem('players')) || [];
+            let events = JSON.parse(localStorage.getItem('events')) || [];
+            let currentPlayerForLottery = null;
+            let totalTrades = parseInt(localStorage.getItem('totalTrades')) || 0;
+            let jackpot = parseInt(localStorage.getItem('jackpot')) || 10;
+            let lotteryRound = parseInt(localStorage.getItem('lotteryRound')) || 1;
+            let selectedNumbers = JSON.parse(localStorage.getItem('selectedNumbers')) || [];
+            
+            // 当前选中的玩家和卡片
+            let currentPlayerForMerchant = null;
+            let currentPlayerForWarehouse = null;
+            let selectedCardId = null;
+            let selectedGoodsCardId = null;
+            let currentCardToUse = null;
+            let currentCardPlayerIndex = null;
+            let currentEvolutionPlayerIndex = null;
+            
+            // 走马灯控制变量
+            let isPriorityMessage = false;
+            let normalMarqueeQueue = [];
+            let priorityMarqueeQueue = [];
+            
+            // 彩色号码球颜色
+            const numberColors = [
+                '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', 
+                '#3498db', '#9b59b6', '#1abc9c', '#d35400',
+                '#c0392b', '#16a085', '#27ae60', '#2980b9',
+                '#8e44ad', '#2c3e50', '#f39c12', '#e74c3c',
+                '#d35400', '#c0392b', '#bdc3c7', '#7f8c8d',
+                '#34495e', '#f39c12', '#e67e22', '#d35400',
+                '#c0392b', '#8e44ad', '#9b59b6', '#2980b9',
+                '#3498db', '#1abc9c', '#16a085', '#27ae60',
+                '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c',
+                '#d35400', '#c0392b', '#8e44ad', '#9b59b6',
+                '#2980b9', '#3498db', '#1abc9c', '#16a085',
+                '#27ae60', '#2ecc71', '#f1c40f', '#e67e22',
+                '#e74c3c', '#d35400'
+            ];
+            
+            // 货物类型
+            const goodsTypes = [
+                { name: "番货", color: "goods-fanhuo", value: 15 },
+                { name: "文玩", color: "goods-wenwan", value: 25 },
+                { name: "异兽", color: "goods-yishou", value: 35 },
+                { name: "盐铁", color: "goods-yantie", value: 20 },
+                { name: "火器", color: "goods-huoqi", value: 40 },
+                { name: "奇物", color: "goods-qiwu", value: 30 }
+            ];
+            
+            // 环境事件库
+            const environmentEvents = [
+                // 全局事件
+                { 
+                    type: 'global', 
+                    shortText: "-全體-沙漠風暴襲擊！所有商人受影響-10兩銀。",
+                    fullText: "沙漠風暴襲擊！漫天黃沙中，所有商隊都受到了影響。商會要求每位商人捐贈10兩銀子用於救災和道路修復。",
+                    effect: "all-10" 
+                },
+                { 
+                    type: 'global', 
+                    shortText: "-全體-商船遭遇風暴，1個貨物損失-如果沒有貨物，需向商會繳3兩銀子補償損。",
+                    fullText: "海上突然刮起猛烈風暴，你們的商船在波濤中艱難前行，部分貨物掉落海中。如果沒有貨物，需向商會繳3兩銀子補償損失。",
+                    effect: "allCargo-3" 
+                },
+                { 
+                    type: 'global', 
+                    shortText: "-全體-貿易繁榮！市場活躍-每人從牌堆抽取一張貨卡",
+                    fullText: "近期貿易繁榮！市場異常活躍，所有商人都獲得了更多的交易機會和利潤-每人從牌堆抽取一張貨卡。",
+                    effect: "all+5" 
+                },
+                { 
+                    type: 'global', 
+                    shortText: "-全體-稅金增加，商會要求繳交額外費用-10兩銀子",
+                    fullText: "地方政府增加了商業稅收，商會必須向所有成員徵收額外費用，每人10兩銀子。",
+                    effect: "all-8" 
+                },
+                
+                // 个体事件
+                { 
+                    type: 'individual', 
+                    shortText: "-個人-買到假貨，損失錢財 個人-20銀兩",
+                    fullText: "一個看似誠實的異鄉商人向你賣了一批貨物，後來發現全是假貨！損失20兩銀子，並需向商會提交一件商品作為警示。",
+                    effect: "-10" 
+                },
+                { 
+                    type: 'individual', 
+                    shortText: "-個人-成功談判，獲得額外利潤+20銀兩",
+                    fullText: "你運用精明的談判技巧，成功與供應商達成優惠協議，獲得了額外利潤 +20銀兩。",
+                    effect: "+15" 
+                },
+                { 
+                    type: 'individual', 
+                    shortText: "-個人-投資成功，回報豐厚+30銀兩",
+                    fullText: "你之前的一項投資獲得了豐厚回報，財富增加了30兩銀子。",
+                    effect: "+20" 
+                },
+                
+                // 特别事件 - 幽街货卡
+                { 
+                    type: 'special', 
+                    shortText: "-特別-遇到神秘客人，獲得幽街貨物交易卡！",
+                    fullText: "在幽街的轉角處，你遇到了一位神秘的客人，他贈予你幽街貨物交易卡，可以在倉庫中查看和使用這些特殊貨物！",
+                    effect: "getGoodsCards" 
+                },
+                { 
+                    type: 'special', 
+                    shortText: "-全體特別-神秘商隊來訪，所有人獲得幽街貨物交易卡！",
+                    fullText: "一支神秘的商隊來到幽街，他們贈予所有商人幽街貨物交易卡，可以在倉庫中查看和使用這些特殊貨物！",
+                    effect: "allGetGoodsCards" 
+                }
+            ];
+
+            // 幽街货卡库
+            const goodsCardLibrary = [
+                // 幽魂级别 (1-2个货物)
+                { id: 101, name: "幽魂貨卡", rarity: "ghost", goodsCount: 1, buyPrice: 20, sellPrice: 30 },
+                { id: 102, name: "幽魂貨卡", rarity: "ghost", goodsCount: 2, buyPrice: 35, sellPrice: 50 },
+                
+                // 妖精级别 (3-4个货物)
+                { id: 201, name: "妖精貨卡", rarity: "fairy", goodsCount: 3, buyPrice: 55, sellPrice: 75 },
+                { id: 202, name: "妖精貨卡", rarity: "fairy", goodsCount: 4, buyPrice: 70, sellPrice: 95 },
+                
+                // 大王级别 (5-6个货物)
+                { id: 301, name: "大王貨卡", rarity: "king", goodsCount: 5, buyPrice: 200, sellPrice: 260 },
+                { id: 302, name: "大王貨卡", rarity: "king", goodsCount: 6, buyPrice: 240, sellPrice: 320 }
+            ];
+
+            // 神秘商人卡片庫
+            const merchantCardLibrary = [
+                { id: 1, name: "雙倍交易", cost: 1, description: "下次賣貨交易獲得雙倍收益,不是整個回合", effect: "doubleNextTrade", rarity: "normal" },
+                { id: 2, name: "小額借貸", cost: 1, description: "立即獲得100兩銀子，但每個回合需歸讓20銀子持續5回合", effect: "smallLoan", rarity: "normal" },
+                { id: 3, name: "幸運骰子", cost: 1, description: "下次交易額外獲得,獲得下一次彩卷抽出的號碼作為獎金", effect: "luckyDice", rarity: "normal" },
+                { id: 4, name: "快速交易", cost: 1, description: "立即完成一次交易，無需等待", effect: "quickTrade", rarity: "normal" },
+                { id: 5, name: "市場洞察", cost: 2, description: "查看下一張環境事件卡", effect: "peekNextEvent", rarity: "magic" },
+                { id: 6, name: "中度防護", cost: 2, description: "抵消下一次負面事件", effect: "reduceNextNegative", rarity: "magic" },
+                { id: 7, name: "貨物保險", cost: 2, description: "防止下一次貨物損失", effect: "cargoInsurance", rarity: "magic" },
+                { id: 8, name: "價格預測", cost: 2, description: "預知下一次交易的價格波動從棄牌堆選擇一張貨物卡", effect: "pricePrediction", rarity: "magic" },
+                { id: 9, name: "財富竊取", cost: 4, description: "隨機從一名玩家竊取20兩銀子", effect: "stealWealth", rarity: "rare" },
+                { id: 10, name: "幸運日", cost: 4, description: "立即獲得40兩銀子", effect: "instantWealth", rarity: "rare" },
+                { id: 11, name: "貿易壟斷", cost: 4, description: "獨佔下一次交易的所有利潤", effect: "tradeMonopoly", rarity: "rare" },
+                { id: 12, name: "商隊護衛", cost: 4, description: "防止下一次搶劫事件", effect: "caravanGuard", rarity: "rare" },
+                { id: 13, name: "貿易保護", cost: 6, description: "免疫下一次負面事件", effect: "immuneNextNegative", rarity: "epic" },
+                { id: 14, name: "精準投資", cost: 6, description: "下三次交易額外獲得10兩銀子", effect: "investmentBonus", rarity: "epic" },
+                { id: 15, name: "彩票預測", cost: 6, description: "提前知道下一期彩票中獎號碼,使用卡片後可以連續按三次交易成功按鈕及選擇號碼", effect: "predictLottery", rarity: "epic" },
+                { id: 16, name: "市場操控", cost: 6, description: "從牌堆抽取五張卡放到自己手牌", effect: "marketManipulation", rarity: "epic" },
+                { id: 17, name: "強制交易", cost: 8, description: "強制與一名玩家進行交易，獲得其50兩銀子/對手3手牌/3個貨物", effect: "forceTrade", rarity: "legendary" },
+                { id: 18, name: "事件操控", cost: 8, description: "選擇下一輪發生的事件類型,從牌堆抽取5張放到自己手牌", effect: "controlEvent", rarity: "legendary" },
+                { id: 19, name: "時間回溯", cost: 8, description: "撤銷上一次交易或事件的影響", effect: "timeReverse", rarity: "legendary" },
+                { id: 20, name: "財富轉移", cost: 8, description: "將自己的財富轉移給其他玩家", effect: "wealthTransfer", rarity: "legendary" },
+                { id: 201, name: "牛神護法", cost: 12, description: "「轟 ——！地脈震動間，金角牛神踏碎岩層登場！粗壯牛角頂向對手！", effect: "bullGuardian", rarity: "legendary" },
+                { id: 202, name: "白虎護法", cost: 12, description: "「嗷嗚 ——！蒼白颶風撕碎戰場雲層，白虎護法四爪踏風現身，銀白皮毛間電弧噼啪作響！", effect: "tigerGuardian", rarity: "legendary" },
+                { id: 203, name: "青龍護法", cost: 12, description: "「嘯 ——！青雲翻湧間，青龍巨軀破霄而下，數十丈龍身纏繞雷霆，龍鱗在天光下泛着冷冽青光！", effect: "dragonGuardian", rarity: "legendary" },
+                { id: 204, name: "朱雀護法", cost: 12, description: "「轟隆！火山裂縫噴涌赤紅岩漿，朱雀護法展開丈餘火翼，火焰羽毛落處皆化焦土！", effect: "phoenixGuardian", rarity: "legendary" },
+                { id: 205, name: "玄武護法", cost: 12, description: "「咚！咚！厚重龜甲砸得戰場地面崩裂，玄武護法從深海湧現，周身纏繞滔天水霧，蛇首與龜頭並列揚起！", effect: "turtleGuardian", rarity: "legendary" },
+                { id: 21, name: "商人祝福", cost: 10, description: "立即獲得80兩銀子", effect: "permanentBonus", rarity: "divine" },
+                { id: 22, name: "點石成金", cost: 10, description: "將一件貨物轉化為100兩銀子貨物回到商會", effect: "alchemy", rarity: "divine" },
+                { id: 23, name: "商會特權", cost: 10, description: "獲得商會特殊待遇，連續三回合得到多三個行動點", effect: "taxExemption", rarity: "divine" },
+                { id: 24, name: "沙漠之舟", cost: 10, description: "免疫所有環境負面事件，持續五輪及從牌埋抽出10張卡放回手牌", effect: "desertShip", rarity: "divine" },
+                { id: 25, name: "天空之眼", cost: 10, description: "無需貨卡資源,直接向商會交易賣出貨物,貨物出售價乘5", effect: "skyEye", rarity: "divine" },
+            ];
+            
+						        // 新增：护法进化图片映射
+        const evolvedGuardianImages = {
+            'bull': 'https://imgur.com/Ph8b0iC.jpg',
+            'dragon': 'https://imgur.com/u78PMgP.jpg',
+            'tiger': 'https://imgur.com/COJnCXH.jpg',
+            'phoenix': 'https://imgur.com/Tt7n0gC.jpg',
+			'turtle': 'https://imgur.com/9Ize9WC.jpg',
+        };
+            // 護法進化數據
+            const guardianEvolutionData = {
+                "牛神護法": {
+                    cost: [{ type: "wealth", amount: 100 }, { type: "cards", amount: 3 }],
+                    benefits: ["每次交易額外獲得100銀兩", "免疫價格波動事件"],
+                    evolvedEffect: { extraWealthPerTrade: 100, immuneToMarketEvents: true },
+                    sound: "bullSound",
+                    image: "https://imgur.com/fKa3ebt.jpg"
+                },
+                "白虎護法": {
+                    cost: [{ type: "wealth", amount: 100 }, { type: "cards", amount: 3 }],
+                    benefits: ["每次從牌堆抽取3張卡", "可以看到對手的手牌"],
+                    evolvedEffect: { extraCardsPerDraw: 3, seeOpponentHand: true },
+                    sound: "tigerSound",
+                    image: "https://imgur.com/COJnCXH.jpg"
+                },
+                "青龍護法": {
+                    cost: [{ type: "wealth", amount: 100 }, { type: "cards", amount: 3 }],
+                    benefits: ["完全免疫所有負面事件", "每回合自動獲得50銀兩"],
+                    evolvedEffect: { immuneToAllNegative: true, autoWealthPerTurn: 50 },
+                    sound: "dragonSound",
+                    image: "https://imgur.com/iDs3ZIS.jpg"
+                },
+                "朱雀護法": {
+                    cost: [{ type: "wealth", amount: 100 }, { type: "cards", amount: 3 }],
+                    benefits: ["每回合從所有對手竊取50銀兩", "交易收益增加50%"],
+                    evolvedEffect: { stealFromAllPerTurn: 50, tradeBonusPercent: 50 },
+                    sound: "phoenixSound",
+                    image: "https://imgur.com/bmygtSe.jpg"
+                },
+                "玄武護法": {
+                    cost: [{ type: "wealth", amount: 100 }, { type: "cards", amount: 3 }],
+                    benefits: ["每回合獲得100銀兩", "所有貨物價值翻倍"],
+                    evolvedEffect: { wealthPerTurn: 100, doubleGoodsValue: true },
+                    sound: "turtleSound",
+                    image: "https://imgur.com/mdSIIkz.jpg"
+                }
+            };
+            
+            // 更新走马灯内容
+            function updateMarquee(text, isPriority = false, duration = 30000, isSpecial = false) {
+                if (isPriority || isSpecial) {
+                    priorityMarqueeQueue.push({text, duration, isSpecial});
+                    processMarqueeQueue();
+                } else {
+                    normalMarqueeQueue.push({text, duration});
+                    if (!isPriorityMessage) {
+                        processMarqueeQueue();
+                    }
+                }
+            }
+            
+            // 处理走马灯队列
+            function processMarqueeQueue() {
+                if (priorityMarqueeQueue.length > 0) {
+                    isPriorityMessage = true;
+                    const message = priorityMarqueeQueue.shift();
+                    showMarqueeMessage(message.text, message.duration, true, message.isSpecial);
+                } else if (normalMarqueeQueue.length > 0 && !isPriorityMessage) {
+                    const message = normalMarqueeQueue.shift();
+                    showMarqueeMessage(message.text, message.duration, false);
+                }
+            }
+            
+            // 显示走马灯消息
+            function showMarqueeMessage(text, duration, isPriority, isSpecial = false) {
+                marqueeText.style.animation = 'none';
+                marqueeText.textContent = text;
+                
+                if (isSpecial) {
+                    marqueeText.classList.add('special');
+                    marqueeText.classList.remove('priority');
+                } else if (isPriority) {
+                    marqueeText.classList.add('priority');
+                    marqueeText.classList.remove('special');
+                } else {
+                    marqueeText.classList.remove('priority', 'special');
+                }
+                
+                const textWidth = marqueeText.scrollWidth;
+                const containerWidth = marqueeText.parentElement.offsetWidth;
+                const distance = textWidth + containerWidth;
+                const speed = distance / (duration / 1000);
+                
+                marqueeText.style.animation = `marquee${isPriority ? '-priority' : ''} ${duration/1000}s linear ${isPriority ? 'forwards' : 'infinite'}`;
+                
+                if (isPriority) {
+                    setTimeout(() => {
+                        isPriorityMessage = false;
+                        processMarqueeQueue();
+                    }, duration);
+                }
+            }
+
+            // 獲取護法效果類名
+            function getGuardianEffectClass(guardianName) {
+                switch(guardianName) {
+                    case "牛神護法": return "guardian-effect-bull";
+                    case "白虎護法": return "guardian-effect-tiger";
+                    case "青龍護法": return "guardian-effect-dragon";
+                    case "朱雀護法": return "guardian-effect-phoenix";
+                    case "玄武護法": return "guardian-effect-turtle";
+                    default: return "";
+                }
+            }
+            
+            // 獲取護法顏色
+            function getGuardianColor(guardianName) {
+                switch(guardianName) {
+                    case "牛神護法": return "#8B4513";
+                    case "白虎護法": return "#2c3e50";
+                    case "青龍護法": return "#008080";
+                    case "朱雀護法": return "#FF4500";
+                    case "玄武護法": return "#006400";
+                    default: return "#3498db";
+                }
+            }
+            
+            // 獲取護法效果文本
+            function getGuardianEffectText(guardianName) {
+                switch(guardianName) {
+                    case "牛神護法": return "牛神護法保護整個旅程，每次交易出售多收取50銀兩";
+                    case "白虎護法": return "白虎護法讓你騎乘到終點，每次從牌堆能多抽取1張卡";
+                    case "青龍護法": return "青龍助你看守大局，從現在到結束不負面事件影響及每回合向商會收取20兩";
+                    case "朱雀護法": return "朱雀向對手持續噴灑百味真火，可使用行動點向對手噴火每輪最多收取25兩/1行動點=5兩，";
+                    case "玄武護法": return "玄武從深海帶來魚穫送，每個回合從商會收取30銀兩";
+                    default: return "";
+                }
+            }
+            
+            // 初始化彩票号码
+            function initLotteryNumbers() {
+                lotteryNumbers.innerHTML = '';
+                lotteryError.textContent = '';
+                
+                for (let i = 1; i <= 50; i++) {
+                    const numberEl = document.createElement('div');
+                    numberEl.className = 'number-circle';
+                    numberEl.textContent = i;
+                    numberEl.dataset.number = i;
+                    
+                    const colorIndex = (i - 1) % numberColors.length;
+                    numberEl.style.background = numberColors[colorIndex];
+                    numberEl.style.color = 'white';
+                    numberEl.style.fontWeight = 'bold';
+                    
+                    if (selectedNumbers.includes(i)) {
+                        numberEl.classList.add('taken');
+                        numberEl.style.background = '#95a5a6';
+                        numberEl.style.cursor = 'not-allowed';
+                    }
+                    
+                    numberEl.addEventListener('click', function() {
+                        if (this.classList.contains('taken')) return;
+                        
+                        document.querySelectorAll('.number-circle').forEach(el => {
+                            el.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+                        lotteryError.textContent = '';
+                    });
+                    
+                    lotteryNumbers.appendChild(numberEl);
+                }
+            }
+            
+            // 添加事件到日志
+            function addEvent(text, type = 'normal', fullText = null) {
+                const eventItem = document.createElement('div');
+                eventItem.className = `event-item ${type === 'global' ? 'event-global' : type === 'individual' ? 'event-individual' : type === 'special' ? 'event-special' : ''}`;
+                
+                const timestamp = new Date().toLocaleTimeString();
+                eventItem.innerHTML = `<strong>${timestamp}:</strong> ${text}`;
+                
+                eventsList.appendChild(eventItem);
+                eventsList.scrollTop = eventsList.scrollHeight;
+                
+                events.push({ text, type, timestamp });
+                localStorage.setItem('events', JSON.stringify(events));
+                
+                if (fullText) {
+                    const isPriority = (type === 'global' || type === 'individual' || type === 'special');
+                    updateMarquee(`${timestamp}: ${fullText}`, isPriority, 30000);
+                } else {
+                    updateMarquee(`${timestamp}: ${text}`, false, 15000);
+                }
+            }
+			// 创建粒子效果
+function createParticleEffect(cardElement, guardianColor) {
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'particle-container';
+// 在玩家卡片渲染时添加特效
+function enhanceEvolvedGuardians() {
+    document.querySelectorAll('.player-card.has-guardian').forEach(card => {
+        const playerIndex = card.querySelector('.trade-btn').getAttribute('data-index');
+        const player = players[playerIndex];
+        
+        if (player.guardianEvolved) {
+            // 添加更强烈的类名
+            card.classList.add('evolved');
+            
+            // 获取护法颜色
+            const guardianColor = getGuardianColor(player.activeGuardian);
+            card.style.setProperty('--guardian-color', guardianColor);
+            
+            // 添加粒子效果
+            createParticleEffect(card, guardianColor);
+            
+            // 增强觉醒按钮效果
+            const evolutionBtn = card.querySelector('.evolution-trigger-btn');
+            if (evolutionBtn) {
+                evolutionBtn.classList.add('evolved');
+            }
+        }
+    });
+}
+    
+    // 创建多个粒子
+    for (let i = 0; i < 15; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.setProperty('--particle-color', guardianColor);
+        particle.style.setProperty('--translate-x', `${Math.random() * 40 - 20}px`);
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.animationDelay = `${Math.random() * 3}s`;
+        particleContainer.appendChild(particle);
+    }
+    
+    cardElement.appendChild(particleContainer);
+    
+    // 添加流动光效边框
+    const glowBorder = document.createElement('div');
+    glowBorder.className = 'glow-border';
+    cardElement.appendChild(glowBorder);
+    
+    // 添加觉醒标识
+    const evolvedBadge = document.createElement('div');
+    evolvedBadge.className = 'guardian-evolved-badge';
+    evolvedBadge.innerHTML = '神';
+    cardElement.appendChild(evolvedBadge);
+}
+            
+            // 玩家卡片闪烁效果
+            function flashPlayerCard(playerIndex, color) {
+                const playerCards = document.querySelectorAll('.player-card');
+                if (playerIndex < playerCards.length) {
+                    const card = playerCards[playerIndex];
+                    card.style.animation = 'flash 1s 3';
+                    card.style.color = color;
+                    setTimeout(() => {
+                        card.style.animation = '';
+                    }, 3000);
+                }
+            }
+            
+            // 生成随机货物
+            function generateRandomGoods(count) {
+                const selectedGoods = [];
+                for (let i = 0; i < count; i++) {
+                    const randomGoods = goodsTypes[Math.floor(Math.random() * goodsTypes.length)];
+                    selectedGoods.push(randomGoods);
+                }
+                return selectedGoods;
+            }
+            
+            // 渲染玩家列表
+            function renderPlayers() {
+                playersList.innerHTML = '';
+                
+                if (players.length === 0) {
+                    playersList.innerHTML = '<div class="no-players">暫無玩家，請新增玩家開始遊戲</div>';
+                    return;
+                }
+                
+                players.forEach((player, index) => {
+                    const playerCard = document.createElement('div');
+                    playerCard.className = 'player-card';
+                    playerCard.style.borderLeftColor = player.color;
+                    
+                    // 如果有護法，添加相應的類
+                    if (player.activeGuardian) {
+                        const guardianClass = getGuardianEffectClass(player.activeGuardian);
+                        playerCard.classList.add('has-guardian', guardianClass);
+                        
+                        // 設置CSS變量以供發光效果使用
+                        playerCard.style.setProperty('--guardian-color', getGuardianColor(player.activeGuardian));
+                    }
+                    
+                    const lotteryNumbersHtml = player.lotteryNumbers && player.lotteryNumbers.length > 0 ? 
+                        player.lotteryNumbers.map(num => {
+                            const colorIndex = (num - 1) % numberColors.length;
+                            return `<span style="background: ${numberColors[colorIndex]}; color: white; display: inline-block; margin: 3px; padding: 5px 10px; border-radius: 15px; font-size: 0.9rem;">${num}</span>`;
+                        }).join('') : '無';
+                    
+                    // 检查是否有仓库按钮需要显示
+                    const warehouseButtonHtml = player.goodsCards && player.goodsCards.length > 0 ? 
+                        `<button class="btn-warehouse" data-index="${index}" style="display: block;">倉庫 (${player.goodsCards.length})</button>` :
+                        `<button class="btn-warehouse" data-index="${index}" style="display: none;">倉庫</button>`;
+                    
+                    playerCard.innerHTML = `
+                        <div class="player-header">
+    <div class="player-name">${player.name}</div>
+    <div class="player-header-actions">
+        ${player.activeGuardian ? `
+            <button class="remove-guardian-btn" data-index="${index}">解除${player.activeGuardian}</button>
+            ${player.canEvolve ? `<button class="evolution-trigger-btn" data-index="${index}">神兽觉醒</button>` : ''}
+        ` : ''}
+        <button class="btn-danger delete-player" data-index="${index}">刪除</button>
+    </div>
+</div>
+                        <div class="player-stats">
+                            <div class="stat-item">
+
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">交易次數:</span>
+                                <span>${player.trades}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">受影響事件:</span>
+                                <span>${player.eventCount || 0}次</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">中獎次數:</span>
+                                <span>${player.wins || 0}</span>
+                            </div>
+                            ${player.activeGuardian ? `
+                            <div class="stat-item guardian-effect ${getGuardianEffectClass(player.activeGuardian)}">
+                                <span class="stat-label">守護神加持:</span>
+                                <span class="guardian-text">${getGuardianEffectText(player.activeGuardian)}</span>
+                            </div>
+                            ` : ''}
+                           ${player.guardianEvolved ? `
+<div class="stat-item guardian-effect evolved">
+    <span class="stat-label">神獸覺醒:</span>
+    <span class="guardian-text">${player.activeGuardian}已覺醒，力量大幅提升！穫得兩倍加持效果</span>
+    <button class="evolution-trigger-btn" data-index="${index}">神兽觉醒</button>
+</div>
+` : ''}
+                        </div>
+                        ${player.guardianTrades >= 10 && !player.guardianEvolved && player.activeGuardian ? 
+                        `<button class="evolution-btn" data-index="${index}">進化護法</button>` : ''}
+                        <div class="lottery-history">
+                            <div class="stat-label">歷史彩券號碼:</div>
+                            ${lotteryNumbersHtml}
+                        </div>
+
+                        <!-- 神秘商人卡片区域 -->
+                        ${player.cards && player.cards.length > 0 ? `
+                        <div class="player-cards-section">
+                            <div class="stat-label">擁有的卡片:</div>
+                            <div class="cards-container">
+                        ${player.cards.map(card => 
+                            `<div class="player-card-item ${card.rarity || 'normal'}" data-player-index="${index}" data-card-id="${card.id}">${card.name}</div>`
+                        ).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <!-- 幽街货卡仓库按钮 -->
+                        ${warehouseButtonHtml}
+
+                        <!-- 交易按钮 -->
+                        <button class="trade-btn" data-index="${index}">交易成功</button>
+                    `;
+                    
+                    playersList.appendChild(playerCard);
+                    
+                    // 添加事件监听器
+                    const deleteBtn = playerCard.querySelector('.delete-player');
+                    deleteBtn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        players.splice(index, 1);
+                        savePlayers();
+                        renderPlayers();
+                    });
+                    
+                    const tradeBtn = playerCard.querySelector('.trade-btn');
+                    tradeBtn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        handleTradeSuccess(index);
+                    });
+                    
+                    const warehouseBtn = playerCard.querySelector('.btn-warehouse');
+                    warehouseBtn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        openWarehouse(index);
+                    });
+                    
+                    // 添加解除护法按钮的事件监听
+                    const removeGuardianBtn = playerCard.querySelector('.remove-guardian-btn');
+                    if (removeGuardianBtn) {
+                        removeGuardianBtn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            removeGuardianEffect(index);
+                        });
+                    }
+                    
+                    // 添加进化按钮的事件监听
+                    const evolutionBtn = playerCard.querySelector('.evolution-btn');
+                    if (evolutionBtn) {
+                        evolutionBtn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            handleGuardianEvolution(index);
+                        });
+                    }
+                    
+                    // 添加神兽觉醒按钮的事件监听
+                    const evolutionTriggerBtn = playerCard.querySelector('.evolution-trigger-btn');
+                    if (evolutionTriggerBtn) {
+                        evolutionTriggerBtn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            
+                        });
+                    }
+                });
+                
+                attachCardEvents();
+            }
+            
+            // 为卡片添加点击事件
+            function attachCardEvents() {
+                document.querySelectorAll('.player-card-item').forEach(cardEl => {
+                    cardEl.addEventListener('click', function() {
+                        const playerIndex = parseInt(this.getAttribute('data-player-index'));
+                        const cardId = parseInt(this.getAttribute('data-card-id'));
+                        useCard(playerIndex, cardId);
+                    });
+                });
+            }
+            
+            // 打开仓库
+            function openWarehouse(playerIndex) {
+                currentPlayerForWarehouse = playerIndex;
+                const player = players[playerIndex];
+                
+                warehouseCardsEl.innerHTML = '';
+                
+                if (player.goodsCards && player.goodsCards.length > 0) {
+                    player.goodsCards.forEach((card, index) => {
+                        const cardEl = document.createElement('div');
+                        cardEl.className = `warehouse-card ${card.rarity}`;
+                        cardEl.dataset.cardIndex = index;
+                        
+                        // 生成货物圆圈
+                        const goodsCirclesHtml = card.goods.map(good => 
+                            `<div class="goods-circle ${good.color}" title="${good.name}">${good.name.charAt(0)}</div>`
+                        ).join('');
+                        
+                        cardEl.innerHTML = `
+                            <div class="card-name">${card.name}</div>
+                            <div class="card-circles">${goodsCirclesHtml}</div>
+                            <div class="card-prices">
+                                <div>買入: ${card.buyPrice}兩</div>
+                                <div>賣出: ${card.sellPrice}兩</div>
+                            </div>
+                            <div class="card-desc">點擊選擇使用此貨卡</div>
+                        `;
+                        
+                        cardEl.addEventListener('click', function() {
+                            document.querySelectorAll('.warehouse-card').forEach(el => {
+                                el.classList.remove('selected');
+                            });
+                            this.classList.add('selected');
+                            selectedGoodsCardId = index;
+                            warehouseError.textContent = '';
+                        });
+                        
+                        warehouseCardsEl.appendChild(cardEl);
+                    });
+                } else {
+                    warehouseCardsEl.innerHTML = '<p>倉庫中沒有貨物交易卡</p>';
+                }
+                
+                warehouseModal.style.display = 'flex';
+                selectedGoodsCardId = null;
+            }
+            
+            // 使用幽街货卡
+            function useGoodsCard() {
+                if (selectedGoodsCardId === null) {
+                    warehouseError.textContent = '請選擇一張貨物交易卡';
+                    return;
+                }
+                
+                const player = players[currentPlayerForWarehouse];
+                const card = player.goodsCards[selectedGoodsCardId];
+                
+                // 检查是否有足够银两购买
+                if (player.wealth < card.buyPrice) {
+                    warehouseError.textContent = `銀兩不足，需要 ${card.buyPrice} 兩購買這些貨物`;
+                    return;
+                }
+                
+                // 扣除银两
+                player.wealth -= card.buyPrice;
+                
+                // 添加事件日志
+                addEvent(`${player.name} 從幽街貨物倉庫拿出了幽街貨卡貨物`, 'special');
+                
+                // 移除使用的卡片
+                player.goodsCards.splice(selectedGoodsCardId, 1);
+                
+                // 更新走马灯
+                updateMarquee(`${player.name} 遇到了神秘客人，獲得幽街貨物交易卡！`, true, 30000, true);
+                
+                // 保存并更新界面
+                savePlayers();
+                renderPlayers();
+                
+                // 关闭仓库
+                warehouseModal.style.display = 'none';
+            }
+            
+            // 处理交易成功
+            function handleTradeSuccess(playerIndex) {
+                const player = players[playerIndex];
+                playSound('tradeSound');
+                player.trades++;
+                totalTrades++;
+                player.wealth = (player.wealth || 50) + 10;
+                
+// 如果有护法，增加护法交易次数
+if (player.activeGuardian && !player.guardianEvolved) {
+    player.guardianTrades = (player.guardianTrades || 0) + 1;
+    
+    // 检查是否达到进化条件
+    if (player.guardianTrades >= 10) {
+        player.canEvolve = true;
+        addEvent(`${player.name} 的${player.activeGuardian}感受週身已縈繞起躍動的靈息，那股蓄勢待發的力量正悄然翻湧—— 此刻，正是祂迎接覺醒的時機、突破界限的時刻！`, 'special');
+        updateMarquee(`${player.name} 的${player.activeGuardian}已累積足夠交易次數，可以進化了！`, true, 30000);
+    }
+}
+                
+                savePlayers();
+                addEvent(`${player.name} 成功了一次交易`);
+                
+                // 随机触发环境事件（30%概率）- 独立触发，不影响其他系统
+                if (Math.random() < 0.35) {
+                    triggerRandomEvent(playerIndex);
+                }
+                
+                // 随机触发神秘商人（15%概率）- 触发时会阻止彩票选择
+                let merchantTriggered = false;
+                if (Math.random() < 0.45) {
+                    triggerMysteriousMerchant(playerIndex);
+                    merchantTriggered = true;
+                }
+                
+                // 随机触发神兽觉醒（5%概率）
+                if (Math.random() < 0.05 && player.activeGuardian && !player.guardianEvolved) {
+                    triggerEvolution(playerIndex);
+                }
+                
+                // 检查是否需要竞猜环节（每6次交易）
+                let guessTriggered = false;
+                if (totalTrades % 6 === 0) {
+                    guessTriggered = true;
+                    setTimeout(() => {
+                        guessModal.style.display = 'flex';
+                        updateMarquee("競猜環節開始！請玩家們互相猜測對方的銀兩數目", true, 30000);
+                        
+                        // 设置竞猜环节关闭时的回调
+                        const closeGuessHandler = function() {
+                            // 只有未触发神秘商人的情况下才显示彩票选择
+                            if (!merchantTriggered) {
+                                // 显示彩票选择
+                                currentPlayerForLottery = playerIndex;
+                                initLotteryNumbers();
+                                lotteryModal.style.display = 'flex';
+                                
+                                // 更新走马灯
+                                updateMarquee(`${player.name} 完成了一次交易，请选择彩票号码`);
+                            }
+                            
+                            // 移除事件监听器，避免重复绑定
+                            closeGuessBtn.removeEventListener('click', closeGuessHandler);
+                            closeGuessBtn2.removeEventListener('click', closeGuessHandler);
+                        };
+                        
+                        // 添加事件监听器
+                        closeGuessBtn.addEventListener('click', closeGuessHandler);
+                        closeGuessBtn2.addEventListener('click', closeGuessHandler);
+                    }, 1500);
+                }
+                
+                // 如果没有触发竞猜环节，正常显示彩票选择
+                if (!guessTriggered && !merchantTriggered) {
+                    // 显示彩票选择
+                    currentPlayerForLottery = playerIndex;
+                    initLotteryNumbers();
+                    lotteryModal.style.display = 'flex';
+                    
+                    // 更新走马灯
+                    updateMarquee(`${player.name} 完成了一次交易，请选择彩票号码`);
+                }
+                
+                // 重新渲染玩家列表
+                renderPlayers();
+                
+                // 检查是否需要开奖（每4次交易）
+                if (totalTrades % 4 === 0) {
+                    setTimeout(conductLotteryDraw, 1000);
+                }
+            }
+
+            
+            // 处理护法进化
+            function handleGuardianEvolution(playerIndex) {
+                const player = players[playerIndex];
+                
+                if (!player.activeGuardian) {
+                    addEvent(`${player.name} 沒有護法，無法進化`, 'individual');
+                    return;
+                }
+                
+                if (player.guardianEvolved) {
+                    addEvent(`${player.name} 的${player.activeGuardian}已經進化過了`, 'individual');
+                    return;
+                }
+                
+                const evolutionData = guardianEvolutionData[player.activeGuardian];
+                
+                if (!evolutionData) {
+                    addEvent(`${player.name} 的${player.activeGuardian}沒有進化數據`, 'individual');
+                    return;
+                }
+                
+                currentEvolutionPlayerIndex = playerIndex;
+                
+                // 設置進化描述
+                evolutionDesc.textContent = `確定要進化您的${player.activeGuardian}嗎？`;
+                
+                // 設置消耗材料
+                evolutionCostList.innerHTML = evolutionData.cost.map(item => 
+                    `<div>${item.amount} ${item.type === "wealth" ? "銀兩" : "張卡片"}</div>`
+                ).join('');
+                
+                // 設置進化好處
+                evolutionBenefitsList.innerHTML = evolutionData.benefits.map(
+                    benefit => `<div>• ${benefit}</div>`
+                ).join('');
+                
+                // 顯示進化模態框
+                evolutionModal.style.display = 'flex';
+                evolutionError.textContent = '';
+            }
+            
+// 確認進化
+function confirmEvolution() {
+    const player = players[currentEvolutionPlayerIndex];
+    const evolutionData = guardianEvolutionData[player.activeGuardian];
+    
+    // 移除原有的材料检查逻辑，改为直接提示
+    const costText = evolutionData.cost.map(item => 
+        `${item.amount} ${item.type === "wealth" ? "银两" : "张卡片"}`
+    ).join(' 和 ');
+    
+    // 显示材料提示（但不阻止进化）
+    evolutionError.textContent = `进化需要: ${costText}`;
+    
+    // 直接执行进化，不检查材料
+    // 扣除材料（可选，如果您想完全移除材料需求，可以注释掉这部分）
+    deductMaterials(player, evolutionData.cost);
+    
+    // 標記為已進化
+    player.guardianEvolved = true;
+    player.canEvolve = false;
+    player.guardianEvolutionData = evolutionData;
+    
+    // 增強護法效果
+    if (!player.guardianEffects) player.guardianEffects = {};
+    Object.assign(player.guardianEffects, evolutionData.evolvedEffect);
+    
+    // 保存並更新界面
+    savePlayers();
+    renderPlayers();
+    
+    // 顯示進化動畫
+    showEvolutionAnimation(player.activeGuardian, evolutionData);
+    
+    // 關閉模態框
+    evolutionModal.style.display = 'none';
+    
+    // 添加事件日志
+    addEvent(`${player.name} 的${player.activeGuardian}進化了！`, 'special');
+    updateMarquee(`${player.name} 的${player.activeGuardian}覺醒了，獲得強大力量！`, true, 30000);
+}
+            
+            // 檢查是否有足夠材料
+            function hasEnoughMaterials(player, cost) {
+                for (const item of cost) {
+                    if (item.type === "wealth" && player.wealth < item.amount) {
+                        return false;
+                    }
+                    if (item.type === "cards" && (!player.cards || player.cards.length < item.amount)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
+            // 扣除材料
+            function deductMaterials(player, cost) {
+                for (const item of cost) {
+                    if (item.type === "wealth") {
+                        player.wealth -= item.amount;
+                    }
+                    if (item.type === "cards") {
+                        // 隨機移除指定數量的卡片
+                        for (let i = 0; i < item.amount; i++) {
+                            if (player.cards && player.cards.length > 0) {
+                                const randomIndex = Math.floor(Math.random() * player.cards.length);
+                                player.cards.splice(randomIndex, 1);
+                            }
+                        }
+                    }
+                }
+            }
+          
+		  
+            // 顯示進化動畫
+
+            function showEvolutionAnimation(guardianName, evolutionData) {
+                const evolutionEffect = document.getElementById('evolution-effect');
+                const guardianArrival = document.getElementById('guardian-arrival');
+                const blackOverlay = document.getElementById('black-overlay');
+                
+                // 播放進化音效
+                playSound('evolutionSound');
+                
+                // 設置進化後的圖片
+                const evolvedImage = evolvedGuardianImages[getGuardianClass(guardianName)];
+               guardianArrival.style.backgroundImage = `url(${evolvedImage || evolutionData.image})`;
+                
+                // 顯示黑色遮罩
+                blackOverlay.style.display = 'block';
+                setTimeout(() => {
+                    blackOverlay.classList.add('active');
+                }, 100);
+                
+                // 顯示進化特效
+                evolutionEffect.style.display = 'flex';
+                setTimeout(() => {
+                    evolutionEffect.classList.add('active');
+                }, 100);
+                
+                // 顯示護法降臨效果
+                guardianArrival.className = `guardian-arrival ${getGuardianClass(guardianName)} evolved`;
+                guardianArrival.style.display = 'block';
+                
+                // 觸發動畫 - 從上方降落
+                setTimeout(() => {
+                    guardianArrival.classList.add('active');
+                    
+                    // 停留7秒後開始淡化
+                    setTimeout(() => {
+                        evolutionEffect.classList.remove('active');
+                        guardianArrival.classList.add('fade-out');
+                        blackOverlay.classList.add('fade-out');
+                        
+                        // 完全淡化後隱藏
+                        setTimeout(() => {
+                            evolutionEffect.style.display = 'none';
+                            guardianArrival.style.display = 'none';
+                            blackOverlay.style.display = 'none';
+                            evolutionEffect.classList.remove('active');
+                            guardianArrival.classList.remove('active', 'fade-out');
+                            blackOverlay.classList.remove('active', 'fade-out');
+                        }, 5000);
+                    }, 7000);
+                }, 100);
+            }
+            
+            // 獲取護法類名
+            function getGuardianClass(guardianName) {
+                switch(guardianName) {
+                    case "牛神護法": return "bull";
+                    case "白虎護法": return "tiger";
+                    case "青龍護法": return "dragon";
+                    case "朱雀護法": return "phoenix";
+                    case "玄武護法": return "turtle";
+                    default: return "";
+                }
+            }
+            
+            // 触发神兽觉醒
+            function triggerEvolution(playerIndex) {
+                const player = players[playerIndex];
+                
+                if (!player.activeGuardian) {
+                    addEvent(`${player.name} 沒有護法，無法覺醒`, 'individual');
+                    return;
+                }
+                
+                if (player.guardianEvolved) {
+                    addEvent(`${player.name} 的${player.activeGuardian}已經覺醒過了`, 'individual');
+                    return;
+                }
+                
+                // 随机决定是否觉醒成功（70%成功率）
+                if (Math.random() < 0.7) {
+                    player.guardianEvolved = true;
+                    const evolutionData = guardianEvolutionData[player.activeGuardian];
+                    
+                    if (evolutionData) {
+                        // 增強護法效果
+                        if (!player.guardianEffects) player.guardianEffects = {};
+                        Object.assign(player.guardianEffects, evolutionData.evolvedEffect);
+                        
+                        // 保存並更新界面
+                        savePlayers();
+                        renderPlayers();
+                        
+                        // 顯示進化動畫
+                        showEvolutionAnimation(player.activeGuardian, evolutionData);
+                        
+                        // 添加事件日志
+                        addEvent(`${player.name} 的${player.activeGuardian}成功覺醒！`, 'special');
+                        updateMarquee(`${player.name} 的${player.activeGuardian}在神秘力量作用下覺醒了！`, true, 30000);
+                    }
+                } else {
+                    // 觉醒失败
+                    addEvent(`${player.name} 的${player.activeGuardian}覺醒失敗了`, 'individual');
+                    updateMarquee(`${player.name} 的${player.activeGuardian}覺醒失敗，需要更多修煉`, true, 15000);
+                }
+            }
+            
+            // 触发随机事件
+            function triggerRandomEvent(playerIndex) {
+                const event = environmentEvents[Math.floor(Math.random() * environmentEvents.length)];
+                const player = players[playerIndex];
+                
+                player.eventCount = (player.eventCount || 0) + 1;
+                
+                if (event.type === 'global') {
+                    addEvent(event.shortText, 'global', event.fullText);
+                    players.forEach((p, idx) => {
+                        p.eventCount = (p.eventCount || 0) + 1;
+                        flashPlayerCard(idx, p.color);
+                    });
+                } else if (event.type === 'special') {
+                    // 处理特别事件 - 获得幽街货卡
+                    addEvent(`${player.name} ${event.shortText}`, 'special', event.fullText);
+                    flashPlayerCard(playerIndex, player.color);
+                    
+                    if (event.effect === "getGoodsCards") {
+                        // 个人获得货卡
+                        giveGoodsCardsToPlayer(playerIndex);
+                    } else if (event.effect === "allGetGoodsCards") {
+                        // 全体获得货卡
+                        players.forEach((p, idx) => {
+                            giveGoodsCardsToPlayer(idx);
+                        });
+                    }
+                } else {
+                    addEvent(`${player.name} ${event.shortText}`, 'individual', event.fullText);
+                    flashPlayerCard(playerIndex, player.color);
+                }
+                
+                savePlayers();
+                renderPlayers();
+            }
+            
+            // 给玩家幽街货卡
+            function giveGoodsCardsToPlayer(playerIndex) {
+                playSound('getGoodsSound'); 
+                const player = players[playerIndex];
+                const cardsToGive = Math.floor(Math.random() * 2) + 1; // 1-2张卡
+                
+                if (!player.goodsCards) {
+                    player.goodsCards = [];
+                }
+                
+                for (let i = 0; i < cardsToGive; i++) {
+                    const randomCardIndex = Math.floor(Math.random() * goodsCardLibrary.length);
+                    const cardTemplate = goodsCardLibrary[randomCardIndex];
+                    
+                    // 创建新的货卡实例
+                    const newCard = {
+                        id: cardTemplate.id,
+                        name: cardTemplate.name,
+                        rarity: cardTemplate.rarity,
+                        goodsCount: cardTemplate.goodsCount,
+                        buyPrice: cardTemplate.buyPrice,
+                        sellPrice: cardTemplate.sellPrice,
+                        goods: generateRandomGoods(cardTemplate.goodsCount)
+                    };
+                    
+                    player.goodsCards.push(newCard);
+                }
+                
+                addEvent(`${player.name} 獲得了 ${cardsToGive} 張幽街貨物交易卡`, 'special');
+            }
+            
+            // 触发神秘商人
+            function triggerMysteriousMerchant(playerIndex) {
+                currentPlayerForMerchant = playerIndex;
+                const player = players[playerIndex];
+                
+                updateMarquee(`${player.name} 遇到了神秘商人！请与他交易吧`, true, 30000);
+                
+                const selectedCards = [];
+                const availableCards = [...merchantCardLibrary];
+                
+                for (let i = availableCards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [availableCards[i], availableCards[j]] = [availableCards[j], availableCards[i]];
+                }
+                
+                for (let i = 0; i < Math.min(8, availableCards.length); i++) {
+                    selectedCards.push(availableCards[i]);
+                }
+                
+                merchantCardsEl.innerHTML = '';
+                selectedCards.forEach(card => {
+                    const cardEl = document.createElement('div');
+                    cardEl.className = `merchant-card ${card.rarity}`;
+                    cardEl.dataset.cardId = card.id;
+                    
+                    const rarityNames = {
+                        'normal': '普通卡', 'magic': '魔法卡', 'rare': '稀有卡',
+                        'epic': '史詩卡', 'legendary': '傳奇卡', 'divine': '神聖卡'
+                    };
+                    
+                    cardEl.innerHTML = `
+                        <div class="card-name">${card.name}</div>
+                        <div class="card-rarity">${rarityNames[card.rarity] || card.rarity}</div>
+                        <div class="card-cost">${card.cost}手牌</div>
+                        <div class="card-desc">${card.description}</div>
+                    `;
+                    
+                    cardEl.addEventListener('click', function() {
+                        document.querySelectorAll('.merchant-card').forEach(el => {
+                            el.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+                        selectedCardId = card.id;
+                        merchantError.textContent = '';
+                    });
+                    
+                    merchantCardsEl.appendChild(cardEl);
+                });
+                
+                merchantModal.style.display = 'flex';
+                selectedCardId = null;
+            }
+            
+            function conductLotteryDraw() {
+                playSound('lotterySound');
+                updateMarquee(`准备开始抽取第${lotteryRound}期的彩票，累计奖金: ${jackpot}两`);
+                
+                setTimeout(() => {
+                    drawModal.style.display = 'flex';
+                    lotteryRoundEl.textContent = lotteryRound;
+                    jackpotAmountEl.textContent = jackpot;
+                    
+                    const drawNumberEl = document.createElement('div');
+                    drawNumberEl.className = 'draw-number';
+                    drawNumberEl.textContent = '?';
+                    drawAnimation.innerHTML = '';
+                    drawAnimation.appendChild(drawNumberEl);
+                    
+                    const winningNumber = Math.floor(Math.random() * 50) + 1;
+                    
+                    let counter = 0;
+                    const interval = setInterval(() => {
+                        counter++;
+                        drawNumberEl.textContent = Math.floor(Math.random() * 50) + 1;
+                        
+                        if (counter > 20) {
+                            clearInterval(interval);
+                            drawNumberEl.textContent = winningNumber;
+                            
+                            const winners = players.filter(player => 
+                                player.lotteryNumbers && player.lotteryNumbers.includes(winningNumber)
+                            );
+                            
+                            if (winners.length > 0) {
+                                playSound('lotteryWinSound');
+                                winnerDisplay.innerHTML = `<h3>中奖号码: ${winningNumber}</h3>`;
+                                winners.forEach(winner => {
+                                    winner.wins = (winner.wins || 0) + 1;
+                                    winner.wealth = (winner.wealth || 50) + jackpot;
+                                    winnerDisplay.innerHTML += `<p>${winner.name} 中奖，获得 ${jackpot} 两奖金！</p>`;
+                                    addEvent(`${winner.name} 彩票中奖，获得${jackpot}两奖金！`, 'individual');
+                                    
+                                    const winnerIndex = players.findIndex(p => p.name === winner.name);
+                                    if (winnerIndex !== -1) flashPlayerCard(winnerIndex, winner.color);
+                                });
+                                
+                                // 重置奖池和彩票号码（只有在有人中奖时）
+                                jackpot = 10;
+                                selectedNumbers = [];
+                                players.forEach(player => {
+                                    player.lotteryNumbers = [];
+                                });
+                                
+                                addEvent(`第${lotteryRound}期彩票开奖完毕，${winners.map(w => w.name).join('和')} 中奖，所有彩票数据已重置`);
+                                updateMarquee(`第${lotteryRound}期彩票开奖，号码 ${winningNumber}，${winners.map(w => w.name).join('和')} 中奖！奖池已重置。`, true, 30000);
+                            } else {
+                                winnerDisplay.innerHTML = `<h3>中奖号码: ${winningNumber}</h3>
+                                                          <p>没有人中奖！奖池累计到下一轮：${jackpot + 10}两</p>`;
+                                addEvent(`彩票开奖，号码 ${winningNumber}，无人中奖，奖池累计到 ${jackpot + 10}两`);
+                                
+                                jackpot += 10;
+                                updateMarquee(`第${lotteryRound}期彩票开奖，号码 ${winningNumber}，无人中奖，奖池累计到 ${jackpot}两`, true, 30000);
+                            }
+                            
+                            lotteryRound++;
+                            savePlayers();
+                            renderPlayers();
+                        }
+                    }, 100);
+                }, 3000);
+            }
+            
+            // 使用卡片
+            function useCard(playerIndex, cardId) {
+                const player = players[playerIndex];
+                const cardIndex = player.cards.findIndex(c => c.id == cardId);
+                
+                if (cardIndex === -1) return;
+                
+                const card = player.cards[cardIndex];
+                currentCardToUse = card;
+                currentCardPlayerIndex = playerIndex;
+                
+                // 检查是否是护法卡片
+                const isGuardianCard = [
+                    "牛神護法", "白虎護法", "青龍護法", "朱雀護法", "玄武護法"
+                ].includes(card.name);
+                
+                useCardDesc.textContent = `确定要使用【${card.name}】卡片吗？效果: ${card.description}`;
+                useCardModal.style.display = 'flex';
+                useCardError.textContent = '';
+                
+                // 移除原有的事件监听器，避免重复绑定
+                confirmUseCardBtn.replaceWith(confirmUseCardBtn.cloneNode(true));
+                const newConfirmBtn = document.getElementById('confirm-use-card');
+                
+                // 根据卡片类型绑定不同的事件处理函数
+                if (isGuardianCard) {
+                    newConfirmBtn.addEventListener('click', executeGuardianEffect);
+                } else {
+                    newConfirmBtn.addEventListener('click', executeCardEffect);
+                }
+            }
+            
+            // 执行护法卡片效果
+            function executeGuardianEffect() {
+                const player = players[currentCardPlayerIndex];
+                const card = currentCardToUse;
+                
+                // 检查是否已有护法效果
+                if (player.activeGuardian) {
+                    useCardError.textContent = `您已有${player.activeGuardian}保護，請先解除當前護法效果`;
+                    return;
+                }
+                
+                // 获取护法降临元素和黑色遮罩元素
+                const guardianArrival = document.getElementById('guardian-arrival');
+                const blackOverlay = document.getElementById('black-overlay');
+                
+                // 显示黑色遮罩
+                blackOverlay.style.display = 'block';
+                setTimeout(() => {
+                    blackOverlay.classList.add('active');
+                }, 100);
+                
+                // 根据卡片类型应用不同效果
+                let guardianClass = '';
+                switch(card.name) {
+                    case "牛神護法":
+                        playSound('bullSound');
+                        player.activeGuardian = "牛神護法";
+                        player.guardianEffects = { extraWealthPerTrade: 30 };
+						        player.guardianTrades = 0; // 确保初始化
+        player.guardianEvolved = false; // 确保初始化
+        player.canEvolve = false; // 确保初始化
+                        guardianClass = 'bull';
+                        break;
+                        
+                    case "白虎護法":
+                        playSound('tigerSound');
+                        player.activeGuardian = "白虎護法";
+                        player.guardianEffects = { extraCardsPerDraw: 1 };
+						        player.guardianTrades = 0; // 确保初始化
+        player.guardianEvolved = false; // 确保初始化
+        player.canEvolve = false; // 确保初始化
+                        guardianClass = 'tiger';
+                        break;
+                        
+                    case "青龍護法":
+                        playSound('dragonSound');
+                        player.activeGuardian = "青龍護法";
+                        player.guardianEffects = { immuneToNegativeEvents: true };
+						        player.guardianTrades = 0; // 确保初始化
+        player.guardianEvolved = false; // 确保初始化
+        player.canEvolve = false; // 确保初始化
+                        guardianClass = 'dragon';
+                        break;
+                        
+                    case "朱雀護法":
+                        playSound('phoenixSound');
+                        player.activeGuardian = "朱雀護法";
+                        player.guardianEffects = { stealWealthPerTurn: 20 };
+						        player.guardianTrades = 0; // 确保初始化
+        player.guardianEvolved = false; // 确保初始化
+        player.canEvolve = false; // 确保初始化
+                        guardianClass = 'phoenix';
+                        break;
+                        
+                    case "玄武護法":
+                        playSound('turtleSound');
+                        player.activeGuardian = "玄武護法";
+                        player.guardianEffects = { extraWealthPerTurn: 30 };
+						        player.guardianTrades = 0; // 确保初始化
+        player.guardianEvolved = false; // 确保初始化
+        player.canEvolve = false; // 确保初始化
+                        guardianClass = 'turtle';
+                        break;
+                }
+                
+                // 显示护法降临效果
+                guardianArrival.className = `guardian-arrival ${guardianClass}`;
+                guardianArrival.style.display = 'block';
+                
+                // 触发动画 - 从上方降落
+                setTimeout(() => {
+                    guardianArrival.classList.add('active');
+                    
+                    // 停留7秒后开始淡化
+                    setTimeout(() => {
+                        guardianArrival.classList.add('fade-out');
+                        blackOverlay.classList.add('fade-out');
+                        
+                        // 完全淡化后隐藏
+                        setTimeout(() => {
+                            guardianArrival.style.display = 'none';
+                            blackOverlay.style.display = 'none';
+                            guardianArrival.classList.remove('active', 'fade-out');
+                            blackOverlay.classList.remove('active', 'fade-out');
+                        }, 5000); // 淡化过程持续5秒
+                    }, 7000); // 停留7秒
+                }, 100);
+                
+                // 移除使用的卡片
+                const cardIndex = player.cards.findIndex(c => c.id == card.id);
+                if (cardIndex !== -1) {
+                    player.cards.splice(cardIndex, 1);
+                }
+                
+                savePlayers();
+                renderPlayers();
+                useCardModal.style.display = 'none';
+                
+                addEvent(`${player.name} 使用了【${card.name}】卡片，獲得了${card.name}的保護`, 'special');
+                updateMarquee(`${player.name} 召喚了${card.name}！`, true, 30000);
+            }
+            
+            function removeGuardianEffect(playerIndex) {
+                const player = players[playerIndex];
+                
+    if (player.activeGuardian) {
+        addEvent(`${player.name} 解除了${player.activeGuardian}的保護`, 'special');
+        player.activeGuardian = null;
+        player.guardianEffects = {};
+        player.guardianEvolved = false;
+        player.guardianTrades = 0;
+        player.canEvolve = false; // 添加这行，确保解除后重置进化状态
+        player.guardianEvolutionData = null; // 添加这行，清除进化数据
+        
+        savePlayers();
+        renderPlayers();
+		enhanceEvolvedGuardians();
+    }
+}
+            
+            // 执行卡片效果
+            function executeCardEffect() {
+                const player = players[currentCardPlayerIndex];
+                const card = currentCardToUse;
+                
+                switch(card.effect) {
+                    case "doubleNextTrade":
+                        player.nextTradeDouble = true;
+                        addEvent(`${player.name} 使用了【${card.name}】，下次交易将获得双倍收益`);
+                        break;
+                    case "stealWealth":
+                        const otherPlayers = players.filter((p, i) => i !== currentCardPlayerIndex);
+                        if (otherPlayers.length > 0) {
+                            const targetIndex = Math.floor(Math.random() * otherPlayers.length);
+                            const target = otherPlayers[targetIndex];
+                            const stolenAmount = 10;
+                            
+                            if (target.wealth >= stolenAmount) {
+                                target.wealth -= stolenAmount;
+                                player.wealth += stolenAmount;
+                                addEvent(`${player.name} 使用了【${card.name}】，从${target.name}窃取了${stolenAmount}两银子`);
+                            } else {
+                                addEvent(`${player.name} 使用了【${card.name}】，但${target.name}没有足够银两可窃取`);
+                            }
+                        }
+                        break;
+                    case "instantWealth":
+                        player.wealth += 20;
+                        addEvent(`${player.name} 使用了【${card.name}】，立即获得20两银子`);
+                        break;
+                    case "immuneNextNegative":
+                        player.immuneNextNegative = true;
+                        addEvent(`${player.name} 使用了【${card.name}】，将免疫下一次负面事件`);
+                        break;
+                    default:
+                        addEvent(`${player.name} 使用了【${card.name}】`);
+                }
+                
+                const cardIndex = player.cards.findIndex(c => c.id == card.id);
+                if (cardIndex !== -1) {
+                    player.cards.splice(cardIndex, 1);
+                }
+                
+                updateMarquee(`${player.name} 使用了【${card.name}】卡片`, true, 30000);
+                savePlayers();
+                renderPlayers();
+                useCardModal.style.display = 'none';
+            }
+            
+            // 保存玩家数据
+            function savePlayers() {
+                localStorage.setItem('players', JSON.stringify(players));
+                localStorage.setItem('totalTrades', totalTrades);
+                localStorage.setItem('jackpot', jackpot);
+                localStorage.setItem('lotteryRound', lotteryRound);
+                localStorage.setItem('selectedNumbers', JSON.stringify(selectedNumbers));
+            }
+            
+            // 初始化
+            function init() {
+                players.forEach(player => {
+                    if (player.cards) {
+                        player.cards.forEach(card => {
+                            if (!card.rarity) {
+                                if (card.id <= 4) card.rarity = 'normal';
+                                else if (card.id <= 6) card.rarity = 'magic';
+                                else if (card.id <= 8) card.rarity = 'rare';
+                                else if (card.id <= 12) card.rarity = 'epic';
+                                else if (card.id <= 16) card.rarity = 'legendary';
+                                else card.rarity = 'normal';
+                            }
+                        });
+                    }
+                });
+                
+                initLotteryNumbers();
+                renderPlayers();
+                updateMarquee("歡迎使用幽街商人桌遊專用-沉浸輔助程式！請新增玩家並開始交易。");
+                
+                // 添加事件监听器
+                addPlayerBtn.addEventListener('click', function() {
+                    const name = playerNameInput.value.trim();
+                    const color = playerColorInput.value;
+                    
+                    if (name) {
+                        players.push({
+                            name: name,
+                            color: color,
+                            trades: 0,
+                            wealth: 500,
+                            eventCount: 0,
+                            lotteryNumbers: [],
+                            wins: 0,
+                            cards: [],
+                            goodsCards: [],
+                            // 護法進化相關屬性
+                            activeGuardian: null,
+                            guardianEffects: {},
+                            guardianTrades: 0,
+                            guardianEvolved: false,
+                            canEvolve: false,
+                            guardianEvolutionData: null
+                        });
+                        
+                        savePlayers();
+                        renderPlayers();
+                        playerNameInput.value = '';
+                        addEvent(`新玩家 ${name} 加入遊戲`);
+                    }
+                });
+                
+                resetGameBtn.addEventListener('click', function() {
+                    if (confirm('確定要重置遊戲嗎？所有玩家資料和事件將被清除。')) {
+                        players = [];
+                        events = [];
+                        totalTrades = 0;
+                        jackpot = 10;
+                        lotteryRound = 1;
+                        selectedNumbers = [];
+                        localStorage.clear();
+                        renderPlayers();
+                        eventsList.innerHTML = '<div class="event-item"><strong>系统消息：</strong> 遊戲已重置。</div>';
+                        addEvent('遊戲已重置，重新開始');
+                        updateMarquee("遊戲已重置，請新增玩家並開始交易。");
+                    }
+                });
+                
+                confirmLotteryBtn.addEventListener('click', function() {
+                    const selectedNumberEl = document.querySelector('.number-circle.selected');
+                    
+                    if (!selectedNumberEl) {
+                        lotteryError.textContent = '請選擇一個號碼';
+                        return;
+                    }
+                    
+                    const number = parseInt(selectedNumberEl.dataset.number);
+                    
+                    if (selectedNumbers.includes(number)) {
+                        lotteryError.textContent = '該號碼已被選擇，請選擇其他號碼';
+                        return;
+                    }
+                    
+                    if (currentPlayerForLottery !== null) {
+                        const player = players[currentPlayerForLottery];
+                        
+                        if (!player.lotteryNumbers) {
+                            player.lotteryNumbers = [];
+                        }
+                        
+                        player.lotteryNumbers.push(number);
+                        selectedNumbers.push(number);
+                        
+                        savePlayers();
+                        renderPlayers();
+                        
+                        addEvent(`${player.name} 選擇了彩券號碼 ${number}`);
+                        lotteryModal.style.display = 'none';
+                    }
+                });
+                
+                closeLotteryBtn.addEventListener('click', function() {
+                    lotteryModal.style.display = 'none';
+                });
+                
+                closeDrawBtn.addEventListener('click', function() {
+                    drawModal.style.display = 'none';
+                });
+                
+                closeGuessBtn.addEventListener('click', function() {
+                    guessModal.style.display = 'none';
+                });
+                
+                closeGuessBtn2.addEventListener('click', function() {
+                    guessModal.style.display = 'none';
+                });
+                
+                closeMerchantBtn.addEventListener('click', function() {
+                    merchantModal.style.display = 'none';
+                });
+                
+                confirmPurchaseBtn.addEventListener('click', function() {
+                    if (!selectedCardId) {
+                        merchantError.textContent = '請選擇一張卡片';
+                        return;
+                    }
+                    
+                    const player = players[currentPlayerForMerchant];
+                    const card = merchantCardLibrary.find(c => c.id == selectedCardId);
+                    
+                    if (player.wealth >= card.cost) {
+                        player.wealth -= card.cost;
+                        
+                        // 确保cards数组存在
+                        if (!player.cards) player.cards = [];
+                        player.cards.push({...card});
+                        
+                        savePlayers();
+                        renderPlayers();
+                        
+                        addEvent(`${player.name} 從神秘商人購買了【${card.name}】卡片`);
+                        merchantModal.style.display = 'none';
+                        selectedCardId = null;
+                        
+                        updateMarquee(`${player.name} 購買了【${card.name}】卡片`, true, 30000);
+                    } else {
+                        merchantError.textContent = '银两不足，无法购买此卡片';
+                    }
+                });
+                
+                useGoodsCardBtn.addEventListener('click', function() {
+                    useGoodsCard();
+                });
+                
+                closeWarehouseBtn.addEventListener('click', function() {
+                    warehouseModal.style.display = 'none';
+                });
+                
+                closeWarehouseBtn2.addEventListener('click', function() {
+                    warehouseModal.style.display = 'none';
+                });
+                
+                confirmUseCardBtn.addEventListener('click', function() {
+                    executeCardEffect();
+                    useCardModal.style.display = 'none';
+                });
+                
+                cancelUseCardBtn.addEventListener('click', function() {
+                    useCardModal.style.display = 'none';
+                    currentCardToUse = null;
+                    currentCardPlayerIndex = null;
+                });
+                
+                confirmEvolutionBtn.addEventListener('click', function() {
+                    confirmEvolution();
+                });
+                
+                cancelEvolutionBtn.addEventListener('click', function() {
+                    evolutionModal.style.display = 'none';
+                });
+                
+                closeEvolutionBtn.addEventListener('click', function() {
+                    evolutionModal.style.display = 'none';
+                });
+                
+                playerNameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addPlayerBtn.click();
+                    }
+                });
+                
+                // 难度选择按钮事件
+                document.querySelectorAll('.difficulty-toggle span').forEach(span => {
+                    span.addEventListener('click', function() {
+                        document.querySelectorAll('.difficulty-toggle span').forEach(s => {
+                            s.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                        
+                        const difficulty = this.getAttribute('data-difficulty');
+                        // 这里可以添加难度调整逻辑
+                        addEvent(`遊戲難度設置為: ${difficulty === 'easy' ? '簡單' : '困難'}`);
+                    });
+                });
+            }
+            
+            // 启动初始化
+            init();
+        });
+    </script>
+</body>
+</html>
