@@ -2687,7 +2687,9 @@
                         ` : ''}
 
                         <!-- 幽街货卡仓库按钮 -->
-                        ${warehouseButtonHtml}
+                                                ${player.goodsCards && player.goodsCards.length > 0 ? 
+    `<button class="btn-warehouse" data-index="${index}">倉庫 (${player.goodsCards.length})</button>` : 
+    ''}
 
                         <!-- 交易按钮 -->
                         <button class="trade-btn" data-index="${index}">交易成功</button>
@@ -3830,6 +3832,7 @@
 </body>
 
 </html>
+
 
 
 
