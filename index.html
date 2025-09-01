@@ -36,6 +36,68 @@
             --king-dark-color: #8b0000;     /* 大王暗黑系颜色 */
         }
 
+		/* 幽魂級別 - 第1級 (1-2個貨物) - 藍色幽光 */
+.warehouse-card.ghost {
+    animation: ghost-glow 2s infinite alternate;
+    border: 2px solid #3498db;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.3));
+}
+
+/* 妖精級別 - 第2級 (3個貨物) - 紫色魅光 */
+.warehouse-card.fairy {
+    animation: fairy-glow 2s infinite alternate;
+    border: 2px solid #9b59b6;
+    background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(155, 89, 182, 0.3));
+}
+
+/* 仙使級別 - 第3級 (4個貨物) - 青綠色仙光 */
+.warehouse-card.immortal {
+    animation: immortal-glow 1.8s infinite alternate;
+    border: 2px solid #00ffcc;
+    background: linear-gradient(135deg, rgba(0, 255, 204, 0.1), rgba(0, 255, 204, 0.3));
+}
+
+/* 大王級別 - 第4級 (5-6個貨物) - 暗黑系血紅光 */
+.warehouse-card.king {
+    animation: king-dark-glow 1.5s infinite alternate;
+    border: 2px solid #8b0000;
+    background: linear-gradient(135deg, rgba(139, 0, 0, 0.1), rgba(139, 0, 0, 0.3));
+}
+
+/* 天尊級別 - 第5級 (5-6個貨物) - 金色聖光 */
+.warehouse-card.celestial {
+    animation: celestial-glow 1.2s infinite alternate;
+    border: 2px solid #ffcc00;
+    background: linear-gradient(135deg, rgba(255, 204, 0, 0.1), rgba(255, 204, 0, 0.3));
+}
+
+		/* 發光動畫關鍵幀 */
+@keyframes ghost-glow {
+    from { box-shadow: 0 0 5px #3498db; }
+    to { box-shadow: 0 0 15px #3498db, 0 0 25px #3498db; }
+}
+
+@keyframes fairy-glow {
+    from { box-shadow: 0 0 5px #9b59b6; }
+    to { box-shadow: 0 0 15px #9b59b6, 0 0 25px #9b59b6; }
+}
+
+@keyframes immortal-glow {
+    from { box-shadow: 0 0 5px #00ffcc; }
+    to { box-shadow: 0 0 15px #00ffcc, 0 0 25px #00ff99, 0 0 35px #00ffcc; }
+}
+
+@keyframes king-dark-glow {
+    from { box-shadow: 0 0 5px #8b0000; }
+    to { box-shadow: 0 0 15px #8b0000, 0 0 30px #ff0000, 0 0 45px #8b0000; }
+}
+
+@keyframes celestial-glow {
+    from { box-shadow: 0 0 5px #ffcc00; }
+    to { box-shadow: 0 0 20px #ffcc00, 0 0 40px #ffff00, 0 0 60px #ffcc00; }
+}
+
+		
         /* 七彩幻变边框效果 */
         .player-card.has-guardian.evolved {
             position: relative;
@@ -3768,6 +3830,7 @@
 </body>
 
 </html>
+
 
 
 
