@@ -4498,6 +4498,8 @@ function useGoodsCard() {
     
     // 移除使用的卡片
     player.goodsCards.splice(selectedGoodsCardId, 1);
+
+	stopWarehouseMusic();
     
     savePlayers();
     renderPlayers();
@@ -5786,4 +5788,5 @@ function init() {
         });
     </script>
 </body>
+
 </html>
