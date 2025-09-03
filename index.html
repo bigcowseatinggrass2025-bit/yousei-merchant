@@ -2734,8 +2734,8 @@
         
         <div style="padding: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 12px; border-left: 4px solid #ffc107; margin: 20px 0;">
             <p style="font-size: 1.3rem; font-weight: bold; color: white; margin: 0; line-height: 1.6;">
-                <strong style="color: #ffd700;">競猜提示：</strong> 现在！各位商人们請互相取出一定量的銀兩,
-                在桌上拳頭握緊,然後進行猜測對方的銀兩數目！！(銀兩數量只能整數10,30,50...)
+                <strong style="color: #ffd700;">競猜提示：</strong> 现在！各位攤販當主們請取出一定量的銀兩,
+                然後在桌上拳頭握緊,然後進行猜測對方的銀兩數目！！(銀兩數量只能整數10,30,50...100) 猜對的可穫得所有銀兩....
             </p>
         </div>
         
@@ -5423,12 +5423,12 @@ function enhanceEvolvedGuardians() {
                             
                             if (winners.length > 0) {
                                 playSound('lotteryWinSound');
-                                winnerDisplay.innerHTML = `<h3>中奖号码: ${winningNumber}</h3>`;
+                                winnerDisplay.innerHTML = `<h3>中獎號碼: ${winningNumber}</h3>`;
                                 winners.forEach(winner => {
                                     winner.wins = (winner.wins || 0) + 1;
                                     winner.wealth = (winner.wealth || 50) + jackpot;
-                                    winnerDisplay.innerHTML += `<p>${winner.name} 中奖，获得 ${jackpot} 两奖金！</p>`;
-                                    addEvent(`${winner.name} 彩票中奖，获得${jackpot}两奖金！`, 'individual');
+                                    winnerDisplay.innerHTML += `<p>${winner.name} 中獎，穫得 ${jackpot} 兩獎金！</p>`;
+                                    addEvent(`${winner.name} 彩票中奖，穫得${jackpot}兩奖金！`, 'individual');
                                     
                                     const winnerIndex = players.findIndex(p => p.name === winner.name);
                                     if (winnerIndex !== -1) flashPlayerCard(winnerIndex, winner.color);
@@ -5444,12 +5444,12 @@ function enhanceEvolvedGuardians() {
                                 addEvent(`第${lotteryRound}期彩票开奖完毕，${winners.map(w => w.name).join('和')} 中奖，所有彩票数据已重置`);
                                 updateMarquee(`第${lotteryRound}期彩票开奖，号码 ${winningNumber}，${winners.map(w => w.name).join('和')} 中奖！奖池已重置。`, true, 30000);
                             } else {
-                                winnerDisplay.innerHTML = `<h3>中奖号码: ${winningNumber}</h3>
-                                                          <p>没有人中奖！奖池累计到下一轮：${jackpot + 10}两</p>`;
-                                addEvent(`彩票开奖，号码 ${winningNumber}，无人中奖，奖池累计到 ${jackpot + 10}两`);
+                                winnerDisplay.innerHTML = `<h3>今期中獎號碼: ${winningNumber}</h3>
+                                           <p>很可惜！没有人中獎！獎金累積到下一輪：${jackpot + 10}两</p>`;
+                                addEvent(`彩票開彩，號碼為 ${winningNumber}，可惜無人中獎，獎金累積到達 ${jackpot + 10}两`);
                                 
                                 jackpot += 10;
-                                updateMarquee(`第${lotteryRound}期彩票开奖，号码 ${winningNumber}，无人中奖，奖池累计到 ${jackpot}两`, true, 30000);
+                                updateMarquee(`第${lotteryRound}期彩票開獎，號碼 ${winningNumber}，無人中獎，獎金累積到達 ${jackpot}两`, true, 30000);
                             }
                             
                             lotteryRound++;
@@ -5910,11 +5910,11 @@ function init() {
                         savePlayers();
                         renderPlayers();
                         
-                        addEvent(`${player.name} 從神秘商人購買了【${card.name}】卡片`);
+                        addEvent(`${player.name} 從神秘商人購買了珍貴的【${card.name}】卡片`);
                         merchantModal.style.display = 'none';
                         selectedCardId = null;
                         
-                        updateMarquee(`${player.name} 購買了【${card.name}】卡片`, true, 30000);
+                        updateMarquee(`${player.name} 購買了珍貴的【${card.name}】卡片`, true, 30000);
                     } else {
                         merchantError.textContent = '银两不足，无法购买此卡片';
                     }
@@ -5994,3 +5994,4 @@ function init() {
 </body>
 
 </html>
+
