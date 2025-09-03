@@ -2904,6 +2904,9 @@
 <audio id="egg-sound-50">
     <source src="sounds/egg50.mp3" type="audio/mpeg">
 </audio>
+<audio id="egg-sound-80">
+    <source src="sounds/egg80.mp3" type="audio/mpeg">
+</audio>
 <audio id="breakthrough-trade-sound">
     <source src="https://www.soundjay.com/misc/sounds/coins-to-table-2.mp3" type="audio/mpeg">
 </audio>	
@@ -2970,7 +2973,7 @@
             // 在游戏数据部分添加彩蛋触发记录
             let egg30Triggered = localStorage.getItem('egg30Triggered') === 'true' || false;
             let egg50Triggered = localStorage.getItem('egg50Triggered') === 'true' || false;
-          
+            let egg80Triggered = localStorage.getItem('egg80Triggered') === 'true' || false;
 
 // 界限突破数据 - 神獸的真摯認同
 const guardianBreakthroughData = {
@@ -4759,14 +4762,20 @@ function triggerDrunkardGame(playerIndex) {
                     playSpecialEggMusic(30);
                     egg30Triggered = true;
                     localStorage.setItem('egg30Triggered', 'true');
-                    addEvent("神秘彩蛋触发！交易达到30次，播放特别音乐", 'special');
+                    addEvent("神秘彩蛋触发！全體交易達到30次，播放彩蛋音樂，同時表示準備進入中期囉", 'special');
                 }
                 
                 if (totalTrades >= 50 && !egg50Triggered) {
                     playSpecialEggMusic(50);
                     egg50Triggered = true;
                     localStorage.setItem('egg50Triggered', 'true');
-                    addEvent("神秘彩蛋触发！交易达到50次，播放特别音乐", 'special');
+                    addEvent("神秘彩蛋触发！全體交易達到50次，播放彩蛋音樂，同時表示準備進入中後期囉", 'special');
+                }
+				                if (totalTrades >= 80 && !egg50Triggered) {
+                    playSpecialEggMusic(80);
+                    egg50Triggered = true;
+                    localStorage.setItem('egg80Triggered', 'true');
+                    addEvent("神秘彩蛋触发！全體交易達到80次，播放彩蛋音樂，同時表示準備進入大後期囉", 'special');
                 }
                 
                 // 播放彩蛋音乐函数
@@ -5998,5 +6007,6 @@ function init() {
 </body>
 
 </html>
+
 
 
