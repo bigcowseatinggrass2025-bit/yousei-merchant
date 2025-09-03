@@ -2845,7 +2845,7 @@
     <!-- ==================== 音频元素 ==Audio部分 ================== -->
     <!-- 音频元素 -->
     <audio id="tradeSound">
-        <source src="https://www.soundjay.com/misc/sounds/coins-to-table-1.mp3" type="audio/mpeg">
+        <source src="sounds/money.mp3" type="audio/mpeg">
     </audio>
     <audio id="buttonSound">
         <source src="sounds/butt.mp3" type="audio/mpeg">
@@ -5992,4 +5992,5 @@ function init() {
         });
     </script>
 </body>
+
 </html>
