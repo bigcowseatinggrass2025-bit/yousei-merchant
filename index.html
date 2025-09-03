@@ -2934,7 +2934,10 @@
 <audio id="drunkard-music-dice">
     <source src="sounds/drunkard3.mp3" type="audio/mpeg">
 </audio>
-
+<audio id="new-sound-effect">
+    <source src="sounds/au3.mp3" type="audio/mpeg">
+    <source src="sounds/au3.mp3" type="audio/ogg">
+</audio>
 
 
     <script>
@@ -4821,7 +4824,8 @@ function triggerDrunkardGame(playerIndex) {
                     addEvent(`${player.name} 的${player.activeGuardian}感受到神秘力量，現在可以進行覺醒！`, 'special');
                     updateMarquee(`${player.name} 的${player.activeGuardian}獲得進化機會！`, true, 30000);
                    
-					
+					 // 播放音效
+                    playSound('new-sound-effec'); // 替换为你的音效文件名或ID
                     // 闪烁提示玩家
                     flashPlayerCard(playerIndex, '#ff6b6b');
                 }
@@ -5994,4 +5998,5 @@ function init() {
 </body>
 
 </html>
+
 
