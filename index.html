@@ -3628,8 +3628,8 @@ function stopDrunkardMusic() {
                 },
 				{ 
                     type: 'individual', 
-                    shortText: "-個人-貨船觸礁，損失一個貨物",
-                    fullText: "閣下貨船在長江觸礁沉沒，所有通過水路運輸的貨物盡數損失，損失一個貨物。",
+                    shortText: "-個人-貨船觸礁，損失一個貨物，無貨損五兩",
+                    fullText: "閣下貨船在長江觸礁沉沒，所有通過水路運輸的貨物盡數損失，損失一個貨物，無貨損五兩。",
                     effect: "+20" 
                 },
 				{ 
@@ -3658,8 +3658,8 @@ function stopDrunkardMusic() {
                 },
 				{ 
                     type: 'individual', 
-                    shortText: "-個人-貨棧遭雨，損失一件貨物",
-                    fullText: "連日暴雨致貨棧進水，一件貨物受潮腐壞。損失一件貨物。",
+                    shortText: "-個人-貨棧遭雨，損失一件貨物，無貨損五兩",
+                    fullText: "連日暴雨致貨棧進水，一件貨物受潮腐壞。損失一件貨物，無貨損五兩。",
                     effect: "+20" 
                 },
 				
@@ -3746,16 +3746,16 @@ const drunkardGames = {
 
 
 
-            // 幽街货卡库
-            const goodsCardLibrary = [
-                // 幽魂级别 - 第1级发光 (1-2个货物)
-                { id: 101, name: "幽魂貨卡", rarity: "ghost", goodsCount: 1, buyPrice: 20, sellPrice: 30, glowLevel: 1 },
-                { id: 102, name: "幽魂貨卡", rarity: "ghost", goodsCount: 2, buyPrice: 35, sellPrice: 50, glowLevel: 1 },
-                
-                // 妖精级别 - 第2级发光 (3个货物)
-                { id: 201, name: "妖精貨卡", rarity: "fairy", goodsCount: 3, buyPrice: 55, sellPrice: 75, glowLevel: 2 },
-                { id: 202, name: "妖精貨卡", rarity: "fairy", goodsCount: 3, buyPrice: 60, sellPrice: 80, glowLevel: 2 },
-                
+           
+
+
+
+
+
+
+
+
+			
                 // 仙使级别 - 第3级发光 (4个货物) - 新增
                 { id: 301, name: "仙使貨卡", rarity: "immortal", goodsCount: 4, buyPrice: 90, sellPrice: 120, glowLevel: 3 },
                 { id: 302, name: "仙使貨卡", rarity: "immortal", goodsCount: 4, buyPrice: 100, sellPrice: 130, glowLevel: 3 },
@@ -5805,7 +5805,7 @@ function initDrunkardMusics() {
                 switch(card.effect) {
                     case "doubleNextTrade":
                         player.nextTradeDouble = true;
-                        addEvent(`${player.name} 使用了【${card.name}】，下次交易将获得双倍收益`);
+                        addEvent(`${player.name} 使用了【${card.name}】，得到特殊效果`);
                         break;
                     case "stealWealth":
                         const otherPlayers = players.filter((p, i) => i !== currentCardPlayerIndex);
@@ -6085,6 +6085,7 @@ function init() {
 </body>
 
 </html>
+
 
 
 
