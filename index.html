@@ -4738,8 +4738,8 @@ function useGoodsCard() {
     // 扣除银两
     player.wealth -= card.buyPrice;
     
-    // 50%几率触发酒鬼游戏
-    if (Math.random() < 0.5) {
+    // 65%几率触发酒鬼游戏
+    if (Math.random() < 0.65) {
         triggerDrunkardGame(currentPlayerForWarehouse);
     } else {
         addEvent(`${player.name} 使用了幽街貨物卡`);
@@ -4813,8 +4813,8 @@ function triggerDrunkardGame(playerIndex) {
                 totalTrades++;
                 player.wealth = (player.wealth || 50) + 10;
 				
-				    // 添加直接获得货卡的小概率事件 (5%概率)
-    if (Math.random() < 0.05) {
+				    // 添加直接获得货卡的小概率事件 (15%概率)
+    if (Math.random() < 0.15) {
         giveGoodsCardsToPlayer(playerIndex);
         addEvent(`${player.name} 在交易時意外獲得了幽街貨物卡！`, 'special');
     }
@@ -6097,6 +6097,7 @@ function init() {
 </body>
 
 </html>
+
 
 
 
