@@ -2901,6 +2901,9 @@
 <audio id="guardianBg1Music">
     <source src="sounds/Bup.mp3" type="audio/mpeg">
 </audio>
+	<audio id="egg-sound-15">
+    <source src="sounds/egg15.mp3" type="audio/mpeg">
+</audio>
 <audio id="egg-sound-30">
     <source src="sounds/egg30.mp3" type="audio/mpeg">
 </audio>
@@ -2976,10 +2979,10 @@
             const jackpotAmountEl = document.getElementById('jackpot-amount');
             
             // 在游戏数据部分添加彩蛋触发记录
+            let egg15Triggered = localStorage.getItem('egg15Triggered') === 'true' || false;
             let egg30Triggered = localStorage.getItem('egg30Triggered') === 'true' || false;
             let egg50Triggered = localStorage.getItem('egg50Triggered') === 'true' || false;
-            let egg80Triggered = localStorage.getItem('egg80Triggered') === 'true' || false;
-			
+			let egg80Triggered = localStorage.getItem('egg80Triggered') === 'true' || false;
 			// 在游戏数据部分添加交易计数变量
 let tradeCountForBgChange = 0;
 const totalTradesForChange = 10;
@@ -4836,24 +4839,30 @@ function triggerDrunkardGame(playerIndex) {
 				
                 
                 // 彩蛋检查
-                if (totalTrades >= 30 && !egg30Triggered) {
-                    playSpecialEggMusic(30);
+                if (totalTrades >= 15 && !egg15Triggered) {
+                    playSpecialEggMusic(15);
                     egg30Triggered = true;
-                    localStorage.setItem('egg30Triggered', 'true');
-                    addEvent("神秘彩蛋触发！全體交易達到30次，播放彩蛋音樂，同時表示準備進入中期囉", 'special');
+                    localStorage.setItem('egg15Triggered', 'true');
+                    addEvent("神秘彩蛋触发！全體交易達到15次，播放彩蛋音樂，同時表示準備進入前中期囉", 'special');
                 }
                 
-                if (totalTrades >= 50 && !egg50Triggered) {
-                    playSpecialEggMusic(50);
+                if (totalTrades >= 30 && !egg30Triggered) {
+                    playSpecialEggMusic(30);
                     egg50Triggered = true;
                     localStorage.setItem('egg50Triggered', 'true');
+                    addEvent("神秘彩蛋触发！全體交易達到30次，播放彩蛋音樂，同時表示準備進入中後期囉", 'special');
+                }
+				                if (totalTrades >= 50 && !egg50Triggered) {
+                    playSpecialEggMusic(50);
+                    egg50Triggered = true;
+                    localStorage.setItem('egg80Triggered', 'true');
                     addEvent("神秘彩蛋触发！全體交易達到50次，播放彩蛋音樂，同時表示準備進入中後期囉", 'special');
                 }
-				                if (totalTrades >= 80 && !egg50Triggered) {
+								                if (totalTrades >= 80 && !egg80Triggered) {
                     playSpecialEggMusic(80);
                     egg50Triggered = true;
                     localStorage.setItem('egg80Triggered', 'true');
-                    addEvent("神秘彩蛋触发！全體交易達到80次，播放彩蛋音樂，同時表示準備進入大後期囉", 'special');
+                    addEvent("神秘彩蛋触发！全體交易達到80次，播放彩蛋音樂，同時表示遊戲馬上要結束囉", 'special');
                 }
                 
                 // 播放彩蛋音乐函数
@@ -6097,6 +6106,7 @@ function init() {
 </body>
 
 </html>
+
 
 
 
