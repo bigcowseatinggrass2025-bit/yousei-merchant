@@ -6024,7 +6024,7 @@ function enhanceEvolvedGuardians() {
                         counter++;
                         drawNumberEl.textContent = Math.floor(Math.random() * 50) + 1;
                         
-                        if (counter > 20) {
+                        if (counter > 100) {
                             clearInterval(interval);
                             drawNumberEl.textContent = winningNumber;
                             
@@ -6068,7 +6068,7 @@ function enhanceEvolvedGuardians() {
                             renderPlayers();
                         }
                     }, 100);
-                }, 3000);
+                }, 1000);
             }
             
 // 使用卡片
@@ -6663,6 +6663,7 @@ function init() {
 </body>
 
 </html>
+
 
 
 
