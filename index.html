@@ -5171,6 +5171,7 @@ function confirmDrunkardGame() {
         
         if (selectedAnswer === correctAnswer) {
             // 答對了 - 獲得較多獎勵
+			playSound('lotteryWinSound');
             const silverReward = Math.floor(Math.random() * 50) + 1;
             const goodsReward = Math.floor(Math.random() * 2) + 1;
             
@@ -5186,6 +5187,7 @@ function confirmDrunkardGame() {
         const diceRoll = Math.floor(Math.random() * 6) + 1;
         
         if (selectedAnswer === diceRoll) {
+			playSound('lotteryWinSound');
             // 猜對了 - 獲得較少獎勵
             const silverReward = Math.floor(Math.random() * 30) + 1;
             const goodsReward = Math.floor(Math.random() * 2);
@@ -6661,6 +6663,7 @@ function init() {
 </body>
 
 </html>
+
 
 
 
