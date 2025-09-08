@@ -45,7 +45,7 @@
     backface-visibility: hidden;
 }
 
-/* 音乐可视化效果样式 */
+/* 增强音乐可视化效果 */
 .music-visualizer {
     position: fixed;
     top: 0;
@@ -55,6 +55,7 @@
     pointer-events: none;
     z-index: 9999;
     display: none;
+    overflow: hidden;
 }
 
 .visualizer-bar {
@@ -102,6 +103,55 @@
     width: 5px;
     height: 100%;
     transform-origin: center left;
+}
+
+/* 波浪效果 */
+.wave-effect {
+    position: absolute;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.5),
+        transparent
+    );
+    opacity: 0.3;
+    animation: wave-flow 2s infinite linear;
+}
+
+.wave-top {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+}
+
+.wave-right {
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+}
+
+.wave-bottom {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+}
+
+.wave-left {
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+}
+
+@keyframes wave-flow {
+    0% {
+        background-position: -100% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
 }
 
 /* 彩蛋激活时的动画 */
@@ -5462,10 +5512,24 @@ if (totalTrades >= 15 && !egg15Triggered) {
                     if (!soundEnabled) return;
                     
                         const eggSound = document.getElementById(`egg-sound-${tradeCount}`);
+function playSpecialEggMusic(tradeCount) {
+    if (!soundEnabled) return;
+    
+    const eggSound = document.getElementById(`egg-sound-${tradeCount}`);
     if (eggSound) {
         // 显示音乐可视化效果
         const visualizer = document.getElementById('music-visualizer');
         visualizer.classList.add('active');
+        
+        // 添加波浪效果元素
+        if (!visualizer.querySelector('.wave-effect')) {
+            const wavePositions = ['top', 'right', 'bottom', 'left'];
+            wavePositions.forEach(pos => {
+                const wave = document.createElement('div');
+                wave.className = `wave-effect wave-${pos}`;
+                visualizer.appendChild(wave);
+            });
+        }
         
         // 创建音频分析器
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -5501,14 +5565,20 @@ if (totalTrades >= 15 && !egg15Triggered) {
             bars[2].style.transform = `scaleY(${scale})`; // 下边
             bars[3].style.transform = `scaleX(${scale})`; // 左边
             
+            // 调整波浪速度基于音频强度
+            const waves = document.querySelectorAll('.wave-effect');
+            const waveSpeed = 2 + (average / 50); // 速度基于音频强度
+            waves.forEach(wave => {
+                wave.style.animationDuration = `${waveSpeed}s`;
+            });
+            
             requestAnimationFrame(updateVisualizer);
         }
         
         eggSound.currentTime = 0;
         eggSound.play().catch(e => console.log("彩蛋音乐播放失败:", e));
-
-						
-              // 开始可视化
+        
+        // 开始可视化
         updateVisualizer();
         
         // 音乐播放完毕后重置
@@ -5519,6 +5589,11 @@ if (totalTrades >= 15 && !egg15Triggered) {
             // 重置条形大小
             document.querySelectorAll('.visualizer-bar').forEach(bar => {
                 bar.style.transform = '';
+            });
+            
+            // 移除波浪效果
+            document.querySelectorAll('.wave-effect').forEach(wave => {
+                wave.remove();
             });
         };
     }
@@ -6795,6 +6870,7 @@ function init() {
 </body>
 
 </html>
+
 
 
 
