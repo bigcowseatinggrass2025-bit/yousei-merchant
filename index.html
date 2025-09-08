@@ -44,6 +44,80 @@
     /* 确保使用硬件加速 */
     backface-visibility: hidden;
 }
+
+/* 音乐可视化效果样式 */
+.music-visualizer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+}
+
+.visualizer-bar {
+    position: absolute;
+    background: linear-gradient(90deg, 
+        rgba(255,0,0,0.8), 
+        rgba(255,165,0,0.8), 
+        rgba(255,255,0,0.8),
+        rgba(0,255,0,0.8),
+        rgba(0,0,255,0.8),
+        rgba(75,0,130,0.8),
+        rgba(238,130,238,0.8)
+    );
+    opacity: 0.7;
+    transition: height 0.1s ease, width 0.1s ease;
+}
+
+.top-bar {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    transform-origin: top center;
+}
+
+.right-bar {
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    transform-origin: center right;
+}
+
+.bottom-bar {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    transform-origin: bottom center;
+}
+
+.left-bar {
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    transform-origin: center left;
+}
+
+/* 彩蛋激活时的动画 */
+@keyframes visualizer-pulse {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.3; }
+}
+
+.music-visualizer.active {
+    display: block;
+}
+
+.music-visualizer.active .visualizer-bar {
+    animation: visualizer-pulse 0.5s infinite alternate;
+}
 		
 .use-card-modal {
     display: none;
@@ -2974,6 +3048,13 @@
     </style>
 </head>
 <body>
+	<div id="music-visualizer" class="music-visualizer">
+    <div class="visualizer-bar top-bar"></div>
+    <div class="visualizer-bar right-bar"></div>
+    <div class="visualizer-bar bottom-bar"></div>
+    <div class="visualizer-bar left-bar"></div>
+</div>
+	
     <!-- 黑色遮罩 -->
     <div id="black-overlay" class="black-overlay"></div>
     
@@ -5380,17 +5461,68 @@ if (totalTrades >= 15 && !egg15Triggered) {
                 function playSpecialEggMusic(tradeCount) {
                     if (!soundEnabled) return;
                     
-                    const eggSound = document.getElementById(`egg-sound-${tradeCount}`);
-                    if (eggSound) {
-                        eggSound.currentTime = 0;
-                        eggSound.play().catch(e => console.log("彩蛋音乐播放失败:", e));
-                        
-                        // 音乐播放完毕后重置，确保下次可以再次播放
-                        eggSound.onended = function() {
-                            eggSound.currentTime = 0;
-                        };
-                    }
-                }
+                        const eggSound = document.getElementById(`egg-sound-${tradeCount}`);
+    if (eggSound) {
+        // 显示音乐可视化效果
+        const visualizer = document.getElementById('music-visualizer');
+        visualizer.classList.add('active');
+        
+        // 创建音频分析器
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaElementSource(eggSound);
+        
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        analyser.fftSize = 256;
+        
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        // 更新可视化效果
+        function updateVisualizer() {
+            if (!visualizer.classList.contains('active')) return;
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            // 计算平均频率值
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+            }
+            const average = sum / bufferLength;
+            
+            // 根据音频数据调整可视化条的大小
+            const bars = document.querySelectorAll('.visualizer-bar');
+            const scale = 1 + (average / 100); // 缩放因子
+            
+            bars[0].style.transform = `scaleY(${scale})`; // 上边
+            bars[1].style.transform = `scaleX(${scale})`; // 右边
+            bars[2].style.transform = `scaleY(${scale})`; // 下边
+            bars[3].style.transform = `scaleX(${scale})`; // 左边
+            
+            requestAnimationFrame(updateVisualizer);
+        }
+        
+        eggSound.currentTime = 0;
+        eggSound.play().catch(e => console.log("彩蛋音乐播放失败:", e));
+
+						
+              // 开始可视化
+        updateVisualizer();
+        
+        // 音乐播放完毕后重置
+        eggSound.onended = function() {
+            visualizer.classList.remove('active');
+            eggSound.currentTime = 0;
+            
+            // 重置条形大小
+            document.querySelectorAll('.visualizer-bar').forEach(bar => {
+                bar.style.transform = '';
+            });
+        };
+    }
+}
                 
                 // 如果有护法，增加护法交易次数
                 if (player.activeGuardian && !player.guardianEvolved) {
@@ -6663,6 +6795,7 @@ function init() {
 </body>
 
 </html>
+
 
 
 
