@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幽街商人「攤販」小遊戲系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid #4cc9f0;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #f72585;
+            text-shadow: 0 0 10px rgba(247, 37, 133, 0.7);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b5179e;
+            margin-bottom: 10px;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .game-card {
+            flex: 1;
+            min-width: 350px;
+            max-width: 450px;
+            background: linear-gradient(145deg, #1e2a3a, #2c3e50);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s;
+            border: 2px solid #4361ee;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(67, 97, 238, 0.4);
+        }
+        
+        .game-header {
+            background: linear-gradient(90deg, #f72585, #b5179e);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-content {
+            padding: 20px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            flex-grow: 1;
+            color: #e0e0e0;
+        }
+        
+        .game-cost {
+            text-align: center;
+            margin: 15px 0;
+            color: #f94144;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-try {
+            display: block;
+            width: 80%;
+            margin: 0 auto;
+            padding: 12px;
+            background: linear-gradient(90deg, #4361ee, #3a0ca3);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-try:hover:not(:disabled) {
+            background: linear-gradient(90deg, #3a0ca3, #4361ee);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn-try:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .game-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .game-area {
+            background: linear-gradient(135deg, #1e2a3a, #2c3e50);
+            width: 90%;
+            max-width: 800px;
+            height: 70vh;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(67, 97, 238, 0.5);
+            border: 2px solid #4cc9f0;
+            position: relative;
+        }
+        
+        .result-area {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f9c74f;
+            text-shadow: 0 0 10px rgba(249, 199, 79, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .countdown {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #f94144;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(249, 65, 68, 0.7);
+            z-index: 101;
+        }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #b5179e;
+            border: 1px solid #7209b7;
+        }
+        
+        /* 转盘样式 */
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+        }
+        
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ff595e 0deg 40deg,
+                #ffca3a 40deg 80deg,
+                #8ac926 80deg 120deg,
+                #1982c4 120deg 160deg,
+                #6a4c93 160deg 200deg,
+                #f72585 200deg 240deg,
+                #4cc9f0 240deg 280deg,
+                #ff595e 280deg 320deg,
+                #ffca3a 320deg 360deg
+            );
+            position: relative;
+            transition: transform 4s cubic-bezier(0.3, 0.1, 0.1, 1);
+            transform: rotate(0deg);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .wheel-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 40px;
+            background: gold;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 10;
+        }
+        
+        .wheel-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(0);
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .wheel-section {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            transform-origin: left center;
+        }
+        
+        .wheel-text {
+            position: absolute;
+            left: 70%;
+            top: 50%;
+            transform: translateY(-50%) rotate(90deg);
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px black;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-card {
+                width: 100%;
+            }
+            
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>幽街商人「攤販」小遊戲系統</h1>
+            <p class="subtitle">兩位攤販主帶來了他們的遊戲，選擇一個試試手氣吧！</p>
+            <p class="subtitle">每次刷新頁面都會隨機出現兩個不同的遊戲！</p>
+        </header>
+        
+        <div class="game-container" id="gameContainer">
+            <!-- 游戏卡片会通过JavaScript动态生成 -->
+        </div>
+        
+        <div class="footer-note">
+            <p>注意：遊戲結束後，請從商會取得得獎內容，系統將在8秒後自動關閉</p>
+            <p>每個遊戲只能玩一次，關閉後需要重新整理頁面才能再次遊玩</p>
+        </div>
+    </div>
+    
+    <!-- 游戏屏幕 -->
+    <div class="game-screen" id="gameScreen">
+        <div class="game-area" id="gameArea">
+            <!-- 游戏内容会通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        // 游戏数据
+        const games = [
+            {
+                id: 'wheel',
+                name: '運氣轉輪',
+                cost: 5,
+                description: '經典的轉盤遊戲，轉盤上分格標註著不同的獎勵。從1兩到100兩，各種獎勵等你來拿！',
+                sections: [
+                    { text: "1兩", color: "#ff595e", probability: 30 },
+                    { text: "2兩", color: "#ffca3a", probability: 25 },
+                    { text: "1貨", color: "#8ac926", probability: 20 },
+                    { text: "3兩", color: "#1982c4", probability: 10 },
+                    { text: "5兩", color: "#6a4c93", probability: 5 },
+                    { text: "10兩", color: "#f72585", probability: 4 },
+                    { text: "2貨", color: "#4cc9f0", probability: 3 },
+                    { text: "50兩", color: "#ff595e", probability: 2 },
+                    { text: "100兩", color: "#ffca3a", probability: 1 }
+                ]
+            },
+            {
+                id: 'tictactoe',
+                name: '過三關',
+                cost: 5,
+                description: '九宮格遊戲，與電腦輪流放置"○"和"╳"，優先連成一條直線者獲勝！'
+            },
+            {
+                id: 'clicker',
+                name: '限時點擊',
+                cost: 5,
+                description: '10秒內點擊盡可能多的圓圈，超過電腦AI的數量即可獲勝！'
+            },
+            {
+                id: 'quiz',
+                name: '智慧猜謎',
+                cost: 5,
+                description: '回答謎語或常識問題，答對即可獲得獎勵！'
+            },
+            {
+                id: 'lantern',
+                name: '祈福天燈',
+                cost: 10,
+                description: '點擊天燈讓它升起，升起的高度決定你的獎項等級！'
+            }
+        ];
+        
+        // 已选择的游戏
+        let selectedGames = [];
+        // 按钮是否已禁用
+        let buttonsDisabled = false;
+        
+        // 随机选择两个游戏
+        function selectRandomGames() {
+            const shuffled = [...games].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 2);
+        }
+        
+        // 生成游戏卡片
+        function generateGameCards() {
+            const gameContainer = document.getElementById('gameContainer');
+            gameContainer.innerHTML = '';
+            
+            selectedGames.forEach(game => {
+                const gameCard = document.createElement('div');
+                gameCard.className = 'game-card';
+                
+                gameCard.innerHTML = `
+                    <div class="game-header">${game.name}</div>
+                    <div class="game-content">
+                        <p class="game-description">${game.description}</p>
+                        <p class="game-cost">需付銀兩: ${game.cost}兩</p>
+                        <button class="btn-try" onclick="openGame('${game.id}')" ${buttonsDisabled ? 'disabled' : ''}>試一手</button>
+                    </div>
+                `;
+                
+                gameContainer.appendChild(gameCard);
+            });
+        }
+        
+        // 打开游戏
+        function openGame(gameId) {
+            // 禁用所有按钮
+            disableAllButtons();
+            
+            const gameScreen = document.getElementById('gameScreen');
+            const gameArea = document.getElementById('gameArea');
+            const game = games.find(g => g.id === gameId);
+            
+            if (game) {
+                // 清空游戏区域
+                gameArea.innerHTML = '';
+                
+                // 添加游戏标题
+                const gameTitle = document.createElement('h2');
+                gameTitle.textContent = game.name;
+                gameTitle.style.color = '#4cc9f0';
+                gameTitle.style.marginBottom = '20px';
+                gameTitle.style.textShadow = '0 0 10px rgba(76, 201, 240, 0.7)';
+                gameArea.appendChild(gameTitle);
+                
+                // 根据游戏ID生成不同的游戏界面
+                switch(gameId) {
+                    case 'wheel':
+                        createWheelGame(gameArea, game);
+                        break;
+                    case 'tictactoe':
+                        createTicTacToeGame(gameArea);
+                        break;
+                    default:
+                        createWheelGame(gameArea, game);
+                }
+                
+                // 显示游戏屏幕
+                gameScreen.style.display = 'flex';
+            }
+        }
+        
+        // 创建转轮游戏
+        function createWheelGame(container, game) {
+            const wheelContainer = document.createElement('div');
+            wheelContainer.className = 'wheel-container';
+            
+            const wheel = document.createElement('div');
+            wheel.className = 'wheel';
+            wheel.id = 'wheel';
+            
+            // 添加转盘文本
+            const wheelLabel = document.createElement('div');
+            wheelLabel.className = 'wheel-label';
+            wheelLabel.textContent = '運氣轉輪';
+            
+            // 添加指针
+            const pointer = document.createElement('div');
+            pointer.className = 'wheel-pointer';
+            
+            wheelContainer.appendChild(wheel);
+            wheelContainer.appendChild(wheelLabel);
+            wheelContainer.appendChild(pointer);
+            container.appendChild(wheelContainer);
+            
+            // 添加开始按钮
+            const spinBtn = document.createElement('button');
+            spinBtn.className = 'btn-try';
+            spinBtn.textContent = '旋轉轉盤';
+            spinBtn.onclick = function() {
+                // 禁用按钮
+                spinBtn.disabled = true;
+                
+                // 模拟旋转动画
+                const wheel = document.getElementById('wheel');
+                const rotation = Math.floor(Math.random() * 3600) + 360;
+                wheel.style.transform = `rotate(${rotation}deg)`;
+                
+                // 模拟结果显示
+                setTimeout(() => {
+                    showResult(container, '恭喜獲得50銀兩！');
+                }, 4500);
+            };
+            
+            container.appendChild(spinBtn);
+        }
+        
+        // 创建井字游戏
+        function createTicTacToeGame(container) {
+            const board = document.createElement('div');
+            board.style.display = 'grid';
+            board.style.gridTemplateColumns = 'repeat(3, 1fr)';
+            board.style.gridGap = '10px';
+            board.style.margin = '20px auto';
+            board.style.maxWidth = '300px';
+            
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.style.width = '80px';
+                cell.style.height = '80px';
+                cell.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                cell.style.border = '2px solid #f1c40f';
+                cell.style.borderRadius = '5px';
+                cell.style.display = 'flex';
+                cell.style.alignItems = 'center';
+                cell.style.justifyContent = 'center';
+                cell.style.fontSize = '2rem';
+                cell.style.cursor = 'pointer';
+                
+                cell.onclick = function() {
+                    if (!cell.textContent) {
+                        cell.textContent = '○';
+                        
+                        // 模拟电脑回应
+                        setTimeout(() => {
+                            const emptyCells = Array.from(board.children).filter(c => !c.textContent);
+                            if (emptyCells.length > 0) {
+                                const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                                randomCell.textContent = '╳';
+                                
+                                // 检查游戏结果
+                                checkTicTacToeResult(container);
+                            }
+                        }, 1000);
+                    }
+                };
+                
+                board.appendChild(cell);
+            }
+            
+            container.appendChild(board);
+        }
+        
+        // 检查井字游戏结果
+        function checkTicTacToeResult(container) {
+            // 模拟结果显示
+            setTimeout(() => {
+                showResult(container, '恭喜獲勝！獲得8銀兩');
+            }, 1000);
+        }
+        
+        // 显示结果
+        function showResult(container, message) {
+            const resultArea = document.createElement('div');
+            resultArea.className = 'result-area';
+            resultArea.textContent = message;
+            container.appendChild(resultArea);
+            
+            // 添加关闭按钮
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'btn-try';
+            closeBtn.textContent = '關閉遊戲';
+            closeBtn.onclick = closeGame;
+            closeBtn.style.marginTop = '20px';
+            container.appendChild(closeBtn);
+            
+            // 开始倒计时关闭
+            startCountdown();
+        }
+        
+        // 开始关闭倒计时
+        function startCountdown() {
+            const countdown = document.createElement('div');
+            countdown.className = 'countdown';
+            countdown.id = 'countdown';
+            countdown.textContent = '8';
+            document.body.appendChild(countdown);
+            
+            let seconds = 8;
+            const countdownInterval = setInterval(() => {
+                seconds--;
+                countdown.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                    closeGame();
+                }
+            }, 1000);
+        }
+        
+        // 关闭游戏
+        function closeGame() {
+            document.getElementById('gameScreen').style.display = 'none';
+            const countdown = document.getElementById('countdown');
+            if (countdown) {
+                countdown.remove();
+            }
+        }
+        
+        // 禁用所有按钮
+        function disableAllButtons() {
+            buttonsDisabled = true;
+            const buttons = document.querySelectorAll('.btn-try');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+        
+        // 初始化
+        window.onload = function() {
+            // 随机选择两个游戏
+            selectedGames = selectRandomGames();
+            generateGameCards();
+        }
+    </script>
+</body>
+</html>
