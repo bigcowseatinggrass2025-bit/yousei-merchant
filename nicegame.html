@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幽街商人「攤販」小遊戲系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+		
+		/* 添加闪烁动画 */
+@keyframes blink {
+    0%, 100% { opacity: 1; box-shadow: 0 0 20px 5px gold; }
+    50% { opacity: 0.7; box-shadow: 0 0 30px 8px gold, 0 0 40px 12px rgba(255,215,0,0.6); }
+}
+
+.grid-item.active {
+    box-shadow: 0 0 15px 5px gold;
+    transform: scale(1.1);
+    z-index: 5;
+    animation: blink 0.8s infinite;
+}
+		
+        /* 新增全局遮罩 */
+        .overlay-mask {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            text-align: center;
+        }
+        
+        .overlay-mask.active {
+            display: flex;
+        }
+        
+        .overlay-content {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #f94144;
+            max-width: 80%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid #4cc9f0;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #f72585;
+            text-shadow: 0 0 10px rgba(247, 37, 133, 0.7);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b5179e;
+            margin-bottom: 10px;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .game-card {
+            flex: 1;
+            min-width: 350px;
+            max-width: 450px;
+            background: linear-gradient(145deg, #1e2a3a, #2c3e50);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s;
+            border: 2px solid #4361ee;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(67, 97, 238, 0.4);
+        }
+        
+        .game-header {
+            background: linear-gradient(90deg, #f72585, #b5179e);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-content {
+            padding: 20px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            flex-grow: 1;
+            color: #e0e0e0;
+        }
+        
+        .game-cost {
+            text-align: center;
+            margin: 15px 0;
+            color: #f94144;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-try {
+            display: block;
+            width: 80%;
+            margin: 0 auto;
+            padding: 12px;
+            background: linear-gradient(90deg, #4361ee, #3a0ca3);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-try:hover:not(:disabled) {
+            background: linear-gradient(90deg, #3a0ca3, #4361ee);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn-try:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .game-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .game-area {
+            background: linear-gradient(135deg, #1e2a3a, #2c3e50);
+            width: 90%;
+            max-width: 800px;
+            height: 70vh;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(67, 97, 238, 0.5);
+            border: 2px solid #4cc9f0;
+            position: relative;
+        }
+        
+        .result-area {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .success-result {
+            color: #4cc9f0;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+        }
+        
+        .failure-result {
+            color: #f94144;
+            text-shadow: 0 0 10px rgba(249, 65, 68, 0.7);
+        }
+        
+        .normal-result {
+            color: #f9c74f;
+            text-shadow: 0 0 10px rgba(249, 199, 79, 0.5);
+        }
+        
+        .countdown {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #f94144;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(249, 65, 68, 0.7);
+            z-index: 101;
+        }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #b5179e;
+            border: 1px solid #7209b7;
+            position: relative;
+        }
+        
+        .close-btn {
+            display: none;
+            margin: 15px auto 0;
+            padding: 10px 25px;
+            background: linear-gradient(90deg, #f94144, #d90429);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .close-btn:hover {
+            background: linear-gradient(90deg, #d90429, #f94144);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 方格閃燈遊戲樣式 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 5px;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            margin: 20px auto;
+        }
+        
+        .grid-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s;
+            padding: 5px;
+            word-break: break-all;
+        }
+        
+        .grid-item.active {
+            box-shadow: 0 0 15px 5px gold;
+            transform: scale(1.1);
+            z-index: 5;
+        }
+        
+        /* 限時點擊遊戲樣式 */
+        .clicker-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border: 2px solid #4cc9f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+        
+        .click-target {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f72585, #4361ee);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(247, 37, 133, 0.7);
+            transition: transform 0.2s;
+        }
+        
+        .click-target:hover {
+            transform: scale(1.1);
+        }
+        
+        .timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f9c74f;
+            margin: 10px 0;
+            text-shadow: 0 0 10px rgba(249, 199, 79, 0.5);
+        }
+        
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4cc9f0;
+            margin: 10px 0;
+        }
+        
+        /* 夜市猜謎遊戲樣式 */
+        .quiz-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        
+        .quiz-question {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #f9c74f;
+            line-height: 1.4;
+        }
+        
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .quiz-option {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #4361ee;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+        
+        .quiz-option:hover {
+            background: rgba(67, 97, 238, 0.3);
+            transform: translateY(-3px);
+        }
+        
+         /* 祈福天燈遊戲樣式 */
+        .lantern-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 600px;
+            margin: 30px auto;
+        }
+        
+        .lantern {
+            width: 80px;
+            height: 120px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .lantern-body {
+            width: 100%;
+            height: 100px;
+            border-radius: 40% 40% 0 0;
+            position: absolute;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: bold;
+        }
+        
+        .lantern.template1 .lantern-body {
+            background: linear-gradient(to bottom, #ff595e, #ffca3a);
+        }
+        
+        .lantern.template2 .lantern-body {
+            background: linear-gradient(to bottom, #1982c4, #8ac926);
+        }
+        
+        .lantern.template3 .lantern-body {
+            background: linear-gradient(to bottom, #6a4c93, #f72585);
+        }
+        
+        .lantern-string {
+            width: 3px;
+            height: 50px;
+            background: white;
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .lantern.launching {
+            animation: launch 5s forwards;
+        }
+        
+        @keyframes launch {
+            0% { transform: translateY(0); }
+            30% { 
+                transform: translateY(-20px);
+                opacity: 1;
+            }
+            70% {
+                transform: translateY(-100px);
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateY(-300px);
+                opacity: 0;
+            }
+        }
+        
+        .lantern.success { animation: launch 5s forwards; }
+        .lantern.medium { animation: launch-medium 5s forwards; }
+        .lantern.low { animation: launch-low 5s forwards; }
+        .lantern.failure { animation: shake 0.5s, fade 5s forwards; }
+        
+        @keyframes launch-medium {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-150px); opacity: 0; }
+        }
+        
+        @keyframes launch-low {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-80px); opacity: 0; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        @keyframes fade {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        
+        .tic-tac-toe {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            margin: 20px auto;
+            max-width: 350px;
+        }
+        
+        .cell {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #f1c40f;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .cell:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .cell.x {
+            color: #f94144;
+        }
+        
+        .cell.o {
+            color: #4cc9f0;
+        }
+        
+        .game-status {
+            margin: 15px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #f9c74f;
+        }
+        
+        .avatar-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #4361ee;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .avatar-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .music-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            z-index: 1000;
+            border: 1px solid #4cc9f0;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-card {
+                width: 100%;
+            }
+            
+            .grid-container {
+                grid-template-columns: repeat(5, 1fr);
+                grid-template-rows: repeat(10, 1fr);
+                height: 500px;
+            }
+            
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .cell {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .lantern-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 40px;
+            }
+        }
+		
+		 /* 天燈容器調整 */
+        .lantern-container {
+            position: relative;
+            z-index: 2;
+        }
+		
+		/* 星空背景样式 */
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000 url('https://i.imgur.com/YKY28eT.png') repeat top center;
+    z-index: 0;
+}
+
+.twinkling {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: transparent url('https://i.imgur.com/XYMF4ca.png') repeat top center;
+    z-index: 1;
+    animation: move-twink-back 200s linear infinite;
+}
+
+.clouds {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: transparent url('https://i.imgur.com/mHbScrQ.png') repeat top center;
+    z-index: 2;
+    opacity: 0.4;
+    animation: move-clouds-back 200s linear infinite;
+}
+
+@keyframes move-twink-back {
+    from { background-position: 0 0; }
+    to { background-position: -10000px 5000px; }
+}
+
+@keyframes move-clouds-back {
+    from { background-position: 0 0; }
+    to { background-position: 10000px 0; }
+}
+		
+		  /* 新增天燈高度標示樣式 */
+        .height-indicator {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin-bottom: 20px;
+            border-left: 2px dashed rgba(255, 255, 255, 0.3);
+        }
+
+        .height-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            display: flex;
+            align-items: center;
+        }
+
+        .height-line::before {
+            content: '';
+            flex-grow: 1;
+            height: 1px;
+            background: currentColor;
+            margin-right: 10px;
+        }
+
+        .height-label {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .low-line {
+            top: 70%;
+            color: #f94144;
+        }
+
+        .low-line .height-label {
+            background: rgba(249, 65, 68, 0.2);
+            border: 1px solid #f94144;
+        }
+
+        .medium-line {
+            top: 40%;
+            color: #f9c74f;
+        }
+
+        .medium-line .height-label {
+            background: rgba(249, 199, 79, 0.2);
+            border: 1px solid #f9c74f;
+        }
+
+        .high-line {
+            top: 10%;
+            color: #4cc9f0;
+        }
+
+        .high-line .height-label {
+            background: rgba(76, 201, 240, 0.2);
+            border: 1px solid #4cc9f0;
+        }
+    </style>
+</head>
+<body>
+
+
+
+<audio id="bgMusic" loop>
+    <source src="background-music.mp3" type="audio/mpeg">
+</audio>
+<button id="musicToggle" style="position: fixed; top: 10px; right: 10px; z-index: 1000;">
+    <i class="fas fa-volume-up"></i>
+</button>
+
+<!-- 添加背景元素 -->
+<div class="background">
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    <div class="clouds"></div>
+</div>
+
+    <!-- 新增全局遮罩 -->
+    <div class="overlay-mask" id="overlayMask">
+        <div class="overlay-content">
+            <h2>攤販遊戲已結束</h2>
+            <p>請從商會取得得獎內容</p>
+		
+           <button class="close-btn" onclick="closeOverlay()">確定</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>幽街商人「攤販」小遊戲系統</h1>
+            <p class="subtitle">兩位攤販主帶來了他們的遊戲，選擇一個試試手氣吧！</p>
+            <p class="subtitle">每次刷新頁面都會隨機出現兩個不同的遊戲！</p>
+        </header>
+        
+        <div class="game-container" id="gameContainer">
+            <!-- 游戏卡片会通过JavaScript动态生成 -->
+        </div>
+        
+        <div class="footer-note">
+            <p>注意：遊戲結束後，請從商會取得得獎內容，系統將在8秒後自動關閉</p>
+            <button class="close-btn" id="closePageBtn">手動關閉頁面</button>
+        </div>
+    </div>
+    
+    <!-- 游戏屏幕 -->
+    <div class="game-screen" id="gameScreen">
+        <div class="game-area" id="gameArea">
+            <!-- 游戏内容会通过JavaScript动态生成 -->
+        </div>
+    </div>
+	
+	
+
+    <script>
+        // 游戏数据
+		
+        const games = [
+            {
+                  id: 'grid',
+        name: '跑馬彩燈',
+        cost: 5,
+        description: '50個方格中有各種獎勵，走馬燈會在方格間移動，停在的格子就是你的獎勵！',
+        bossTalk: '看你今天臉相，今天運氣好像特別好，來吧準備開始吧',
+        rewards: [
+                    { text: "1兩", color: "#ff595e", probability: 10 },
+                    { text: "2兩", color: "#ffca3a", probability: 10 },
+                    { text: "1貨", color: "#8ac926", probability: 10 },
+                    { text: "3兩", color: "#1982c4", probability: 8 },
+                    { text: "5兩", color: "#6a4c93", probability: 10 },
+                    { text: "10兩", color: "#f72585", probability: 10 },
+                    { text: "2貨", color: "#4cc9f0", probability: 3 },
+                    { text: "50兩", color: "#ff9e00", probability: 3 },
+                    { text: "100兩", color: "#ff006e", probability: 1 }
+                ]
+            },
+             {
+        id: 'tictactoe',
+        name: '過三關',
+        cost: 5,
+        description: '九宮格遊戲，與老闆輪流放置"○"和"╳"，優先連成一條直線者獲勝！',
+        bossTalk: '這可是考驗智慧的遊戲，讓我看看你的實力如何'
+    },
+            {
+               id: 'clicker',
+        name: '限時點擊',
+        cost: 5,
+        description: '15秒內點擊盡可能多的圓圈，超過攤販老闆的數量即可獲勝！',
+        bossTalk: '手速決定一切，讓我看看你的極限在哪裡'
+            },
+            {
+                        id: 'quiz',
+        name: '夜市猜謎',
+        cost: 5,
+        description: '回答謎語或常識問題，答對即可獲得獎勵！',
+        bossTalk: '知識就是財富，讓我考考你的智慧',
+        questions: [
+                    {
+                        question: "「朝辭白帝彩雲間」的下一句是？",
+                        options: [
+                            "千里江陵一日還",
+                            "兩岸猿聲啼不住",
+                            "輕舟已過萬重山",
+                            "孤帆遠影碧空盡"
+                        ],
+                        answer: 0
+                    },
+                    {
+                        question: "下列哪個不是四大名著？",
+                        options: [
+                            "紅樓夢",
+                            "水滸傳",
+                            "金瓶梅",
+                            "三國演義"
+                        ],
+                        answer: 2
+                    },
+                    {
+                        question: "「床前明月光」中的「床」指的是什麼？",
+                        options: [
+                            "睡覺的床",
+                            "井欄",
+                            "窗台",
+                            "門檻"
+                        ],
+                        answer: 1
+                    },
+                    {
+                        question: "十二生肖中排在龍後面的是？",
+                        options: [
+                            "兔",
+                            "蛇",
+                            "馬",
+                            "羊"
+                        ],
+                        answer: 1
+                    },
+                    {
+                        question: "「而立之年」指的是多少歲？",
+                        options: [
+                            "30歲",
+                            "40歲",
+                            "50歲",
+                            "60歲"
+                        ],
+                        answer: 0
+                    }
+                ]
+            },
+            {
+                      id: 'lantern',
+        name: '祈福天燈',
+        cost: 10,
+        description: '點擊天燈讓它升起，升起的高度決定你的獎項等級！',
+        bossTalk: '心誠則靈，讓天燈帶走你的願望，帶來好運'
+    }
+];
+        
+        // 已选择的游戏
+let selectedGames = [];
+// 按钮是否已禁用
+let buttonsDisabled = false;
+// 页面关闭倒计时
+let pageCloseTimer = null;
+// 游戏是否已结束
+let gameEnded = false;
+// 新增：总奖励跟踪
+let totalRewards = { silver: 0, goods: 0 }; // 银两和货物
+        
+        // 随机选择两个游戏
+        function selectRandomGames() {
+            const shuffled = [...games].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 2);
+        }
+        
+       // 生成游戏卡片
+function generateGameCards() {
+    const gameContainer = document.getElementById('gameContainer');
+    gameContainer.innerHTML = '';
+    
+    selectedGames.forEach(game => {
+        const gameCard = document.createElement('div');
+        gameCard.className = 'game-card';
+        
+        gameCard.innerHTML = `
+            <div class="game-header">${game.name}</div>
+            <div class="game-content">
+                <div class="avatar-img">
+                    <img src="${getAvatarImage(game.id)}" alt="${game.name}">
+                </div>
+                <p class="game-description">${game.description}</p>
+                <p class="boss-talk" style="font-style: italic; color: #f9c74f; margin: 10px 0; text-align: center;">
+                    "${game.bossTalk}"
+                </p>
+                <p class="game-cost">需付銀兩: <span style="color: #f94144;">${game.cost}兩</span></p>
+                <button class="btn-try" onclick="openGame('${game.id}')" ${buttonsDisabled ? 'disabled' : ''}>試一手</button>
+            </div>
+        `;
+        
+        gameContainer.appendChild(gameCard);
+    });
+}
+		
+		// 获取头像图片URL
+function getAvatarImage(gameId) {
+    const images = {
+        'grid': 'https://imgur.com/9yBN2su.jpg',
+        'tictactoe': 'https://imgur.com/fNHYfZA.jpg',
+        'clicker': 'https://imgur.com/COkfjIO.jpg',
+        'quiz': 'https://imgur.com/5A7JNps.jpg',
+        'lantern': 'https://imgur.com/kAp9J7b.jpg'
+    };
+    return images[gameId] || 'https://imgur.com/kNVCQ4r.jpg';
+}
+        
+        // 打开游戏
+        function openGame(gameId) {
+            // 禁用所有按钮
+            disableAllButtons();
+            
+            const gameScreen = document.getElementById('gameScreen');
+            const gameArea = document.getElementById('gameArea');
+            const game = games.find(g => g.id === gameId);
+            
+            if (game) {
+                // 清空游戏区域
+                gameArea.innerHTML = '';
+                
+               // 添加游戏标题
+const gameTitle = document.createElement('h2');
+gameTitle.textContent = game.name;
+gameTitle.style.color = '#4cc9f0';
+gameTitle.style.marginBottom = '10px';
+gameTitle.style.textShadow = '0 0 10px rgba(76, 201, 240, 0.7)';
+gameArea.appendChild(gameTitle);
+
+// 添加老板对话
+const bossTalk = document.createElement('p');
+bossTalk.textContent = `"${game.bossTalk}"`;
+bossTalk.style.color = '#f9c74f';
+bossTalk.style.fontStyle = 'italic';
+bossTalk.style.marginBottom = '20px';
+bossTalk.style.textAlign = 'center';
+gameArea.appendChild(bossTalk);
+                
+                // 根据游戏ID生成不同的游戏界面
+                switch(gameId) {
+                    case 'grid':
+                        createGridGame(gameArea, game);
+                        break;
+                    case 'tictactoe':
+                        createTicTacToeGame(gameArea);
+                        break;
+                    case 'clicker':
+                        createClickerGame(gameArea);
+                        break;
+                    case 'quiz':
+                        createQuizGame(gameArea, game);
+                        break;
+                    case 'lantern':
+                        createLanternGame(gameArea);
+                        break;
+                    default:
+                        createGridGame(gameArea, game);
+                }
+                
+                // 显示游戏屏幕
+                gameScreen.style.display = 'flex';
+            }
+        }
+        
+        // 创建方格閃燈遊戲
+        function createGridGame(container, game) {
+            const gridContainer = document.createElement('div');
+            gridContainer.className = 'grid-container';
+            
+            // 生成50个格子
+            const gridItems = [];
+            for (let i = 0; i < 50; i++) {
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                gridContainer.appendChild(item);
+                gridItems.push(item);
+            }
+            
+            // 分配奖励到格子
+            const rewards = [];
+            game.rewards.forEach(reward => {
+                for (let i = 0; i < reward.probability; i++) {
+                    rewards.push(reward);
+                }
+            });
+            
+            // 随机打乱奖励顺序
+            for (let i = rewards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [rewards[i], rewards[j]] = [rewards[j], rewards[i]];
+            }
+            
+            // 应用奖励到格子
+            gridItems.forEach((item, index) => {
+                const reward = rewards[index % rewards.length];
+                item.textContent = reward.text;
+                item.style.backgroundColor = reward.color;
+            });
+            
+            container.appendChild(gridContainer);
+            
+            // 添加开始按钮
+            const startBtn = document.createElement('button');
+            startBtn.className = 'btn-try';
+            startBtn.textContent = '開始遊戲';
+            startBtn.style.marginTop = '20px';
+            
+            let currentIndex = 0;
+            let intervalId = null;
+            let finalReward = null;
+            
+               startBtn.onclick = function() {
+        if (intervalId) return;
+        
+        startBtn.disabled = true;
+        gridItems.forEach(item => item.classList.remove('active'));
+        
+        let speed = 50;
+        let duration = 7000;
+        let elapsed = 0;
+        let finalCountdown = false;
+        let countdownSteps = 5;
+        
+        function animate() {
+            if (elapsed >= duration && finalCountdown) return;
+            
+            gridItems[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + 1) % gridItems.length;
+            gridItems[currentIndex].classList.add('active');
+            
+            const progress = elapsed / duration;
+            
+            // 当时间接近结束时，开始倒计时效果
+            if (progress > 0.8 && !finalCountdown) {
+                finalCountdown = true;
+                startFinalCountdown();
+                return;
+            }
+            
+            speed = 50 + Math.floor(progress * 200);
+            elapsed += speed;
+            
+            if (elapsed < duration) {
+                setTimeout(animate, speed);
+            }
+        }
+        
+        function startFinalCountdown() {
+            // 显示倒计时提示
+            const countdownEl = document.createElement('div');
+            countdownEl.className = 'countdown-display';
+            countdownEl.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 5rem;
+                font-weight: bold;
+                color: gold;
+                text-shadow: 0 0 20px rgba(255,215,0,0.8);
+                z-index: 10;
+            `;
+            container.appendChild(countdownEl);
+            
+            // 倒计时效果
+            let count = countdownSteps;
+            countdownEl.textContent = count;
+            
+            const countdownInterval = setInterval(() => {
+                count--;
+                
+                if (count > 0) {
+                    countdownEl.textContent = count;
+                    // 添加缩放效果
+                    countdownEl.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                    setTimeout(() => {
+                        countdownEl.style.transform = 'translate(-50%, -50%) scale(1)';
+                    }, 200);
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownEl.textContent = '!';
+                    
+                    // 最终停顿效果
+                    setTimeout(() => {
+                        container.removeChild(countdownEl);
+                        
+                        // 最终慢速移动
+let finalSteps = 0;
+const finalMove = () => {
+    gridItems[currentIndex].classList.remove('active');
+    currentIndex = (currentIndex + 1) % gridItems.length;
+    gridItems[currentIndex].classList.add('active');
+    
+    finalSteps++;
+    if (finalSteps < 8) {
+        setTimeout(finalMove, 300 + finalSteps * 100);
+    } else {
+        // 最终结果
+        const rewardText = gridItems[currentIndex].textContent;
+        finalReward = game.rewards.find(r => r.text === rewardText);
+        
+        // 添加闪烁效果
+        const blinkInterval = setInterval(() => {
+            gridItems[currentIndex].classList.toggle('active');
+        }, 300);
+        
+        setTimeout(() => {
+            clearInterval(blinkInterval);
+            gridItems[currentIndex].classList.add('active');
+            
+            if (finalReward.text.includes("100兩")) {
+                showResult(container, `恭喜獲得${finalReward.text}！特等獎！`, 'success');
+            } else if (finalReward.text.includes("50兩")) {
+                showResult(container, `恭喜獲得${finalReward.text}！大獎！`, 'success');
+            } else if (finalReward.text.includes("貨") || finalReward.text.includes("10兩")) {
+                showResult(container, `恭喜獲得${finalReward.text}！成功！`, 'success');
+            } else {
+                showResult(container, `獲得${finalReward.text}。繼續努力！`, 'normal');
+            }
+        }, 2000);
+    }
+};
+
+finalMove();
+                    }, 500);
+                }
+            }, 800);
+        }
+        
+        animate();
+    };
+    
+    container.appendChild(startBtn);
+}
+        
+        // 创建井字游戏
+        function createTicTacToeGame(container) {
+            // 创建游戏状态显示
+            const statusEl = document.createElement('div');
+            statusEl.className = 'game-status';
+            statusEl.textContent = '您的回合：請選擇一個位置';
+            container.appendChild(statusEl);
+            
+            // 创建游戏板
+            const board = document.createElement('div');
+            board.className = 'tic-tac-toe';
+            
+            // 初始化游戏状态
+            let currentPlayer = 'player';
+            let gameOver = false;
+            const boardState = Array(9).fill(null);
+            
+            // 创建单元格
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                
+                cell.addEventListener('click', () => {
+                    if (gameOver || currentPlayer !== 'player' || boardState[i]) return;
+                    
+                    // 玩家下棋
+                    boardState[i] = 'X';
+                    cell.textContent = 'X';
+                    cell.classList.add('x');
+                    
+                    // 检查玩家是否获胜
+                    if (checkWinner(boardState, 'X')) {
+                        // 生成随机奖励8-20两
+                        const reward = Math.floor(Math.random() * 13) + 8;
+                        statusEl.textContent = '恭喜您獲勝了！';
+                        showResult(container, `恭喜獲勝！獲得${reward}銀兩`, 'success');
+                        gameOver = true;
+                        return;
+                    }
+                    
+                    // 检查是否平局
+                    if (isBoardFull(boardState)) {
+                        statusEl.textContent = '平局！';
+                        showResult(container, '平局！沒有獲得獎勵', 'normal');
+                        gameOver = true;
+                        return;
+                    }
+                    
+                    // 切换到电脑
+                    currentPlayer = 'computer';
+                    statusEl.textContent = '攤主思考中...';
+                    
+                    // 电脑下棋
+                    setTimeout(() => {
+                        const emptyCells = boardState.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
+                        const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                        
+                        boardState[randomIndex] = 'O';
+                        const computerCell = board.querySelector(`[data-index="${randomIndex}"]`);
+                        computerCell.textContent = 'O';
+                        computerCell.classList.add('o');
+                        
+                        // 检查电脑是否获胜
+                        if (checkWinner(boardState, 'O')) {
+                            statusEl.textContent = '攤主獲勝！';
+                            showResult(container, '失敗！沒有獲得獎勵', 'failure');
+                            gameOver = true;
+                            return;
+                        }
+                        
+                        // 检查是否平局
+                        if (isBoardFull(boardState)) {
+                            statusEl.textContent = '平局！';
+                            showResult(container, '平局！沒有獲得獎勵', 'normal');
+                            gameOver = true;
+                            return;
+                        }
+                        
+                        // 切换回玩家
+                        currentPlayer = 'player';
+                        statusEl.textContent = '您的回合：請選擇一個位置';
+                    }, 1000);
+                });
+                
+                board.appendChild(cell);
+            }
+            
+            container.appendChild(board);
+        }
+        
+function createClickerGame(container) {
+    const clickerContainer = document.createElement('div');
+    clickerContainer.className = 'clicker-container';
+    container.appendChild(clickerContainer);
+    
+    const timerDisplay = document.createElement('div');
+    timerDisplay.className = 'timer-display';
+    timerDisplay.textContent = '15';
+    container.appendChild(timerDisplay);
+    
+    const scoreDisplay = document.createElement('div');
+    scoreDisplay.className = 'score-display';
+    scoreDisplay.textContent = '點擊數: 0';
+    container.appendChild(scoreDisplay);
+    
+    const startBtn = document.createElement('button');
+    startBtn.className = 'btn-try';
+    startBtn.textContent = '開始遊戲';
+    startBtn.style.marginTop = '20px';
+    
+    let score = 0;
+    let timeLeft = 15;
+    let timer = null;
+    let targetInterval = null;
+    let gameActive = false;
+    
+    startBtn.onclick = function() {
+        if (gameActive) return;
+        
+        startBtn.disabled = true;
+        gameActive = true;
+        score = 0;
+        timeLeft = 15;
+        scoreDisplay.textContent = '點擊數: 0';
+        timerDisplay.textContent = timeLeft;
+        
+        // 清除现有的目标
+        document.querySelectorAll('.click-target').forEach(target => target.remove());
+        
+        // 开始计时
+        timer = setInterval(() => {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+        
+        // 生成目标
+        targetInterval = setInterval(() => {
+            createTarget();
+            
+            // 最后5秒加速
+            if (timeLeft <= 5) {
+                createTarget();
+                if (timeLeft <= 2) {
+                    createTarget();
+                }
+            }
+        }, 800);
+        
+        // 初始生成几个目标
+        for (let i = 0; i < 3; i++) {
+            setTimeout(createTarget, i * 300);
+        }
+    };
+    
+    function createTarget() {
+        if (!gameActive) return;
+        
+        const target = document.createElement('div');
+        target.className = 'click-target';
+        
+        // 随机位置
+        const x = Math.random() * (clickerContainer.offsetWidth - 60);
+        const y = Math.random() * (clickerContainer.offsetHeight - 60);
+        target.style.left = `${x}px`;
+        target.style.top = `${y}px`;
+        
+        // 点击事件
+        target.onclick = function() {
+            score++;
+            scoreDisplay.textContent = `點擊數: ${score}`;
+            this.remove();
+        };
+        
+        // 自动消失时间根据剩余时间调整
+        const disappearTime = timeLeft <= 5 ? 1000 : 1500;
+        setTimeout(() => {
+            if (target.parentNode) {
+                target.remove();
+            }
+        }, disappearTime);
+        
+        clickerContainer.appendChild(target);
+    }
+    
+    function endGame() {
+        clearInterval(timer);
+        clearInterval(targetInterval);
+        gameActive = false;
+        
+        // 清除所有目标
+        document.querySelectorAll('.click-target').forEach(target => target.remove());
+        
+        // 电脑AI得分 (随机15-25)
+        const aiScore = Math.floor(Math.random() * 11) + 15;
+        
+        if (score > aiScore) {
+            // 生成随机奖励8-15两
+            const reward = Math.floor(Math.random() * 8) + 8;
+            showResult(container, `您得分: ${score}，攤主得分: ${aiScore}。恭喜獲勝！獲得${reward}銀兩`, 'success');
+        } else {
+            showResult(container, `您得分: ${score}，攤主得分: ${aiScore}。可惜！沒有獲得獎勵`, 'failure');
+        }
+        
+        // 修复：确保重新启用开始按钮
+        startBtn.disabled = false;
+    }
+    
+    container.appendChild(startBtn);
+}
+        
+        // 创建夜市猜谜游戏
+        function createQuizGame(container, game) {
+            const quizContainer = document.createElement('div');
+            quizContainer.className = 'quiz-container';
+            
+            // 随机选择一个问题
+            const question = game.questions[Math.floor(Math.random() * game.questions.length)];
+            
+            const questionEl = document.createElement('div');
+            questionEl.className = 'quiz-question';
+            questionEl.textContent = question.question;
+            quizContainer.appendChild(questionEl);
+            
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'quiz-options';
+            
+            question.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'quiz-option';
+                optionEl.textContent = option;
+                
+                optionEl.onclick = function() {
+                    // 禁用所有选项
+                    document.querySelectorAll('.quiz-option').forEach(opt => {
+                        opt.style.pointerEvents = 'none';
+                    });
+                    
+                    if (index === question.answer) {
+                        optionEl.style.backgroundColor = 'rgba(76, 201, 240, 0.5)';
+                        optionEl.style.borderColor = '#4cc9f0';
+                        
+                        // 生成随机奖励5-12两
+                        const reward = Math.floor(Math.random() * 8) + 5;
+                        setTimeout(() => {
+                            showResult(container, `回答正確！獲得${reward}銀兩`, 'success');
+                        }, 1000);
+                    } else {
+                        optionEl.style.backgroundColor = 'rgba(249, 65, 68, 0.5)';
+                        optionEl.style.borderColor = '#f94144';
+                        
+                        // 显示正确答案
+                        document.querySelectorAll('.quiz-option')[question.answer].style.backgroundColor = 'rgba(76, 201, 240, 0.5)';
+                        document.querySelectorAll('.quiz-option')[question.answer].style.borderColor = '#4cc9f0';
+                        
+                        setTimeout(() => {
+                            showResult(container, '回答錯誤！沒有獲得獎勵', 'failure');
+                        }, 1000);
+                    }
+                };
+                
+                optionsContainer.appendChild(optionEl);
+            });
+            
+            quizContainer.appendChild(optionsContainer);
+            container.appendChild(quizContainer);
+        }
+        
+        // 创建祈福天燈遊戲
+       function createLanternGame(container) {
+            // 創建高度標示區域
+            const heightIndicator = document.createElement('div');
+            heightIndicator.className = 'height-indicator';
+            heightIndicator.innerHTML = `
+                <div class="height-line high-line">
+                    <span class="height-label">高</span>
+                </div>
+                <div class="height-line medium-line">
+                    <span class="height-label">中</span>
+                </div>
+                <div class="height-line low-line">
+                    <span class="height-label">低</span>
+                </div>
+            `;
+            container.appendChild(heightIndicator);
+            
+            const lanternContainer = document.createElement('div');
+            lanternContainer.className = 'lantern-container';
+            
+            // 創建三個天燈
+            const templates = ['template1', 'template2', 'template3'];
+            
+            templates.forEach(template => {
+                const lantern = document.createElement('div');
+                lantern.className = `lantern ${template}`;
+                
+                const string = document.createElement('div');
+                string.className = 'lantern-string';
+                
+                const body = document.createElement('div');
+                body.className = 'lantern-body';
+                
+                // 隨機設置天燈上的文字
+                const texts = ['福', '祿', '壽', '喜', '財'];
+                body.textContent = texts[Math.floor(Math.random() * texts.length)];
+                
+                lantern.appendChild(string);
+                lantern.appendChild(body);
+                
+                lantern.onclick = function() {
+                    if (lantern.classList.contains('launching')) return;
+                    
+                    // 禁用所有天燈
+                    document.querySelectorAll('.lantern').forEach(l => l.style.pointerEvents = 'none');
+                    
+                    // 隨機決定天燈飛起的高度
+                    const result = Math.random();
+                    let outcome = '';
+                    
+                    if (result < 0.3) {
+                        outcome = '低';
+                        lantern.classList.add('low');
+                    } else if (result < 0.7) {
+                        outcome = '中';
+                        lantern.classList.add('medium');
+                    } else {
+                        outcome = '高';
+                        lantern.classList.add('success');
+                    }
+                    
+                    // 添加起飛動畫類
+                    lantern.classList.add('launching');
+                    
+                    // 遊戲結束
+                    setTimeout(() => {
+                        // 根據高度顯示不同結果
+                        let message = '';
+                        let type = '';
+                        
+                        if (outcome === '高') {
+                            const reward = Math.floor(Math.random() * 15) + 15;
+                            message = `天燈飛到了${outcome}度高度！獲得${reward}銀兩`;
+                            type = 'success';
+                        } else if (outcome === '中') {
+                            const reward = Math.floor(Math.random() * 10) + 5;
+                            message = `天燈飛到了${outcome}度高度！獲得${reward}銀兩`;
+                            type = 'normal';
+                        } else {
+                            message = `天燈只飛到了${outcome}度高度！沒有獲得獎勵`;
+                            type = 'failure';
+                        }
+                        
+                        showResult(container, message, type);
+                    }, 5000);
+                };
+                
+                lanternContainer.appendChild(lantern);
+            });
+            
+            container.appendChild(lanternContainer);
+        }
+        
+        // 显示游戏结果
+        function showResult(container, message, type) {
+            // 如果已经显示结果，不再重复显示
+            if (container.querySelector('.result-area')) return;
+            
+            const resultArea = document.createElement('div');
+            resultArea.className = `result-area ${type}-result`;
+            resultArea.textContent = message;
+            
+            container.appendChild(resultArea);
+            
+            // 添加关闭按钮
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-btn';
+            closeBtn.textContent = '關閉';
+            closeBtn.style.marginTop = '20px';
+            
+            closeBtn.onclick = function() {
+                document.getElementById('gameScreen').style.display = 'none';
+                // 启用所有按钮
+                enableAllButtons();
+            };
+            
+            container.appendChild(closeBtn);
+            
+            // 设置游戏结束状态
+            gameEnded = true;
+            
+            // 显示全局遮罩
+            setTimeout(function() {
+    document.getElementById('overlayMask').classList.add('active');
+}, 6000); // 5000毫秒 = 3秒
+            
+           
+        }
+        
+        // 关闭遮罩
+        function closeOverlay() {
+            document.getElementById('overlayMask').classList.remove('active');
+        }
+        
+        // 禁用所有按钮
+        function disableAllButtons() {
+            buttonsDisabled = true;
+            document.querySelectorAll('.btn-try').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+        
+        // 启用所有按钮
+        function enableAllButtons() {
+            buttonsDisabled = false;
+            document.querySelectorAll('.btn-try').forEach(btn => {
+                btn.disabled = false;
+            });
+        }
+        
+        // 启动页面关闭倒计时
+function startPageCloseTimer() {
+    const countdownEl = document.createElement('div');
+    countdownEl.className = 'countdown';
+    countdownEl.textContent = '8';
+    document.body.appendChild(countdownEl);
+    
+    let seconds = 8;
+    pageCloseTimer = setInterval(() => {
+        seconds--;
+        countdownEl.textContent = seconds;
+        
+        if (seconds <= 0) {
+            clearInterval(pageCloseTimer);
+            document.body.removeChild(countdownEl);
+            // 移除了页面关闭的代码
+            // 只保留关闭遮罩
+            document.getElementById('overlayMask').classList.remove('active');
+        }
+    }, 1000);
+}
+        
+        // 检查井字游戏获胜者
+        function checkWinner(board, player) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // 横
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // 竖
+                [0, 4, 8], [2, 4, 6]             // 对角
+            ];
+            
+            return winPatterns.some(pattern => {
+                return pattern.every(index => board[index] === player);
+            });
+        }
+        
+        // 检查井字游戏是否平局
+        function isBoardFull(board) {
+            return board.every(cell => cell !== null);
+        }
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            selectedGames = selectRandomGames();
+            generateGameCards();
+            
+            // 添加手动关闭页面按钮事件
+            document.getElementById('closePageBtn').addEventListener('click', function() {
+                alert('頁面即將關閉');
+            });
+        };
+    </script>
+</body>
+</html>
