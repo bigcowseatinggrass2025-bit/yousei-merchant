@@ -3359,8 +3359,8 @@
         
         <div style="padding: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 12px; border-left: 4px solid #ffc107; margin: 20px 0;">
             <p style="font-size: 1.3rem; font-weight: bold; color: white; margin: 0; line-height: 1.6;">
-                <strong style="color: #ffd700;">競猜提示：</strong> 现在！各位攤販當主們請取出一定量的銀兩,
-                然後在桌上拳頭握緊,然後進行猜測對方的銀兩數目！！(銀兩數量只能整數10,30,50...100) 猜對的可穫得所有銀兩....
+                <strong style="color: #ffd700;">競猜提示：</strong> 现在！各位攤販當主請取出一定量的銀兩,
+                然後在桌上拳頭握緊,然後進行對賭！！(銀兩數量只能整數10,30,70...100) 猜對即可穫得對手所有銀兩....
             </p>
         </div>
         
@@ -3449,8 +3449,8 @@
             <!-- 攤販對話內容將在這裡動態顯示 -->
         </div>
         <div class="vendor-options">
-            <button class="vendor-btn btn-visit" id="visit-vendor">過去看一下吧</button>
-            <button class="vendor-btn btn-later" id="later-vendor">下次再說吧</button>
+            <button class="vendor-btn btn-visit" id="visit-vendor">進入街道</button>
+            <button class="vendor-btn btn-later" id="later-vendor">下次再說</button>
         </div>
     </div>
 </div>
@@ -4253,8 +4253,8 @@ const goodsTypes = [
                 // 全局事件
                 { 
                     type: 'global', 
-                    shortText: "-全體-絲路馬賊猖獗！每人支付五兩紋銀作護衛資",
-                    fullText: "絲綢之路上馬賊團夥活動頻繁，商幫不得不雇用額外鏢師護衛。眾商賈均攤費用，每人支付五兩紋銀。",
+                    shortText: "-全體-絲路馬賊猖獗！每人支付十兩紋銀作護衛資",
+                    fullText: "絲綢之路上馬賊團夥活動頻繁，商幫不得不雇用額外鏢師護衛。眾商賈均攤費用，每人支付十兩紋銀。",
                     effect: "all-10" 
                 },
                 { 
@@ -4265,8 +4265,8 @@ const goodsTypes = [
                 },
                 { 
                     type: 'global', 
-                    shortText: "-全體-貿易繁榮！市場活躍-每人從牌堆抽取一張貨卡",
-                    fullText: "近期貿易繁榮！市場異常活躍，所有商人都獲得了更多的交易機會和利潤-每人從牌堆抽取一張貨卡。",
+                    shortText: "-全體-貿易繁榮！市場活躍-每人從牌堆抽取一張卡片",
+                    fullText: "近期貿易繁榮！市場異常活躍，所有商人都獲得了更多的交易機會和利潤-每人從牌堆抽取一張卡片。",
                     effect: "all+5" 
                 },
                 { 
@@ -4283,8 +4283,8 @@ const goodsTypes = [
                 },
 				                { 
                     type: 'global', 
-                    shortText: "-全體-朝貢賞賜！皇室分賜外邦貢品，從商會取得得一件貨物",
-                    fullText: "外邦使節進獻貢品，聖上龍心大悅，將部分貢品分賜商賈。眾人皆可從商會取得得一件貨物。",
+                    shortText: "-全體-朝貢賞賜！皇室分賜外邦貢品，從商會取得一件貨物",
+                    fullText: "外邦使節進獻貢品，聖上龍心大悅，將部分貢品分賜商賈。眾人皆可從商會取得一件貨物。",
                     effect: "all-8" 
                 },
 				                { 
@@ -4321,8 +4321,8 @@ const goodsTypes = [
                 },
 				{ 
                     type: 'individual', 
-                    shortText: "-個人-貨船觸礁，損失一個貨物/損五兩銀",
-                    fullText: "閣下貨船在長江觸礁沉沒，所有通過水路運輸的貨物盡數損失，損失一個貨物/損五兩銀。",
+                    shortText: "-個人-貨船觸礁，損失一個貨物/損十兩銀",
+                    fullText: "閣下貨船在長江觸礁沉沒，所有通過水路運輸的貨物盡數損失，損失一個貨物/損十兩銀。",
                     effect: "+20" 
                 },
 				{ 
@@ -4339,8 +4339,8 @@ const goodsTypes = [
                 },
 				{ 
                     type: 'individual', 
-                    shortText: "-個人-結識皇商，從牌堆抽出一張貨物卡回到手牌",
-                    fullText: "閣下在酒宴結識皇商總管，獲得宮廷採買門路，從牌堆抽出一張貨物卡回到手牌。",
+                    shortText: "-個人-結識皇商，從牌堆抽出一卡片回到手牌",
+                    fullText: "閣下在酒宴結識皇商總管，獲得宮廷採買門路，從牌堆抽出一張卡片回到手牌。",
                     effect: "+20" 
                 },
 				{ 
@@ -4351,8 +4351,8 @@ const goodsTypes = [
                 },
 				{ 
                     type: 'individual', 
-                    shortText: "-個人-貨棧遭雨，損失一件貨物/損五兩銀",
-                    fullText: "連日暴雨致貨棧進水，一件貨物受潮腐壞。損失一件貨物/損五兩銀。",
+                    shortText: "-個人-貨棧遭雨，損失一件貨物/損五10銀",
+                    fullText: "連日暴雨致貨棧進水，一件貨物受潮腐壞。損失一件貨物/損五10銀。",
                     effect: "+20" 
                 },
 				
@@ -4363,26 +4363,26 @@ const goodsTypes = [
                     // 特别事件 - 幽街货卡 (增加数量)
     { 
         type: 'special', 
-        shortText: "-特別-遇到神秘客人，獲得幽街貨物交易卡！",
+        shortText: "-特別-遇到神秘客人，獲得幽街虛擬貨物卡！",
         fullText: "在幽街的轉角處，你遇到了一位神秘的客人，他贈予你幽街貨物交易卡，可以在倉庫中查看和使用這些特殊貨物！",
         effect: "getGoodsCards" 
     },
     { 
         type: 'special', 
-        shortText: "-全體特別-神秘商隊來訪，所有人獲得幽街貨物交易卡！",
+        shortText: "-全體特別-神秘商隊來訪，所有人獲得幽街虛擬貨物卡！",
         fullText: "一支神秘的商隊來到幽街，他們贈予所有商人幽街貨物交易卡，可以在倉庫中查看和使用這些特殊貨物！",
         effect: "allGetGoodsCards" 
     },
     // 新增特别事件
     { 
         type: 'special', 
-        shortText: "-特別-發現隱藏貨倉，獲得幽街貨物交易卡！",
+        shortText: "-特別-發現隱藏貨倉，獲得幽街虛擬貨物卡！",
         fullText: "在探索幽街時，你意外發現了一個隱藏的貨倉，裡面裝滿了幽街貨物交易卡！",
         effect: "getGoodsCards" 
     },
     { 
         type: 'special', 
-        shortText: "-特別-老商人饋贈，獲得精美貨物交易卡！",
+        shortText: "-特別-老商人饋贈，獲得幽街虛擬貨物卡！",
         fullText: "一位年邁的商人被你的誠意打動，贈予你他珍藏多年的幽街貨物交易卡！",
         effect: "getGoodsCards" 
     }
@@ -7047,6 +7047,7 @@ function init() {
 </body>
 
 </html>
+
 
 
 
