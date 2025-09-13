@@ -6430,8 +6430,8 @@ function enhanceEvolvedGuardians() {
                                 updateMarquee(`第${lotteryRound}期彩票开奖，号码 ${winningNumber}，${winners.map(w => w.name).join('和')} 中奖！奖池已重置。`, true, 30000);
                             } else {
                                 winnerDisplay.innerHTML = `<h3>今期中獎號碼: ${winningNumber}</h3>
-                                           <p>很可惜！没有人中獎！獎金累積到下一輪：${jackpot + 10}两</p>`;
-                                addEvent(`彩票開彩，號碼為 ${winningNumber}，可惜無人中獎，獎金累積到達 ${jackpot + 10}两`);
+                                           <p>很可惜！没有人中獎！獎金累積到下一輪：${jackpot + 20}两</p>`;
+                                addEvent(`彩票開彩，號碼為 ${winningNumber}，可惜無人中獎，獎金累積到達 ${jackpot + 20}两`);
                                 
                                 jackpot += 10;
                                 updateMarquee(`第${lotteryRound}期彩票開獎，號碼 ${winningNumber}，無人中獎，獎金累積到達 ${jackpot}两`, true, 30000);
@@ -7047,6 +7047,7 @@ function init() {
 </body>
 
 </html>
+
 
 
 
