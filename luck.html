@@ -452,9 +452,6 @@ body::before {
     <source src="sounds/eggluck3.mp3" type="audio/mpeg">
 </audio>
 
-<audio id="flash-sound" loop>
-    <source src="sounds/flash-sound.mp3" type="audio/mpeg">
-</audio>
 
 <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -470,7 +467,7 @@ body::before {
         const eggActionButton = document.getElementById('egg-action-button');
         const eggSound = document.getElementById('bgm-sound'); // 修改这里
         const overlayMask = document.getElementById('overlayMask');
-        const flashSound = document.getElementById('flash-sound');
+        const flashSound = document.getElementById('');
         
         const options = eggGrid.querySelectorAll('.egg-option');
         const multiplierOptions = multiplierGrid.querySelectorAll('.multiplier-option');
@@ -643,12 +640,7 @@ function openEggModal() {
 		
 		
         // 在selectBasicReward函数中添加音效控制
-function selectBasicReward() {
-    // 播放闪灯音效
-    flashSound.currentTime = 0;
-    flashSound.volume = 0.8;
-    flashSound.play().catch(e => console.log("闪灯音效播放失败:", e));
-    
+   
     // 随机闪光效果
     let flashCount = 0;
     const maxFlashes = 25;
@@ -810,4 +802,5 @@ function selectSpecialReward() {
     });
 </script>
 </body>
+
 </html> 
