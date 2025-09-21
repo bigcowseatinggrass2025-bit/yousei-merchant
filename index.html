@@ -3542,7 +3542,7 @@
     <div class="lottery-modal" id="draw-modal">
         <div class="lottery-content">
             <h2>彩票開獎 - 第<span id="lottery-round">1</span>期</h2>
-            <p>累 計 獎 金: <span id="jackpot-amount">10</span>銀兩</p>
+            <p>今 期 累 計 獎 金: <span id="jackpot-amount">10</span>銀兩</p>
             <div class="draw-animation" id="draw-animation">
                 <div class="draw-number">?</div>
             </div>
@@ -6859,7 +6859,7 @@ function enhanceEvolvedGuardians() {
                                     winner.wins = (winner.wins || 0) + 1;
                                     winner.wealth = (winner.wealth || 50) + jackpot;
                                     winnerDisplay.innerHTML += `<p>${winner.name} 中獎，穫得 ${jackpot} 兩獎金！</p>`;
-                                    addEvent(`${winner.name} 彩票中奖，穫得${jackpot}兩奖金！`, 'individual');
+                                    addEvent(`${winner.name} 彩票中獎，穫得${jackpot}兩獎金！`, 'individual');
                                     
                                     const winnerIndex = players.findIndex(p => p.name === winner.name);
                                     if (winnerIndex !== -1) flashPlayerCard(winnerIndex, winner.color);
@@ -6872,14 +6872,14 @@ function enhanceEvolvedGuardians() {
                                     player.lotteryNumbers = [];
                                 });
                                 
-                                addEvent(`第${lotteryRound}期彩票开奖完毕，${winners.map(w => w.name).join('和')} 中奖，所有彩票数据已重置`);
-                                updateMarquee(`第${lotteryRound}期彩票开奖，号码 ${winningNumber}，${winners.map(w => w.name).join('和')} 中奖！奖池已重置。`, true, 30000);
+                                addEvent(`第${lotteryRound}期彩票開獎完畢，${winners.map(w => w.name).join('和')} 中奖，所有彩票數據已重置`);
+                                updateMarquee(`第${lotteryRound}期彩票开奖，号码 ${winningNumber}，${winners.map(w => w.name).join('和')} 中獎！獎池已重置。`, true, 30000);
                             } else {
                                 winnerDisplay.innerHTML = `<h3>今期中獎號碼: ${winningNumber}</h3>
-                                           <p>很可惜！没有人中獎！獎金累積到下一輪：${jackpot + 20}两</p>`;
+                                           <p>很可惜！没有人中獎！獎金累積到下一期!累積獎金：${jackpot + 20}两</p>`;
                                 addEvent(`彩票開彩，號碼為 ${winningNumber}，可惜無人中獎，獎金累積到達 ${jackpot + 20}两`);
                                 
-                                jackpot += 10;
+                                jackpot += 20;
                                 updateMarquee(`第${lotteryRound}期彩票開獎，號碼 ${winningNumber}，無人中獎，獎金累積到達 ${jackpot}两`, true, 30000);
                             }
                             
@@ -6904,7 +6904,7 @@ function useCard(playerIndex, cardId) {
     
     // 设置使用卡片模态框内容
     const useCardContent = document.getElementById('use-card-content');
-    useCardDesc.textContent = `确定要使用「${card.name}」吗？效果: ${card.description || '无说明'}`;
+    useCardDesc.textContent = `确定要使用「${card.name}」嗎？效果: ${card.description || '无说明'}`;
     
     // 清除之前的稀有度类
     useCardContent.classList.remove('normal', 'magic', 'rare', 'epic', 'legendary', 'divine', 'ancient');
@@ -7504,6 +7504,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
