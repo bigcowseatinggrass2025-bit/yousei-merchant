@@ -1199,7 +1199,7 @@
         <div class="progress-bar">
             <div class="progress-fill" id="progress-fill"></div>
         </div>
-        <div class="progress-text">按住圓圈六秒即可解鎖</div>
+        <div class="progress-text">按住圓圈五秒即可解鎖</div>
     </div>
 </div>
         
@@ -1946,7 +1946,7 @@ function startUnlock(e) {
     }
     
     unlockInterval = setInterval(() => {
-        unlockProgress += 1.67;
+        unlockProgress += 2;
         progressFillEl.style.width = `${unlockProgress}%`;
         
         if (unlockProgress >= 100) {
@@ -2168,4 +2168,5 @@ function playSound(soundId) {
 </body>
 
 </html>
+
 
