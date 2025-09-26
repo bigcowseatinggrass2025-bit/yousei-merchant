@@ -6466,7 +6466,7 @@ if (totalTrades >= 15 && !egg15Triggered) {
                 if (Math.random() < 0.10 && player.activeGuardian && !player.guardianEvolved) {
                     // 同时设置可以进化和满足交易次数条件
                     player.canEvolve = true;
-                    player.guardianTrades = 10; // 直接设置为满足进化条件
+                    player.guardianTrades = 5; // 直接设置为满足进化条件
                     
                     savePlayers();
                     renderPlayers();
@@ -6482,7 +6482,7 @@ if (totalTrades >= 15 && !egg15Triggered) {
                 
                 // 检查是否需要竞猜环节（每6次交易）
                 let guessTriggered = false;
-                if (totalTrades % 6 === 0) {
+                if (totalTrades % 8 === 0) {
                     guessTriggered = true;
                     setTimeout(() => {
                         guessModal.style.display = 'flex';
@@ -7703,6 +7703,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
