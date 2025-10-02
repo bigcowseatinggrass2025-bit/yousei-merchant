@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幽街商人 - 神秘商人抽卡系统</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #1abc9c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --rarity-normal: #ffffff;
+            --rarity-magic: #8888ff;
+            --rarity-rare: #ffff00;
+            --rarity-epic: #ff44ff;
+            --rarity-legendary: #ff8800;
+            --rarity-divine: #ffcc00;
+            --rarity-ancient: #ff0000;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: url('https://imgur.com/07Bcmi8.jpg') no-repeat center center fixed, 
+                        linear-gradient(135deg, #1a1a2e, #16213e);
+            background-size: cover;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+        
+        /* 登录页面样式 */
+        .login-container {
+            max-width: 500px;
+            margin: 50px auto;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .login-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b, #9b59b6, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: rainbowText 8s linear infinite;
+        }
+        
+        .login-subtitle {
+            margin-bottom: 30px;
+            color: #ccc;
+            font-size: 1.1rem;
+        }
+        
+        .player-selection {
+            margin-bottom: 30px;
+        }
+        
+        .player-selection label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .player-select {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            background: rgba(30, 30, 40, 0.9);
+            color: #f0f0f0;
+            border: 2px solid #3498db;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+        
+        .login-btn {
+            padding: 14px 30px;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 主容器样式 */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            display: none;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b, #9b59b6, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: rainbowText 8s linear infinite;
+        }
+        
+        @keyframes rainbowText {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 卡背样式 */
+        .card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backface-visibility: hidden;
+            transform: rotateY(0deg);
+            border: 2px solid gold;
+        }
+        
+        .card-back::before {
+            content: "幽";
+            font-size: 2rem;
+            color: gold;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+        
+        .card-back::after {
+            content: "";
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="20" y="20" width="60" height="60" fill="none" stroke="gold" stroke-width="2"/><circle cx="50" cy="50" r="15" fill="none" stroke="gold" stroke-width="2"/></svg>') center/contain no-repeat;
+            opacity: 0.6;
+        }
+        
+        /* 添加不同稀有度的边框动画 */
+        .showcase-normal-border {
+            border: 3px solid #ffffff;
+            animation: normal-border-pulse 2s infinite;
+        }
+        
+        .showcase-magic-border {
+            border: 3px solid #8888ff;
+            animation: magic-border-pulse 2s infinite;
+        }
+        
+        .showcase-rare-border {
+            border: 3px solid #ffff00;
+            animation: rare-border-pulse 1.5s infinite;
+        }
+        
+        .showcase-epic-border {
+            border: 3px solid #ff44ff;
+            animation: epic-border-pulse 1.2s infinite;
+        }
+        
+        .showcase-legendary-border {
+            border: 3px solid #ff8800;
+            animation: legendary-border-pulse 1s infinite;
+        }
+        
+        .showcase-divine-border {
+            border: 3px solid #ffcc00;
+            animation: divine-border-pulse 0.8s infinite;
+        }
+        
+        .showcase-ancient-border {
+            border: 3px solid #ff0000;
+            animation: ancient-border-pulse 0.5s infinite;
+        }
+        
+        /* 解锁机制样式 */
+        .unlock-mechanism {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        /* 添加圆形按钮按下时的样式 */
+        .circle.pressing {
+    background: radial-gradient(circle, #ff6b6b, #c0392b);
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.9);
+    transform: scale(0.95);
+    animation: rainbowPulse 0.8s infinite alternate, particleGlow 1.2s infinite;
+    position: relative;
+    overflow: visible;
+}
+/* 圆形按钮按下时的特效 */
+.circle.pressing {
+    background: radial-gradient(circle, #ff6b6b, #c0392b);
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.9);
+    transform: scale(0.95);
+    animation: rainbowPulse 0.8s infinite alternate, particleGlow 1.2s infinite;
+    position: relative;
+    overflow: visible;
+}
+
+/* 七彩变色动画 */
+@keyframes rainbowPulse {
+    0% { box-shadow: 0 0 15px #ff0000, 0 0 25px rgba(255, 0, 0, 0.7); }
+    14% { box-shadow: 0 0 20px #ff7f00, 0 0 30px rgba(255, 127, 0, 0.7); }
+    28% { box-shadow: 0 0 25px #ffff00, 0 0 35px rgba(255, 255, 0, 0.7); }
+    42% { box-shadow: 0 0 20px #80ff00, 0 0 30px rgba(128, 255, 0, 0.7); }
+    57% { box-shadow: 0 0 25px #00ffff, 0 0 35px rgba(0, 255, 255, 0.7); }
+    71% { box-shadow: 0 0 20px #0000ff, 0 0 30px rgba(0, 0, 255, 0.7); }
+    85% { box-shadow: 0 0 25px #4b0082, 0 0 35px rgba(75, 0, 130, 0.7); }
+    100% { box-shadow: 0 0 30px #9400d3, 0 0 40px rgba(148, 0, 211, 0.7); }
+}
+
+/* 粒子发光效果 */
+@keyframes particleGlow {
+    0%, 100% { 
+        opacity: 0.8;
+        transform: scale(0.95) rotate(0deg);
+    }
+    50% { 
+        opacity: 1;
+        transform: scale(1) rotate(180deg);
+    }
+}
+
+/* 粒子轨道效果 */
+.circle.pressing::before,
+.circle.pressing::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid transparent;
+    animation: particleOrbit 2s linear infinite;
+    box-sizing: border-box;
+}
+
+.circle.pressing::before {
+    border-top-color: #ff0000;
+    animation-delay: 0s;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+}
+
+.circle.pressing::after {
+    border-bottom-color: #00ffff;
+    animation-delay: -1s;
+    width: 140%;
+    height: 140%;
+    top: -20%;
+    left: -20%;
+}
+
+/* 粒子轨道动画 */
+@keyframes particleOrbit {
+    0% { 
+        transform: rotate(0deg) scale(1);
+        opacity: 0.7;
+    }
+    50% { 
+        transform: rotate(180deg) scale(1.2);
+        opacity: 1;
+    }
+    100% { 
+        transform: rotate(360deg) scale(1);
+        opacity: 0.7;
+    }
+}
+
+/* 小粒子效果 */
+.circle.pressing .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fff;
+    animation: particleFloat 1.5s infinite;
+    opacity: 0;
+}
+
+@keyframes particleFloat {
+    0% {
+        transform: translate(0, 0) scale(0);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: translate(
+            calc((Math.random() * 100 - 50) * 1px),
+            calc((Math.random() * 100 - 50) * 1px)
+        ) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* 多个粒子的位置和颜色 */
+.circle.pressing .particle:nth-child(1) { 
+    top: 20%; left: 20%; 
+    background: #ff0000; 
+    animation-delay: 0s; 
+    animation-duration: 2s; 
+}
+.circle.pressing .particle:nth-child(2) { 
+    top: 60%; left: 30%; 
+    background: #ff9900; 
+    animation-delay: 0.3s; 
+    animation-duration: 1.8s; 
+}
+.circle.pressing .particle:nth-child(3) { 
+    top: 40%; left: 70%; 
+    background: #ffff00; 
+    animation-delay: 0.6s; 
+    animation-duration: 2.2s; 
+}
+.circle.pressing .particle:nth-child(4) { 
+    top: 80%; left: 50%; 
+    background: #00ff00; 
+    animation-delay: 0.9s; 
+    animation-duration: 1.9s; 
+}
+.circle.pressing .particle:nth-child(5) { 
+    top: 30%; left: 40%; 
+    background: #00ffff; 
+    animation-delay: 1.2s; 
+    animation-duration: 2.1s; 
+}
+.circle.pressing .particle:nth-child(6) { 
+    top: 70%; left: 20%; 
+    background: #0000ff; 
+    animation-delay: 1.5s; 
+    animation-duration: 2.3s; 
+}
+        
+        .magic-circle {
+            width: 320px;
+            height: 280px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: url('https://i.imgur.com/d2uucTp.png') center/contain no-repeat,
+                        radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+            position: relative;
+            transition: background-image 0.5s ease-in-out;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+        }
+        
+        .circle {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #e74c3c, #c0392b);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.7);
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        
+        .circle:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.9);
+        }
+        
+        .unlock-progress {
+            width: 100%;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #e74c3c, #f39c12);
+            border-radius: 5px;
+            transition: width 0.1s linear;
+        }
+        
+        .progress-text {
+            font-size: 0.9rem;
+            color: #f1f1f1;
+        }
+        
+        /* 边框动画关键帧 */
+        @keyframes normal-border-pulse {
+            0% { box-shadow: 0 0 5px #ffffff; }
+            50% { box-shadow: 0 0 15px #ffffff; }
+            100% { box-shadow: 0 0 5px #ffffff; }
+        }
+        
+        @keyframes magic-border-pulse {
+            0% { box-shadow: 0 0 5px #8888ff; }
+            50% { box-shadow: 0 0 20px #8888ff; }
+            100% { box-shadow: 0 0 5px #8888ff; }
+        }
+        
+        @keyframes rare-border-pulse {
+            0% { box-shadow: 0 0 10px #ffff00; }
+            50% { box-shadow: 0 0 25px #ffff00; }
+            100% { box-shadow: 0 0 10px #ffff00; }
+        }
+        
+        @keyframes epic-border-pulse {
+            0% { box-shadow: 0 0 15px #ff44ff; }
+            50% { box-shadow: 0 0 30px #ff44ff; }
+            100% { box-shadow: 0 0 15px #ff44ff; }
+        }
+        
+        @keyframes legendary-border-pulse {
+            0% { box-shadow: 0 0 20px #ff8800; }
+            50% { box-shadow: 0 0 35px #ff8800; }
+            100% { box-shadow: 0 0 20px #ff8800; }
+        }
+        
+        @keyframes divine-border-pulse {
+            0% { box-shadow: 0 0 25px #ffcc00; }
+            50% { box-shadow: 0 0 40px #ffcc00; }
+            100% { box-shadow: 0 0 25px #ffcc00; }
+        }
+        
+        @keyframes ancient-border-pulse {
+            0% { 
+                border: 3px solid #ff0000;
+                box-shadow: 0 0 30px #ff0000; 
+            }
+            50% { 
+                border: 3px solid #ff5555;
+                box-shadow: 0 0 45px #ff0000, 0 0 55px rgba(255, 0, 0, 0.6); 
+            }
+            100% { 
+                border: 3px solid #ff0000;
+                box-shadow: 0 0 30px #ff0000; 
+            }
+        }
+        
+        .drawn-card {
+            position: relative;
+            perspective: 1000px;
+            cursor: pointer;
+            width: 100px;
+            height: 140px;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            font-size: 0.85rem;
+            animation: popIn 0.5s ease-out;
+            margin: 5px;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            transform: rotateY(0deg);
+        }
+        
+        /* 卡面样式 */
+        .card-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px;
+            text-align: center;
+            transform: rotateY(180deg);
+        }
+        
+        /* 翻转后的样式 */
+        .card-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        /* 添加卡片稀有度颜色样式 */
+        .card-normal {
+            background: linear-gradient(135deg, var(--rarity-normal), #d9d9d9);
+            color: #333;
+            border: 2px solid #ccc;
+        }
+        
+        .card-magic {
+            background: linear-gradient(135deg, var(--rarity-magic), #6b6bff);
+            color: white;
+            border: 2px solid var(--rarity-magic);
+            box-shadow: 0 0 10px rgba(136, 136, 255, 0.7);
+        }
+        
+        .card-rare {
+            background: linear-gradient(135deg, var(--rarity-rare), #d9d900);
+            color: #333;
+            border: 2px solid var(--rarity-rare);
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.9);
+            position: relative;
+            overflow: hidden;
+            animation: rareGlow 2s infinite alternate;
+        }
+        
+        .card-rare::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 0, 0.4), transparent);
+            transform: rotate(45deg);
+            animation: rareShine 2s infinite;
+        }
+        
+        @keyframes rareGlow {
+            0% { box-shadow: 0 0 20px rgba(255, 255, 0, 0.7); }
+            100% { box-shadow: 0 0 30px rgba(255, 255, 0, 0.9), 0 0 40px rgba(255, 255, 0, 0.6); }
+        }
+        
+        @keyframes rareShine {
+            0% { transform: rotate(45deg) translate(-30%, -30%); }
+            100% { transform: rotate(45deg) translate(30%, 30%); }
+        }
+        
+        /* 史诗卡 - 增强光效 */
+        .card-epic {
+            background: linear-gradient(135deg, var(--rarity-epic), #dd22dd);
+            color: white;
+            border: 2px solid var(--rarity-epic);
+            box-shadow: 0 0 25px rgba(255, 68, 255, 0.9);
+            position: relative;
+            overflow: hidden;
+            animation: epicGlow 1.5s infinite alternate;
+        }
+        
+        .card-epic::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, transparent 30%, rgba(255, 68, 255, 0.5) 100%);
+            animation: epicPulse 1.5s infinite alternate;
+        }
+        
+        @keyframes epicGlow {
+            0% { box-shadow: 0 0 25px rgba(255, 68, 255, 0.7); }
+            100% { box-shadow: 0 0 35px rgba(255, 68, 255, 0.9), 0 0 45px rgba(255, 68, 255, 0.6); }
+        }
+        
+        @keyframes epicPulse {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.8; }
+        }
+        
+        /* 传奇卡 - 增强光效 */
+        .card-legendary {
+            background: linear-gradient(135deg, var(--rarity-legendary), #dd6600);
+            color: white;
+            border: 2px solid var(--rarity-legendary);
+            box-shadow: 0 0 30px rgba(255, 136, 0, 0.9);
+            position: relative;
+            overflow: hidden;
+            animation: legendaryGlow 1.2s infinite alternate;
+        }
+        
+        .card-legendary::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background: conic-gradient(
+                transparent, 
+                rgba(255, 136, 0, 0.7), 
+                transparent, 
+                rgba(255, 136, 0, 0.5),
+                transparent
+            );
+            animation: legendaryRotate 3s linear infinite;
+        }
+        
+        @keyframes legendaryGlow {
+            0% { box-shadow: 0 0 30px rgba(255, 136, 0, 0.7); }
+            100% { box-shadow: 0 0 40px rgba(255, 136, 0, 0.9), 0 0 50px rgba(255, 136, 0, 0.6); }
+        }
+        
+        @keyframes legendaryRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 神圣卡 - 增强光效 */
+        .card-divine {
+            background: linear-gradient(135deg, var(--rarity-divine), #dd9900);
+            color: white;
+            border: 2px solid var(--rarity-divine);
+            box-shadow: 0 0 35px rgba(255, 204, 0, 0.9);
+            position: relative;
+            overflow: hidden;
+            animation: divineGlow 1s infinite alternate;
+        }
+        
+        .card-divine::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                circle at 30% 30%,
+                rgba(255, 255, 255, 0.6) 0%,
+                rgba(255, 204, 0, 0.4) 40%,
+                transparent 70%
+            );
+            animation: divineLight 3s infinite alternate;
+        }
+        
+        @keyframes divineGlow {
+            0% { box-shadow: 0 0 35px rgba(255, 204, 0, 0.7); }
+            100% { box-shadow: 0 0 45px rgba(255, 204, 0, 0.9), 0 0 55px rgba(255, 204, 0, 0.6); }
+        }
+        
+        @keyframes divineLight {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.8); opacity: 0.9; }
+        }
+        
+        /* 古代卡 - 增强光效 */
+        .card-ancient {
+            background: linear-gradient(135deg, var(--rarity-ancient), #dd0000);
+            color: white;
+            border: 2px solid var(--rarity-ancient);
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.9);
+            position: relative;
+            overflow: hidden;
+            animation: ancientGlow 0.8s infinite alternate;
+        }
+        
+        .card-ancient::before,
+        .card-ancient::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 0, 0, 0.5);
+            border-radius: 50%;
+            animation: ancientOrbit 4s linear infinite;
+        }
+        
+        .card-ancient::before {
+            width: 40px;
+            height: 40px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .card-ancient::after {
+            width: 30px;
+            height: 30px;
+            bottom: 15%;
+            right: 15%;
+            animation-delay: -2s;
+        }
+        
+        @keyframes ancientGlow {
+            0% { box-shadow: 0 0 40px rgba(255, 0, 0, 0.7); }
+            100% { box-shadow: 0 0 50px rgba(255, 0, 0, 0.9), 0 0 60px rgba(255, 0, 0, 0.6); }
+        }
+        
+        @keyframes ancientOrbit {
+            0% { 
+                transform: rotate(0deg) translateX(30px) rotate(0deg); 
+            }
+            100% { 
+                transform: rotate(360deg) translateX(30px) rotate(-360deg); 
+            }
+        }
+        
+        .card-rarity {
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin: 5px 0;
+            text-transform: uppercase;
+        }
+        
+        /* 抽卡机器区域 */
+        .card-machine {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .machine-display {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #ffd700;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .card-showcase {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .instruction-list {
+            text-align: left;
+            margin: 20px;
+            padding-left: 20px;
+        }
+        
+        .instruction-list li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .info-btn {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            color: white;
+        }
+        
+        .showcase-card {
+            width: 120px;
+            height: 160px;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            position: absolute;
+            left: -150px;
+            opacity: 0;
+            transition: all 1.5s ease-in-out;
+            transform-style: preserve-3d;
+        }
+        
+        .showcase-card.active {
+            opacity: 1;
+            left: 50%;
+            transform: translateX(-50%) rotateY(0deg);
+            animation: cardSpin 2s ease-in-out, cardPause 5s 2s forwards;
+        }
+        
+        @keyframes cardSpin {
+            0% { transform: translateX(-50%) rotateY(0deg); }
+            50% { transform: translateX(-50%) rotateY(360deg); }
+            100% { transform: translateX(-50%) rotateY(720deg); }
+        }
+        
+        @keyframes cardPause {
+            0% { transform: translateX(-50%) rotateY(720deg); }
+            100% { transform: translateX(-50%) rotateY(720deg); }
+        }
+        
+        .showcase-card.exiting {
+            left: calc(100% + 150px);
+            opacity: 0;
+            transform: translateX(-50%) rotateY(0deg);
+            transition: all 1.5s ease-in-out;
+        }
+        
+        .card-junk { 
+            background: #777; 
+            color: #ccc; 
+            border: 2px solid #555;    
+        }
+        
+        .card-junk::before {
+            content: none;
+        }
+        
+        .card-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .card-desc {
+            font-size: 0.7rem;
+            margin-top: 5px;
+        }
+        
+        .draw-result {
+            width: 100%;
+            min-height: 150px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 2px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .draw-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .draw-single {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .draw-multi {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+        
+        .probability-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .draw-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .draw-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 传送区域 */
+        .transfer-section {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .transfer-section h2 {
+            margin-bottom: 15px;
+            text-align: center;
+            color: #ffd700;
+        }
+        
+        .selected-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            min-height: 120px;
+            border: 1px dashed #3498db;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .player-info {
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #ffd700;
+        }
+        
+        .transfer-info {
+            background: rgba(52, 152, 219, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .transfer-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .transfer-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .confirm-transfer {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+        
+        .cancel-transfer {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .transfer-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* 概率模态框 */
+        .probability-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .probability-content {
+            background: rgba(43, 45, 66, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            color: #f1f1f1;
+            border: 2px solid rgba(142, 68, 173, 0.5);
+        }
+        
+        .probability-content h2 {
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+        
+        .probability-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .probability-table th, .probability-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .probability-table th {
+            color: #ffd700;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #e74c3c;
+        }
+        
+        /* 确认传送模态框 */
+        .confirm-transfer-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .confirm-transfer-content {
+            background: rgba(43, 45, 66, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            color: #f1f1f1;
+            border: 2px solid rgba(142, 68, 173, 0.5);
+        }
+        
+        .confirm-transfer-content h2 {
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+        
+        .transfer-cards-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            text-align: left;
+        }
+        
+        .transfer-player {
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 音效元素 - 从card1.html移植过来 -->
+    <audio id="button-sound" src="sounds/butt.mp3" preload="auto"></audio>
+    <!-- 普通按鈕點擊音效 - 用於所有功能按鈕 -->
+
+    <audio id="unlock-sound" src="sounds/magic-spell.mp3" preload="auto"></audio>
+    <!-- 解鎖魔法音效 - 用於圓形支付按鈕按下時 -->
+
+    <audio id="draw-sound" src="sounds/card-draw.mp3" preload="auto"></audio>
+    <!-- 抽卡完成音效 - 用於完成支付開始抽卡時 -->
+
+    <audio id="card-flip-sound" src="sounds/card-flip.mp3" preload="auto"></audio>
+    <!-- 基礎翻牌音效 - 所有卡牌翻開時都會播放 -->
+
+    <audio id="normal-card-sound" src="sounds/normal-card.mp3" preload="auto"></audio>
+    <!-- 普通卡音效 - 翻到普通卡時播放 -->
+
+    <audio id="magic-card-sound" src="sounds/magic-card.mp3" preload="auto"></audio>
+    <!-- 魔法卡音效 - 翻到魔法卡時播放 -->
+
+    <audio id="rare-card-sound" src="sounds/rare-card.mp3" preload="auto"></audio>
+    <!-- 稀有卡音效 - 翻到稀有卡時播放 -->
+
+    <audio id="epic-card-sound" src="sounds/epic-card.mp3" preload="auto"></audio>
+    <!-- 史詩卡音效 - 翻到史詩卡時播放 -->
+
+    <audio id="legendary-card-sound" src="sounds/legendary-card.mp3" preload="auto"></audio>
+    <!-- 傳說卡音效 - 翻到傳說卡時播放 -->
+
+    <audio id="divine-card-sound" src="sounds/divine-card.mp3" preload="auto"></audio>
+    <!-- 神聖卡音效 - 翻到神聖卡時播放 -->
+
+    <audio id="ancient-card-sound" src="sounds/ancient-card.mp3" preload="auto"></audio>
+    <!-- 古代卡音效 - 翻到古代卡時播放 -->
+    <audio id="instruction-voice" src="sounds/instruction-voice.mp3" preload="auto"></audio>
+    <!-- 語音說明音效 - 點擊抽卡說明按鈕時播放 -->
+
+    <!-- 登录页面 -->
+    <div class="login-container" id="login-container">
+        <h1 class="login-title">幽街抽卡系統</h1>
+        <p class="login-subtitle">燈昏巷靜 貨暖人閒 - 請先選擇玩家</p>
+        
+        <div class="player-selection">
+            <label for="player-select-login">選擇玩家：</label>
+            <select id="player-select-login" class="player-select">
+                <option value="">-- 請選擇玩家 --</option>
+                <!-- 玩家选项会通过JS动态添加 -->
+            </select>
+        </div>
+        
+        <button class="login-btn" id="login-btn" disabled>進入抽卡系統</button>
+    </div>
+    
+    <!-- 主抽卡系统 -->
+    <div class="container" id="main-container">
+        <header>
+            <h1>幽街抽卡系統</h1>
+            <p>燈昏巷靜 貨暖人閒 - 試試手氣吧！</p>
+            <div class="player-info" id="player-info">
+                <!-- 当前玩家信息会显示在这里 -->
+            </div>
+        </header>
+        
+        <div class="card-machine">
+            <div class="machine-display">
+                <div class="card-showcase">
+                    <!-- 展示的卡片会通过JS动态添加 -->
+                </div>
+            </div>
+            
+            <div class="draw-result" id="draw-result">
+                <!-- 抽出的卡片会显示在这里 -->
+            </div>
+            
+            <div class="button-group">
+                <button class="draw-btn draw-single" id="draw-single">6兩-1抽</button>
+                <button class="draw-btn draw-multi" id="draw-multi">50兩-10抽</button>
+                <button class="draw-btn probability-btn" id="probability-btn">機率說明</button>
+                <button class="draw-btn info-btn" id="info-btn">抽卡說明</button>
+            </div>
+        </div>
+        
+        <!-- 确认抽卡模态框 -->
+        <div class="probability-modal" id="draw-confirm-modal">
+            <div class="probability-content">
+                <span class="close-modal" id="close-draw-confirm">&times;</span>
+                <h2>確認支付</h2>
+                <p id="payment-info">正在支付 <span id="payment-amount">0</span> 兩銀子，抽取 <span id="draw-count">0</span> 次</p>
+                
+                <div class="unlock-mechanism">
+                    <div class="magic-circle">
+                        <div class="circle" id="unlock-circle"></div>
+                    </div>
+                    <div class="unlock-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="progress-text">按住圓圈五秒即可解鎖</div>
+                    </div>
+                </div>
+                
+                <div class="transfer-actions">
+                    <button class="transfer-btn cancel-transfer" id="cancel-draw-btn">取消支付</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 抽卡说明模态框 -->
+        <div class="probability-modal" id="info-modal">
+            <div class="probability-content">
+                <span class="close-modal" id="close-info">&times;</span>
+                <h2>抽卡使用說明</h2>
+                
+                <ul class="instruction-list">
+                    <li>歡迎來到 幽街商人 - 神秘商人抽卡系統</li>
+                    <li>先付款，後抽卡，六銀兩抽一次 五十兩抽十次</li>
+                    <li>抽到的卡片會顯示在中間區域，可以拖拽到下方傳送區域</li>
+                    <li>傳送後，卡片會回到目標玩家的卡片庫</li>
+                    <li>沒有移動的卡片，卡片會被洗走，無法再被移動</li>
+                    <li>每一次啟動傳送卡片只能帶走一種卡片，如果同時出現兩張，卡片會被蓋上</li>
+                    <li>每頁面僅限傳送2次，用完後無法再啟用傳送卡片</li>
+                    <li>每次傳送完畢，請回到主系統按重新整理按鈕收取卡片</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="transfer-section">
+            <h2>卡片傳送區</h2>
+            
+            <div class="selected-cards" id="selected-cards">
+                <!-- 选中的卡片会显示在这里 -->
+                <p id="no-cards-message">暫無選中的卡片</p>
+            </div>
+            
+            <div class="transfer-info">
+                傳送機會: <span id="transfer-chances">2</span> 次
+            </div>
+            
+            <div class="transfer-actions">
+                <button class="transfer-btn confirm-transfer" id="transfer-btn" disabled>傳送卡片</button>
+                <button class="transfer-btn cancel-transfer" id="clear-btn">清空選擇</button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 幽街商人- 支線網頁 -抽卡系統 - 每次僅限傳送2次</p>
+        </footer>
+    </div>
+    
+    <!-- 概率说明模态框 -->
+    <div class="probability-modal" id="probability-modal">
+        <div class="probability-content">
+            <span class="close-modal" id="close-probability">&times;</span>
+            <h2>抽卡機率說明</h2>
+            
+            <table class="probability-table">
+                <thead>
+                    <tr>
+                        <th>稀有度</th>
+                        <th>機率</th>
+                        <th>說明</th>
+                    </tr>
+                </thead>
+                <tbody id="probability-table-body">
+                    <!-- 概率数据会通过JS动态添加 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- 确认传送模态框 -->
+    <div class="confirm-transfer-modal" id="confirm-transfer-modal">
+        <div class="confirm-transfer-content">
+            <span class="close-modal" id="close-confirm">&times;</span>
+            <h2>確認傳送</h2>
+            
+            <p>確定傳送以下卡片：</p>
+            
+            <div class="transfer-cards-list" id="confirm-cards-list">
+                <!-- 确认传送的卡片列表会通过JS动态添加 -->
+            </div>
+            
+            <div class="transfer-actions">
+                <button class="transfer-btn confirm-transfer" id="final-confirm-btn">確定傳送</button>
+                <button class="transfer-btn cancel-transfer" id="cancel-transfer-btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+	
+	
+        document.addEventListener('DOMContentLoaded', function() {
+            // 卡片库定义
+            const cardLibrary = [
+                // 普通卡
+                { id: 1, name: "雙倍交易", cost: 1, description: "下次賣貨雙倍收益", effect: "doubleNextTrade", rarity: "normal" },
+                { id: 2, name: "小額借貸", cost: 1, description: "得100兩，5回各還20兩", effect: "smallLoan", rarity: "normal" },
+                { id: 3, name: "幸運獎金", cost: 1, description: "獲下次彩券號碼獎金", effect: "luckyDice", rarity: "normal" },
+                { id: 4, name: "快速交易", cost: 1, description: "交易成功按鈕互動一次", effect: "quickTrade", rarity: "normal" },
+                
+                // 魔法卡
+                { id: 5, name: "市場洞察", cost: 2, description: "從棄牌堆選一張回手", effect: "peekNextEvent", rarity: "magic" },
+                { id: 6, name: "中度防護", cost: 2, description: "抵銷負面事件+交易互動", effect: "reduceNextNegative", rarity: "magic" },
+                { id: 7, name: "貨物保險", cost: 2, description: "防貨物損失+抽一張回手", effect: "cargoInsurance", rarity: "magic" },
+                { id: 8, name: "價格預測", cost: 2, description: "預知價格波動選貨物卡", effect: "pricePrediction", rarity: "magic" },
+                
+                // 稀有卡
+                { id: 9, name: "財富竊取", cost: 4, description: "竊取50兩+交易互動", effect: "stealWealth", rarity: "rare" },
+                { id: 10, name: "幸運日", cost: 3, description: "立即獲得50兩", effect: "instantWealth", rarity: "rare" },
+                { id: 11, name: "貿易壟斷", cost: 3, description: "抽兩張貨物卡回手", effect: "tradeMonopoly", rarity: "rare" },
+                { id: 12, name: "商隊護衛", cost: 3, description: "防止搶劫或攻擊事件", effect: "caravanGuard", rarity: "rare" },
+                
+                // 史诗卡
+                { id: 13, name: "貿易保護", cost: 3, description: "免疫下一次負面事件", effect: "immuneNextNegative", rarity: "epic" },
+                { id: 14, name: "精準投資", cost: 3, description: "下三次交易+10兩", effect: "investmentBonus", rarity: "epic" },
+                { id: 15, name: "彩票預測", cost: 3, description: "連續按三次交易成功", effect: "predictLottery", rarity: "epic" },
+                { id: 16, name: "市場操控", cost: 3, description: "抽五張卡到手牌", effect: "marketManipulation", rarity: "epic" },
+                
+                // 传奇卡
+                { id: 17, name: "強制交易", cost: 5, description: "強制對手提交50兩/牌", effect: "forceTrade", rarity: "legendary" },
+                { id: 18, name: "自己操控", cost: 5, description: "抽五張卡到手牌", effect: "controlEvent", rarity: "legendary" },
+                { id: 19, name: "時間回溯", cost: 5, description: "棄牌堆取3張回手", effect: "timeReverse", rarity: "legendary" },
+                { id: 20, name: "財富轉移", cost: 5, description: "從對手取三個貨物", effect: "wealthTransfer", rarity: "legendary" },
+                
+                // 神圣卡
+                { id: 21, name: "商人祝福", cost: 8, description: "十次交易成功互動", effect: "permanentBonus", rarity: "divine" },
+                { id: 22, name: "點石成金", cost: 8, description: "貨物轉150兩", effect: "alchemy", rarity: "divine" },
+                { id: 23, name: "商會特權", cost: 8, description: "三回合多三個行動點", effect: "taxExemption", rarity: "divine" },
+                { id: 24, name: "沙漠之舟", cost: 8, description: "免疫環境負面事件", effect: "desertShip", rarity: "divine" },
+                { id: 25, name: "天空之眼", cost: 8, description: "無貨物賣出得五倍銀兩", effect: "skyEye", rarity: "divine" },
+                
+                // 古代卡/神话卡
+                { id: 201, name: "牛神護法", cost: 6, description: "金角牛神攻擊對手", effect: "bullGuardian", rarity: "ancient" },
+                { id: 202, name: "白虎護法", cost: 6, description: "白虎護法電弧攻擊", effect: "tigerGuardian", rarity: "ancient" },
+                { id: 203, name: "青龍護法", cost: 6, description: "青龍巨軀雷霆攻擊", effect: "dragonGuardian", rarity: "ancient" },
+                { id: 204, name: "朱雀護法", cost: 6, description: "朱雀火翼焦土攻擊", effect: "phoenixGuardian", rarity: "ancient" },
+                { id: 205, name: "玄武護法", cost: 6, description: "玄武龜甲水霧攻擊", effect: "turtleGuardian", rarity: "ancient" },
+                
+                // 废品卡
+                { id: 999, name: "廢品卡", cost: 0, description: "毫無用處的廢品卡或許可以出售給某些人..", effect: "none", rarity: "junk" }
+            ];
+			
+			// 在文件开头的状态变量部分添加魔法阵图片数组
+const circleBackgrounds = [
+    'https://i.imgur.com/d2uucTp.png',
+    'https://i.imgur.com/G1FeWJJ.png',
+    'https://i.imgur.com/Gn25Afn.png',
+    'https://i.imgur.com/GY1eJSm.png'
+];
+
+            // 概率配置
+            const probabilityRates = {
+                "normal": 60,
+                "magic": 13,
+                "rare": 10,
+                "epic": 8,
+                "legendary": 5,
+                "divine": 1.5,
+                "ancient": 2.5
+            };
+            
+            // 状态变量
+            let drawnCards = [];
+            let selectedCards = [];
+            let transferChances = 2;
+            let players = [];
+            let currentPlayer = null;
+            let drawType = '';
+            let unlockProgress = 0;
+            let unlockInterval = null;
+            let currentUnlockSound = null;
+            
+            // DOM 元素
+            const loginContainerEl = document.getElementById('login-container');
+            const mainContainerEl = document.getElementById('main-container');
+            const playerSelectLoginEl = document.getElementById('player-select-login');
+            const loginBtnEl = document.getElementById('login-btn');
+            const playerInfoEl = document.getElementById('player-info');
+            const drawResultEl = document.getElementById('draw-result');
+            const selectedCardsEl = document.getElementById('selected-cards');
+            const noCardsMessageEl = document.getElementById('no-cards-message');
+            const transferChancesEl = document.getElementById('transfer-chances');
+            const transferBtnEl = document.getElementById('transfer-btn');
+            const clearBtnEl = document.getElementById('clear-btn');
+            const drawSingleBtnEl = document.getElementById('draw-single');
+            const drawMultiBtnEl = document.getElementById('draw-multi');
+            const probabilityBtnEl = document.getElementById('probability-btn');
+            const infoBtnEl = document.getElementById('info-btn');
+            const probabilityModalEl = document.getElementById('probability-modal');
+            const closeProbabilityEl = document.getElementById('close-probability');
+            const probabilityTableBodyEl = document.getElementById('probability-table-body');
+            const infoModalEl = document.getElementById('info-modal');
+            const closeInfoEl = document.getElementById('close-info');
+            const confirmTransferModalEl = document.getElementById('confirm-transfer-modal');
+            const closeConfirmEl = document.getElementById('close-confirm');
+            const confirmCardsListEl = document.getElementById('confirm-cards-list');
+            const finalConfirmBtnEl = document.getElementById('final-confirm-btn');
+            const cancelTransferBtnEl = document.getElementById('cancel-transfer-btn');
+            const unlockCircleEl = document.getElementById('unlock-circle');
+            const progressFillEl = document.getElementById('progress-fill');
+            const drawConfirmModalEl = document.getElementById('draw-confirm-modal');
+            const closeDrawConfirmEl = document.getElementById('close-draw-confirm');
+            const cancelDrawBtnEl = document.getElementById('cancel-draw-btn');
+            const paymentAmountEl = document.getElementById('payment-amount');
+            const drawCountEl = document.getElementById('draw-count');
+            const paymentInfoEl = document.getElementById('payment-info');
+            
+            // 音效播放函数 - 从card1.html移植过来
+            function playSound(soundId) {
+                const sound = document.getElementById(soundId);
+                if (sound) {
+                    sound.currentTime = 0;
+                    sound.play().catch(e => console.log("Audio play failed:", e));
+                }
+            }
+            
+			
+			 // 设置随机魔法阵背景
+    setRandomCircleBackground();
+            // 修改后：
+			
+           function init() {
+    // 从localStorage获取玩家数据
+    try {
+        const mainPagePlayers = localStorage.getItem('players');
+        if (mainPagePlayers) {
+            players = JSON.parse(mainPagePlayers);
+        } else {
+            players = [
+                { id: 1, name: "玩家一", cards: [], silver: 1000 },
+                { id: 2, name: "玩家二", cards: [], silver: 1000 },
+                { id: 3, name: "玩家三", cards: [], silver: 1000 },
+                { id: 4, name: "玩家四", cards: [], silver: 1000 }
+            ];
+        }
+    } catch (e) {
+        players = [
+            { id: 1, name: "玩家一", cards: [], silver: 1000 },
+            { id: 2, name: "玩家二", cards: [], silver: 1000 },
+            { id: 3, name: "玩家三", cards: [], silver: 1000 },
+            { id: 4, name: "玩家四", cards: [], silver: 1000 }
+        ];
+    }
+    
+    populatePlayerSelect();
+    setupEventListeners();
+    initShowcaseCards();
+    setRandomCircleBackground();
+}
+            
+            // 填充玩家选择下拉框
+            function populatePlayerSelect() {
+                playerSelectLoginEl.innerHTML = '<option value="">-- 請選擇玩家 --</option>';
+                
+                players.forEach((player, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = player.name;
+                    playerSelectLoginEl.appendChild(option);
+                });
+            }
+            
+            // 设置事件监听器
+            function setupEventListeners() {
+                // 登录页面事件
+                playerSelectLoginEl.addEventListener('change', function() {
+                    loginBtnEl.disabled = this.value === '';
+                });
+                
+                loginBtnEl.addEventListener('click', function() {
+    const playerIndex = parseInt(playerSelectLoginEl.value);
+    if (!isNaN(playerIndex) && playerIndex >= 0 && playerIndex < players.length) {
+        currentPlayer = players[playerIndex]; // 直接使用，不用拷贝
+        loginContainerEl.style.display = 'none';
+        mainContainerEl.style.display = 'block';
+        playerInfoEl.textContent = `当前玩家: ${currentPlayer.name}`;
+    }
+});
+                
+                // 抽卡按钮 - 添加音效
+                drawSingleBtnEl.addEventListener('click', () => {
+                    playSound('button-sound');
+                    showDrawConfirm('single');
+                });
+                
+                drawMultiBtnEl.addEventListener('click', () => {
+                    playSound('button-sound');
+                    showDrawConfirm('multi');
+                });
+                
+                // 概率按钮 - 添加音效
+                probabilityBtnEl.addEventListener('click', () => {
+                    playSound('button-sound');
+                    showProbabilityModal();
+                });
+                
+                closeProbabilityEl.addEventListener('click', () => {
+                    probabilityModalEl.style.display = 'none';
+                });
+                
+                // 信息按钮 - 添加音效
+                infoBtnEl.addEventListener('click', () => {
+                    playSound('button-sound');
+                    
+                    // 停止可能正在播放的語音
+                    const voiceSound = document.getElementById('instruction-voice');
+                    if (voiceSound) {
+                        voiceSound.currentTime = 0;
+                        voiceSound.play().catch(e => console.log("Voice play failed:", e));
+                    }
+                    
+                    infoModalEl.style.display = 'flex';
+                });
+                
+                closeInfoEl.addEventListener('click', () => {
+                    infoModalEl.style.display = 'none';
+                });
+                
+                // 传送按钮 - 添加音效
+                transferBtnEl.addEventListener('click', () => {
+                    playSound('button-sound');
+                    showConfirmTransferModal();
+                });
+                
+                clearBtnEl.addEventListener('click', () => {
+                    playSound('button-sound');
+                    if (selectedCards.length === 0) {
+                        alert('暫無選中的卡片，無需清空');
+                        return;
+                    }
+                    
+                    if (confirm('確定要清空所有已選擇的卡片嗎？此操作無法復原！')) {
+                        clearSelectedCards();
+                    }
+                });
+                
+                // 抽卡确认模态框事件
+                closeDrawConfirmEl.addEventListener('click', cancelDraw);
+                cancelDrawBtnEl.addEventListener('click', cancelDraw);
+                
+                // 解锁机制事件 - 添加音效
+                unlockCircleEl.addEventListener('mousedown', (e) => {
+                    playSound('unlock-sound');
+                    startUnlock(e);
+                });
+                unlockCircleEl.addEventListener('touchstart', (e) => {
+                    playSound('unlock-sound');
+                    startUnlock(e);
+                });
+                unlockCircleEl.addEventListener('mouseup', stopUnlock);
+                unlockCircleEl.addEventListener('touchend', stopUnlock);
+                unlockCircleEl.addEventListener('mouseleave', stopUnlock);
+                
+                // 确认传送模态框事件
+                closeConfirmEl.addEventListener('click', () => {
+                    confirmTransferModalEl.style.display = 'none';
+                });
+                
+                cancelTransferBtnEl.addEventListener('click', () => {
+                    confirmTransferModalEl.style.display = 'none';
+                });
+                
+                finalConfirmBtnEl.addEventListener('click', confirmTransfer);
+                
+                // 点击模态框外部关闭功能
+                window.addEventListener('click', (e) => {
+                    if (e.target === probabilityModalEl) {
+                        probabilityModalEl.style.display = 'none';
+                    }
+                    if (e.target === confirmTransferModalEl) {
+                        confirmTransferModalEl.style.display = 'none';
+                    }
+                    if (e.target === drawConfirmModalEl) {
+                        drawConfirmModalEl.style.display = 'none';
+                        resetUnlock();
+                    }
+                    if (e.target === infoModalEl) {
+                        infoModalEl.style.display = 'none';
+                    }
+                });
+            }
+			
+			function setRandomCircleBackground() {
+    const randomIndex = Math.floor(Math.random() * circleBackgrounds.length);
+    const magicCircle = document.querySelector('.magic-circle');
+    
+    // 直接设置背景图片 - 修正语法
+    magicCircle.style.background = 
+        `url('${circleBackgrounds[randomIndex]}') center/contain no-repeat, 
+         radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%)`;
+}
+            
+            // 初始化展示卡片
+            function initShowcaseCards() {
+                const showcaseEl = document.querySelector('.card-showcase');
+                showcaseEl.innerHTML = '';
+                
+                // 只展示传奇级别以上的卡片
+                const showcaseCards = cardLibrary.filter(card => 
+                    card.rarity === 'legendary' || card.rarity === 'divine' || card.rarity === 'ancient'
+                );
+                
+                // 开始展示循环
+                startShowcaseLoop(showcaseCards);
+            }
+            
+            // 开始展示循环
+            function startShowcaseLoop(showcaseCards) {
+                const machineDisplay = document.querySelector('.machine-display');
+                
+                function showNextCard() {
+                    const showcaseEl = document.querySelector('.card-showcase');
+                    
+                    // 移除所有现有卡片
+                    const existingCards = showcaseEl.querySelectorAll('.showcase-card');
+                    existingCards.forEach(card => card.remove());
+                    
+                    // 随机选择一张卡片
+                    const randomIndex = Math.floor(Math.random() * showcaseCards.length);
+                    const card = showcaseCards[randomIndex];
+                    
+                    // 更新机器边框样式
+                    updateMachineBorder(card.rarity);
+                    
+                    // 创建新卡片
+                    const cardEl = document.createElement('div');
+                    cardEl.className = `showcase-card card-${card.rarity}`;
+                    cardEl.innerHTML = `
+                        <div class="card-name">${card.name}</div>
+                        <div class="card-rarity">${getRarityName(card.rarity)}</div>
+                        <div class="card-desc">${card.description}</div>
+                    `;
+                    
+                    showcaseEl.appendChild(cardEl);
+                    
+                    // 开始进入动画
+                    setTimeout(() => {
+                        cardEl.classList.add('active');
+                        
+                        // 卡片停留一段时间后退出
+                        setTimeout(() => {
+                            cardEl.classList.remove('active');
+                            cardEl.classList.add('exiting');
+                            
+                            // 退出完成后移除卡片并显示下一张
+                            setTimeout(() => {
+                                cardEl.remove();
+                                showNextCard();
+                            }, 1500);
+                        }, 7000);
+                    }, 100);
+                }
+                
+                // 更新机器边框的函数
+                function updateMachineBorder(rarity) {
+                    // 移除所有边框类
+                    machineDisplay.classList.remove(
+                        'showcase-normal-border',
+                        'showcase-magic-border',
+                        'showcase-rare-border',
+                        'showcase-epic-border',
+                        'showcase-legendary-border',
+                        'showcase-divine-border',
+                        'showcase-ancient-border'
+                    );
+                    
+                    // 添加对应的边框类
+                    machineDisplay.classList.add(`showcase-${rarity}-border`);
+                }
+                
+                // 开始循环
+                showNextCard();
+            }
+            
+            // 显示抽卡确认模态框
+            function showDrawConfirm(type) {
+                drawType = type;
+                const amount = type === 'single' ? 6 : 50;
+                const count = type === 'single' ? 1 : 10;
+                
+                paymentAmountEl.textContent = amount;
+                drawCountEl.textContent = count;
+                paymentInfoEl.textContent = `正在支付 ${amount} 兩銀子，抽取 ${count} 次`;
+                
+                // 重置解锁进度
+                resetUnlock();
+                
+                // 显示模态框
+                drawConfirmModalEl.style.display = 'flex';
+            }
+            
+            // 开始解锁
+// 修改开始解锁函数
+function startUnlock(e) {
+    e.preventDefault();
+    
+    // 防止多次触发
+    if (unlockInterval) return;
+    
+    // 添加按下效果
+    unlockCircleEl.classList.add('pressing');
+    
+    // 播放并保存音效引用
+    const unlockSound = document.getElementById('unlock-sound');
+    unlockSound.currentTime = 0;
+    unlockSound.play();
+    currentUnlockSound = unlockSound;
+    
+    // 添加粒子元素
+    for (let i = 1; i <= 6; i++) {
+        const particle = document.createElement('div');
+        particle.className = `particle`;
+        unlockCircleEl.appendChild(particle);
+    }
+    
+    unlockInterval = setInterval(() => {
+        unlockProgress += 1.67;
+        progressFillEl.style.width = `${unlockProgress}%`;
+        
+        if (unlockProgress >= 100) {
+            stopUnlock();
+            completeUnlock();
+        }
+    }, 100);
+}
+
+// 修改停止解锁函数
+function stopUnlock() {
+    // 移除按下效果
+    unlockCircleEl.classList.remove('pressing');
+    
+    // 停止音效
+    if (currentUnlockSound) {
+        currentUnlockSound.pause();
+        currentUnlockSound.currentTime = 0;
+        currentUnlockSound = null;
+    }
+    
+    // 移除所有粒子元素
+    const particles = unlockCircleEl.querySelectorAll('.particle');
+    particles.forEach(particle => particle.remove());
+    
+    if (unlockInterval) {
+        clearInterval(unlockInterval);
+        unlockInterval = null;
+        
+        // 如果未完成，重置进度
+        if (unlockProgress < 100) {
+            setTimeout(() => {
+                progressFillEl.style.width = '0%';
+                unlockProgress = 0;
+            }, 300);
+        }
+    }
+}
+
+// 完成解锁
+function completeUnlock() {
+    playSound('draw-sound');
+    // 执行抽卡
+    const count = drawType === 'single' ? 1 : 10;
+    drawCards(count);
+    
+    // 关闭模态框
+    drawConfirmModalEl.style.display = 'none';
+    
+    // 重置解锁状态
+    resetUnlock();
+}
+
+// 重置解锁
+function resetUnlock() {
+    stopUnlock();
+    unlockProgress = 0;
+    progressFillEl.style.width = '0%';
+}
+
+// 取消抽卡
+function cancelDraw() {
+    drawConfirmModalEl.style.display = 'none';
+    resetUnlock();
+}
+            
+            // 抽卡函数
+            function drawCards(count) {
+                drawnCards = [];
+                
+                for (let i = 0; i < count; i++) {
+                    const card = drawSingleCard();
+                    drawnCards.push(card);
+                }
+                
+                renderDrawnCards();
+            }
+            
+            // 单次抽卡
+            function drawSingleCard() {
+                const random = Math.random() * 100;
+                let accumulatedRate = 0;
+                let selectedRarity = '';
+                
+                // 根据概率选择稀有度
+                for (const [rarity, rate] of Object.entries(probabilityRates)) {
+                    accumulatedRate += rate;
+                    if (random <= accumulatedRate) {
+                        selectedRarity = rarity;
+                        break;
+                    }
+                }
+                
+                // 从选定稀有度的卡片中随机选择一张
+                let cardsOfRarity = cardLibrary.filter(card => card.rarity === selectedRarity);
+                
+                // 如果是普通卡，有50%概率变为废品卡
+                if (selectedRarity === "normal" && Math.random() < 0.5) {
+                    cardsOfRarity = cardLibrary.filter(card => card.rarity === "junk");
+                }
+                
+                const randomIndex = Math.floor(Math.random() * cardsOfRarity.length);
+                
+                return cardsOfRarity[randomIndex];
+            }
+            
+            // 渲染抽出的卡片 - 添加音效
+            function renderDrawnCards() {
+                drawResultEl.innerHTML = '';
+                
+                if (drawnCards.length === 0) {
+                    drawResultEl.innerHTML = '<p>暫無抽出的卡片</p>';
+                    return;
+                }
+                
+                drawnCards.forEach(card => {
+                    const cardEl = document.createElement('div');
+                    cardEl.className = `drawn-card`;
+                    cardEl.dataset.id = card.id;
+                    cardEl.dataset.revealed = "false";
+                    
+                    // 创建卡片内部结构
+                    cardEl.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-back"></div>
+                            <div class="card-front card-${card.rarity}">
+                                <div class="card-name">${card.name}</div>
+                                <div class="card-rarity">${getRarityName(card.rarity)}</div>
+                                <div class="card-desc">${card.description}</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 添加點擊事件處理 - 添加音效
+                    cardEl.addEventListener('click', function() {
+                        const isRevealed = this.dataset.revealed === "true";
+                        
+                        if (!isRevealed) {
+                            // 第一次點擊，翻轉卡片（顯示內容）
+                            this.classList.add('card-flipped');
+                            this.dataset.revealed = "true";
+                            
+                            // 播放翻卡音效
+                            playSound('card-flip-sound');
+                            
+                            // 根據稀有度播放不同音效
+                            setTimeout(() => {
+                                switch(card.rarity) {
+                                    case 'ancient':
+                                        playSound('ancient-card-sound');
+                                        break;
+                                    case 'divine':
+                                        playSound('divine-card-sound');
+                                        break;
+                                    case 'legendary':
+                                        playSound('legendary-card-sound');
+                                        break;
+                                    case 'epic':
+                                        playSound('epic-card-sound');
+                                        break;
+                                    case 'rare':
+                                        playSound('rare-card-sound');
+                                        break;
+                                    case 'magic':
+                                        playSound('magic-card-sound');
+                                        break;
+                                    case 'normal':
+                                        playSound('normal-card-sound');
+                                        break;
+                                    case 'junk':
+                                        // 廢品卡不需要特殊音效
+                                        break;
+                                }
+                            }, 300);
+                        } else {
+                            // 第二次點擊，選擇卡片
+                            playSound('button-sound');
+                            toggleCardSelection(card);
+                        }
+                    });
+                    
+                    drawResultEl.appendChild(cardEl);
+                });
+            }
+            
+            // 切换卡片选择状态
+            function toggleCardSelection(card) {
+                const index = selectedCards.findIndex(c => c.id === card.id);
+                
+                if (index === -1) {
+                    // 添加卡片到选择列表
+                    selectedCards.push(card);
+                    
+                    // 创建选择的卡片元素
+                    const selectedCardEl = document.createElement('div');
+                    selectedCardEl.className = `drawn-card card-${card.rarity}`;
+                    selectedCardEl.dataset.id = card.id;
+                    selectedCardEl.innerHTML = `
+                        <div class="card-name">${card.name}</div>
+                    `;
+                    
+                    // 添加点击取消选择功能
+                    selectedCardEl.addEventListener('click', () => {
+                        selectedCards = selectedCards.filter(c => c.id !== card.id);
+                        selectedCardEl.remove();
+                        updateSelectedCardsDisplay();
+                        updateTransferButtonState();
+                    });
+                    
+                    selectedCardsEl.appendChild(selectedCardEl);
+                    noCardsMessageEl.style.display = 'none';
+                } else {
+                    // 从选择列表中移除卡片
+                    selectedCards.splice(index, 1);
+                    const cardEl = selectedCardsEl.querySelector(`[data-id="${card.id}"]`);
+                    if (cardEl) {
+                        cardEl.remove();
+                    }
+                }
+                
+                updateSelectedCardsDisplay();
+                updateTransferButtonState();
+            }
+            
+            // 更新已选择卡片的显示
+            function updateSelectedCardsDisplay() {
+                if (selectedCards.length === 0) {
+                    noCardsMessageEl.style.display = 'block';
+                } else {
+                    noCardsMessageEl.style.display = 'none';
+                }
+            }
+            
+            // 清空已选择的卡片
+            function clearSelectedCards() {
+                selectedCards = [];
+                selectedCardsEl.innerHTML = '';
+                noCardsMessageEl.style.display = 'block';
+                updateTransferButtonState();
+            }
+            
+            // 更新传送按钮状态
+            function updateTransferButtonState() {
+                const hasSelectedCards = selectedCards.length > 0;
+                const hasTransferChances = transferChances > 0;
+                
+                transferBtnEl.disabled = !(hasSelectedCards && hasTransferChances);
+            }
+            
+            // 更新传送次数显示
+            function updateTransferChances() {
+                transferChancesEl.textContent = transferChances;
+            }
+            
+            // 显示概率模态框
+            function showProbabilityModal() {
+                probabilityTableBodyEl.innerHTML = '';
+                
+                for (const [rarity, rate] of Object.entries(probabilityRates)) {
+                    const row = document.createElement('tr');
+                    
+                    const rarityCell = document.createElement('td');
+                    rarityCell.textContent = getRarityName(rarity);
+                    rarityCell.style.color = getRarityColor(rarity);
+                    
+                    const rateCell = document.createElement('td');
+                    rateCell.textContent = `${rate}%`;
+                    
+                    const descCell = document.createElement('td');
+                    descCell.textContent = getRarityDescription(rarity);
+                    
+                    row.appendChild(rarityCell);
+                    row.appendChild(rateCell);
+                    row.appendChild(descCell);
+                    
+                    probabilityTableBodyEl.appendChild(row);
+                }
+                
+                probabilityModalEl.style.display = 'flex';
+            }
+            
+            // 显示确认传送模态框
+            function showConfirmTransferModal() {
+                confirmCardsListEl.innerHTML = '';
+                selectedCards.forEach(card => {
+                    const cardItem = document.createElement('div');
+                    cardItem.className = `card-item card-${card.rarity}`;
+                    cardItem.textContent = card.name;
+                    confirmCardsListEl.appendChild(cardItem);
+                });
+                
+                confirmTransferModalEl.style.display = 'flex';
+            }
+            
+           // 确认传送 - 简单版本
+function confirmTransfer() {
+    // 保存卡片数量用于显示消息
+    const cardsCount = selectedCards.length;
+    
+    // 直接给当前登录玩家添加卡片
+    if (!currentPlayer.cards) {
+        currentPlayer.cards = [];
+    }
+    
+    // 添加卡片
+    selectedCards.forEach(card => {
+        currentPlayer.cards.push(card);
+    });
+    
+    // 保存到localStorage
+    try {
+        localStorage.setItem('players', JSON.stringify(players));
+    } catch (e) {
+        alert('保存卡片失败，请重试！');
+        return;
+    }
+    
+    // 后续逻辑保持不变...
+    transferChances--;
+    updateTransferChances();
+    
+    // 移除已选择的卡片
+    selectedCards.forEach(card => {
+        const index = drawnCards.findIndex(c => c.id === card.id);
+        if (index !== -1) {
+            drawnCards.splice(index, 1);
+        }
+        const cardElement = drawResultEl.querySelector(`[data-id="${card.id}"]`);
+        if (cardElement) {
+            cardElement.remove();
+        }
+    });
+    
+    if (drawnCards.length === 0) {
+        drawResultEl.innerHTML = '<p>暫無抽出的卡片</p>';
+    }
+    
+    selectedCards = [];
+    selectedCardsEl.innerHTML = '';
+    noCardsMessageEl.style.display = 'block';
+    confirmTransferModalEl.style.display = 'none';
+    
+    alert(`成功傳送 ${cardsCount} 張卡片給 ${currentPlayer.name}！`);
+    updateTransferButtonState();
+    
+    if (transferChances <= 0) {
+        transferBtnEl.disabled = true;
+    }
+}
+            
+            // 获取稀有度名称
+            function getRarityName(rarity) {
+                const names = {
+                    'normal': '普通',
+                    'magic': '魔法',
+                    'rare': '稀有',
+                    'epic': '史诗',
+                    'legendary': '傳奇',
+                    'divine': '神聖',
+                    'ancient': '古代',
+                    'junk': '废品'
+                };
+                
+                return names[rarity] || rarity;
+            }
+            
+            // 获取稀有度颜色
+            function getRarityColor(rarity) {
+                const colors = {
+                    'normal': '#ffffff',
+                    'magic': '#8888ff',
+                    'rare': '#ffff00',
+                    'epic': '#ff44ff',
+                    'legendary': '#ff8800',
+                    'divine': '#ffcc00',
+                    'ancient': '#ff0000',
+                    'junk': '#777777'
+                };
+                
+                return colors[rarity] || '#ffffff';
+            }
+            
+            // 获取稀有度描述
+            function getRarityDescription(rarity) {
+                const descriptions = {
+                    'normal': '基礎卡片，效果一般',
+                    'magic': '具有魔法效果的卡片',
+                    'rare': '較為稀有的強力卡片',
+                    'epic': '史詩级别的强大卡片',
+                    'legendary': '傳說级别的珍貴卡片',
+                    'divine': '神聖级别的超凡卡片',
+                    'ancient': '古代神话級别的頂級卡片',
+                    'junk': '毫无用处的废品卡片'
+                };
+                
+                return descriptions[rarity] || '';
+            }
+            
+            // 初始化应用
+            init();
+        });
+    </script>
+</body>
+</html>
