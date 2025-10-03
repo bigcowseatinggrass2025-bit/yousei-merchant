@@ -708,73 +708,101 @@
 </div>
 
     <script>
-	    // Supabase配置 - 使用新的API密钥格式
-const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
+	   // Supabase配置
+    const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// 初始化Supabase客户端
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // 全局数据
+    // 全局数据（只声明一次！）
     let playerData = [];
-    let rankings = {
+    let rankings = JSON.parse(localStorage.getItem('youseiHallOfFame')) || {
         wealth: [],
         trades: [],
         luck: [],
         time: [],
         streak: []
     };
-        // 全局数据
-        let playerData = [];
-        let rankings = JSON.parse(localStorage.getItem('youseiHallOfFame')) || {
-            wealth: [],
-            trades: [],
-            luck: [],
-            time: []
-        };
-// 初始化
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM加载完成，开始初始化...');
-    
-    // 确保游戏记录正确加载
-    gameRecords = JSON.parse(localStorage.getItem('youseiGameRecords')) || [];
-    console.log('加载的游戏记录数量:', gameRecords.length);
-    
-    loadPlayerData();
-    updateAllRankings();
-    setupEventListeners();
-    updateMarqueeWithTopPlayers();
-    updateRecordsTable(); // 确保表格更新
-});
-        function loadPlayerData() {
-    try {
-        // 直接从本地存储读取玩家数据
-        const savedPlayers = JSON.parse(localStorage.getItem('players')) || [];
-        
-        // 只要有玩家就显示输入表单
-        if (savedPlayers.length > 0) {
-            playerData = savedPlayers.map(player => ({
-    name: player.name,
-    wealth: player.wealth || 0,
-    tradeCount: player.trades || 0,
-    lotteryWins: player.wins || 0,
-    spiritStones: getSpiritStonesFromAuctionData(player.name) || 0,  // 改函数名
-    color: player.color,
-    startTime: new Date().toLocaleString('zh-TW'),
-    gameDuration: getGameDurationFromStorage(),  // 从存储读取时长
-    silver: 0
-}));
+    let gameRecords = JSON.parse(localStorage.getItem('youseiGameRecords')) || [];
+    let currentPage = 1;
+    const recordsPerPage = 10;
+
+    // 测试数据库连接函数
+    async function testSupabaseConnection() {
+        try {
+            console.log('🔗 测试Supabase连接...');
+            console.log('Supabase URL:', SUPABASE_URL);
             
-            showInputSection();
-            return;
+            // 测试插入一条数据
+            const { data, error } = await supabase
+                .from('game_records')
+                .insert({
+                    game_date: new Date().toISOString(),
+                    duration: '连接测试'
+                })
+                .select();
+                
+            if (error) {
+                console.error('❌ 数据库连接失败:', error);
+                console.error('错误详情:', error.message);
+                return false;
+            }
+            
+            console.log('✅ 数据库连接成功! 测试数据:', data);
+            return true;
+        } catch (error) {
+            console.error('❌ 连接异常:', error);
+            return false;
         }
-    } catch (e) {
-        console.log('數據讀取失敗:', e);
     }
-    
-    document.getElementById('input-section').style.display = 'none';
-    updateMarqueeWithTopPlayers();
-}
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('DOM加载完成，开始初始化...');
+        
+        // 测试数据库连接
+        await testSupabaseConnection();
+        
+        // 确保游戏记录正确加载
+        gameRecords = JSON.parse(localStorage.getItem('youseiGameRecords')) || [];
+        console.log('加载的游戏记录数量:', gameRecords.length);
+        
+        loadPlayerData();
+        updateAllRankings();
+        setupEventListeners();
+        updateMarqueeWithTopPlayers();
+        updateRecordsTable();
+    });
+
+    // 其余的函数保持不变...
+    function loadPlayerData() {
+        try {
+            // 直接从本地存储读取玩家数据
+            const savedPlayers = JSON.parse(localStorage.getItem('players')) || [];
+            
+            // 只要有玩家就显示输入表单
+            if (savedPlayers.length > 0) {
+                playerData = savedPlayers.map(player => ({
+                    name: player.name,
+                    wealth: player.wealth || 0,
+                    tradeCount: player.trades || 0,
+                    lotteryWins: player.wins || 0,
+                    spiritStones: getSpiritStonesFromAuctionData(player.name) || 0,
+                    color: player.color,
+                    startTime: new Date().toLocaleString('zh-TW'),
+                    gameDuration: getGameDurationFromStorage(),
+                    silver: 0
+                }));
+                
+                showInputSection();
+                return;
+            }
+        } catch (e) {
+            console.log('數據讀取失敗:', e);
+        }
+        
+        document.getElementById('input-section').style.display = 'none';
+        updateMarqueeWithTopPlayers();
+    }
 
 
 // 背景图片数组 - 使用高质量的奇幻风格图片URL
@@ -1326,4 +1354,5 @@ document.addEventListener('click', function(e) {
         }
     </script>
 </body>
+
 </html>
