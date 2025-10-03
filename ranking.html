@@ -1192,9 +1192,7 @@ function calculateWinStreaks() {
 }
 		
 		
-		// 游戏记录数据
-
-
+// 游戏记录数据
 let isSaving = false; // 在全局变量区域添加这个
 
 async function saveGameRecord() {
@@ -1247,9 +1245,11 @@ async function saveGameRecord() {
     } finally {
         isSaving = false; // 释放锁
     }
-}
+}  // ← 这里结束，不要多一个括号！
+
 // 找出胜出者
 function findWinner(players) {
+    if (!players || players.length === 0) return null; // 添加空数组检查
     return players.reduce((prev, current) => 
         (prev.silver || 0) > (current.silver || 0) ? prev : current
     ).name;
@@ -1502,6 +1502,7 @@ document.addEventListener('click', function(e) {
 </body>
 
 </html>
+
 
 
 
