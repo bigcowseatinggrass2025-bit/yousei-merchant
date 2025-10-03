@@ -948,17 +948,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // 从数据库加载数据
     console.log('🔄 从数据库加载数据...');
-    const dbRankings = await db.loadLeaderboards();
-    if (dbRankings) {
-        rankings = dbRankings;
-        console.log('✅ 排行榜数据已从数据库加载');
-    }
-    
-    const dbRecords = await db.loadGameRecords();
-    if (dbRecords && dbRecords.length > 0) {
-        gameRecords = dbRecords;
-        console.log('✅ 游戏记录已从数据库加载');
-    }
+   const dbRecords = await db.loadGameRecords();
+if (dbRecords && dbRecords.length > 0) {
+    gameRecords = dbRecords;
+    console.log('✅ 游戏记录已从数据库加载:', gameRecords.length);
+    // 更新本地存储
+    localStorage.setItem('youseiGameRecords', JSON.stringify(gameRecords));
+} else {
+    // 如果没有数据库数据，才用本地存储
+    gameRecords = JSON.parse(localStorage.getItem('youseiGameRecords')) || [];
+    console.log('💾 从本地存储加载游戏记录:', gameRecords.length);
+}
     
     loadPlayerData();
     updateAllRankings();
@@ -1486,6 +1486,7 @@ document.addEventListener('click', function(e) {
 </body>
 
 </html>
+
 
 
 
