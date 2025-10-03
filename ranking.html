@@ -1196,6 +1196,7 @@ function calculateWinStreaks() {
 
 
 async function saveGameRecord() {
+	console.log('🔄 saveGameRecord被调用，调用栈:', new Error().stack);
     const record = {
         id: Date.now(),
         timestamp: new Date().toLocaleString('zh-TW'),
@@ -1486,6 +1487,7 @@ document.addEventListener('click', function(e) {
 </body>
 
 </html>
+
 
 
 
