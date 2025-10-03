@@ -579,21 +579,10 @@
 .background-btn:hover {
     background: rgba(255, 215, 0, 0.3);
 }
-    </style>
+</style>
 </head>
 <body>
     <div class="container">
-	<!-- 自定义背景控制 -->
-<div class="background-controls">
-    <div>
-        <button class="background-btn" onclick="toggleBackgroundPanel()">🎨 背景设置</button>
-        <div class="background-section" id="background-panel" style="display: none;">
-            <div class="backgrounds-grid" id="backgrounds-grid">
-                <!-- 背景预览图将通过JavaScript动态生成 -->
-            </div>
-        </div>
-    </div>
-</div>
         <!-- 顶部横幅 -->
         <div class="banner">
             <h1>🏆 幽街商人榮譽殿堂 🏆</h1>
@@ -954,6 +943,8 @@ const db = {
 // 初始化
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM加载完成，开始初始化...');
+	 // 设置随机图片背景
+    setRandomBackground();
     
     // 从数据库加载数据
     console.log('🔄 从数据库加载数据...');
@@ -1008,91 +999,33 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
 
-// 背景图片数组 - 使用高质量的奇幻风格图片URL
-const backgrounds = [
-    {
-        name: '神秘星空',
-        url: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&w=1200'
-    },
-    {
-        name: '魔法森林',
-        url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&w=1200'
-    },
-    {
-        name: '古代神殿',
-        url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&w=1200'
-    },
-    {
-        name: '龙之峡谷',
-        url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&w=1200'
-    },
-    {
-        name: '月光城堡',
-        url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?ixlib=rb-4.0.3&w=1200'
-    },
-    {
-        name: '奇幻山脉',
-        url: 'https://images.unsplash.com/photo-1464822759844-4c9a8537f727?ixlib=rb-4.0.3&w=1200'
-    },
-    {
-        name: '深渊海洋',
-        url: 'https://images.unsplash.com/photo-1439405326854-014607f694d7?ixlib=rb-4.0.3&w=1200'
-    },
-    {
-        name: '火焰之地',
-        url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&w=1200'
-    },
-    {
-        name: '冰封王座',
-        url: 'https://images.unsplash.com/photo-1491002052546-bf38f186af56?ixlib=rb-4.0.3&w=1200'
-    }
-];
-
-let currentBackground = 0;
-
-// 初始化背景选择器
-function initBackgroundSelector() {
-    const grid = document.getElementById('backgrounds-grid');
-    grid.innerHTML = '';
+// 随机图片背景功能
+function setRandomBackground() {
+    const backgroundImages = [
+        'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&w=1920', // 神秘星空
+        'https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&w=1920', // 魔法森林
+        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&w=1920', // 山脉云雾
+        'https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&w=1920', // 奇幻峡谷
+        'https://images.unsplash.com/photo-1518837695005-2083093ee35b?ixlib=rb-4.0.3&w=1920', // 古老建筑
+        'https://images.unsplash.com/photo-1464822759844-4c9a8537f727?ixlib=rb-4.0.3&w=1920', // 雪山
+        'https://images.unsplash.com/photo-1439405326854-014607f694d7?ixlib=rb-4.0.3&w=1920', // 海洋
+        'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&w=1920'  // 烟花
+    ];
     
-    backgrounds.forEach((bg, index) => {
-        const preview = document.createElement('div');
-        preview.className = `background-preview ${index === currentBackground ? 'active' : ''}`;
-        preview.style.backgroundImage = `url(${bg.url})`;
-        preview.title = bg.name;
-        preview.onclick = () => setBackground(index);
-        grid.appendChild(preview);
-    });
-}
-
-// 设置背景
-function setBackground(index) {
-    currentBackground = index;
-    const bg = backgrounds[index];
-    
-    // 设置背景图片
-    document.body.style.background = `linear-gradient(rgba(12, 26, 45, 0.8), rgba(26, 54, 88, 0.8)), url(${bg.url})`;
+    const randomImage = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
+    document.body.style.backgroundImage = `linear-gradient(rgba(12, 26, 45, 0.7), rgba(26, 54, 88, 0.7)), url(${randomImage})`;
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center';
     document.body.style.backgroundAttachment = 'fixed';
-    
-    // 更新激活状态
-    document.querySelectorAll('.background-preview').forEach((preview, i) => {
-        preview.classList.toggle('active', i === index);
-    });
 }
 
-// 切换背景面板
-function toggleBackgroundPanel() {
-    const panel = document.getElementById('background-panel');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-}
 
 // 在初始化时调用
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM加载完成，开始初始化...');
-    initBackgroundSelector();
+    
     setBackground(0); // 设置默认背景
+	setRandomBackground();
     
     gameRecords = JSON.parse(localStorage.getItem('youseiGameRecords')) || [];
     console.log('加载的游戏记录数量:', gameRecords.length);
@@ -1569,5 +1502,6 @@ document.addEventListener('click', function(e) {
 </body>
 
 </html>
+
 
 
