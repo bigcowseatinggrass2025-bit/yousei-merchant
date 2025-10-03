@@ -1496,15 +1496,7 @@ function updateRankingDisplay(containerId, data, unit, description = '') {
         }
     });
 }
-// 在排行榜代码末尾添加
-document.addEventListener('click', function(e) {
-    if (e.target.id === 'save-results' || e.target.closest('#save-results')) {
-        console.log('🎯 事件委托捕获到保存按钮点击');
-        e.preventDefault();
-        e.stopPropagation();
-        saveResults();
-    }
-});
+
 
 
 
@@ -1516,6 +1508,7 @@ document.addEventListener('click', function(e) {
 </body>
 
 </html>
+
 
 
 
