@@ -1195,44 +1195,59 @@ function calculateWinStreaks() {
 		// 游戏记录数据
 
 
-async function saveGameRecord() {
-	console.log('🔄 saveGameRecord被调用，调用栈:', new Error().stack);
-    const record = {
-        id: Date.now(),
-        timestamp: new Date().toLocaleString('zh-TW'),
-        date: new Date().toLocaleDateString('zh-TW'),
-        duration: getGameDurationFromStorage(),
-        players: playerData.map(player => ({
-            name: player.name,
-            tradeCount: player.tradeCount,
-            lotteryWins: player.lotteryWins,  
-            spiritStones: player.spiritStones,
-            silver: player.silver
-        })),
-        winner: findWinner(playerData)
-    };
-    
-    console.log('保存的游戏记录:', record);
-    
-    // 保存到本地存储
-    gameRecords.unshift(record);
-    gameRecords = gameRecords.slice(0, 100);
-    localStorage.setItem('youseiGameRecords', JSON.stringify(gameRecords));
-    
-    // 保存到数据库
-    const dbSuccess = await db.saveGameRecord(record);
-    if (dbSuccess) {
-        console.log('✅ 数据已同步到云端');
-        
-        // 更新排行榜到数据库
-        await db.updateLeaderboards(rankings);
-    } else {
-        console.log('💾 数据保存到本地存储');
-    }
-    
-    updateRecordsTable();
-}
+let isSaving = false; // 在全局变量区域添加这个
 
+async function saveGameRecord() {
+    // 防重复检查
+    if (isSaving) {
+        console.log('⏸️ 保存操作正在进行中，跳过重复调用');
+        return;
+    }
+    isSaving = true;
+    
+    console.log('🔄 saveGameRecord被调用，调用栈:', new Error().stack);
+    
+    try {
+        const record = {
+            id: Date.now(),
+            timestamp: new Date().toLocaleString('zh-TW'),
+            date: new Date().toLocaleDateString('zh-TW'),
+            duration: getGameDurationFromStorage(),
+            players: playerData.map(player => ({
+                name: player.name,
+                tradeCount: player.tradeCount,
+                lotteryWins: player.lotteryWins,  
+                spiritStones: player.spiritStones,
+                silver: player.silver
+            })),
+            winner: findWinner(playerData)
+        };
+
+        console.log('保存的游戏记录:', record);
+        
+        // 保存到本地存储
+        gameRecords.unshift(record);
+        gameRecords = gameRecords.slice(0, 100);
+        localStorage.setItem('youseiGameRecords', JSON.stringify(gameRecords));
+        
+        // 保存到数据库
+        const dbSuccess = await db.saveGameRecord(record);
+        if (dbSuccess) {
+            console.log('✅ 数据已同步到云端');
+            // 更新排行榜到数据库
+            await db.updateLeaderboards(rankings);
+        } else {
+            console.log('💾 数据保存到本地存储');
+        }
+        
+        updateRecordsTable();
+        
+    } catch (error) {
+        console.error('保存出错:', error);
+    } finally {
+        isSaving = false; // 释放锁
+    }
+}
 // 找出胜出者
 function findWinner(players) {
     return players.reduce((prev, current) => 
@@ -1487,6 +1502,7 @@ document.addEventListener('click', function(e) {
 </body>
 
 </html>
+
 
 
 
