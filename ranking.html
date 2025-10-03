@@ -943,22 +943,36 @@ const db = {
 // 初始化
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM加载完成，开始初始化...');
-	 // 设置随机图片背景
+    
+    // 设置随机图片背景
     setRandomBackground();
     
     // 从数据库加载数据
     console.log('🔄 从数据库加载数据...');
-   const dbRecords = await db.loadGameRecords();
-if (dbRecords && dbRecords.length > 0) {
-    gameRecords = dbRecords;
-    console.log('✅ 游戏记录已从数据库加载:', gameRecords.length);
-    // 更新本地存储
-    localStorage.setItem('youseiGameRecords', JSON.stringify(gameRecords));
-} else {
-    // 如果没有数据库数据，才用本地存储
-    gameRecords = JSON.parse(localStorage.getItem('youseiGameRecords')) || [];
-    console.log('💾 从本地存储加载游戏记录:', gameRecords.length);
-}
+    
+    // 1. 加载游戏记录
+    const dbRecords = await db.loadGameRecords();
+    if (dbRecords && dbRecords.length > 0) {
+        gameRecords = dbRecords;
+        console.log('✅ 游戏记录已从数据库加载:', gameRecords.length);
+    } else {
+        // 如果没有数据库数据，才用本地存储
+        gameRecords = JSON.parse(localStorage.getItem('youseiGameRecords')) || [];
+        console.log('💾 从本地存储加载游戏记录:', gameRecords.length);
+    }
+    
+    // 2. 加载排行榜数据
+    const dbRankings = await db.loadLeaderboards();
+    if (dbRankings) {
+        rankings = dbRankings;
+        console.log('✅ 排行榜数据已从数据库加载');
+    } else {
+        // 如果没有数据库数据，才用本地存储
+        rankings = JSON.parse(localStorage.getItem('youseiHallOfFame')) || {
+            wealth: [], trades: [], luck: [], time: [], streak: []
+        };
+        console.log('💾 从本地存储加载排行榜');
+    }
     
     loadPlayerData();
     updateAllRankings();
@@ -1502,6 +1516,7 @@ document.addEventListener('click', function(e) {
 </body>
 
 </html>
+
 
 
 
