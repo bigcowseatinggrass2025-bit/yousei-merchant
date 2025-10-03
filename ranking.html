@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幽街商人 - 榮譽殿堂</title>
+    
+    <!-- 添加Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c1a2d, #1a3658);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+		
+		/* 游戏记录表格样式 */
+ /* 游戏记录表格样式 */
+        .records-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .records-section::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                #ffd700, #ff6b00, #ff0080, #00ff88, 
+                #00ffff, #ff00ff, #ffd700);
+            background-size: 400% 400%;
+            border-radius: 17px;
+            z-index: -1;
+            animation: energyFlow 8s ease infinite;
+            opacity: 0.5;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .section-header h2 {
+            color: #ffd700;
+            font-size: 1.8rem;
+            text-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.8),
+                0 0 20px rgba(255, 215, 0, 0.6),
+                0 0 30px rgba(255, 215, 0, 0.4);
+            animation: textGlow 3s ease-in-out infinite alternate;
+        }
+        
+        .records-info {
+            color: #bdc3c7;
+            font-size: 1rem;
+        }
+
+.records-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.records-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.records-table th {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+    padding: 15px 10px;
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.records-table td {
+    padding: 12px 8px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ecf0f1;
+}
+
+.records-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.records-table tbody tr.winner-row {
+    background: rgba(255, 215, 0, 0.1);
+    border-left: 3px solid #ffd700;
+}
+
+.winner-badge {
+    background: #ffd700;
+    color: #333;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.table-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.page-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.page-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#page-info {
+    color: #bdc3c7;
+    font-weight: bold;
+}
+        
+        /* 顶部横幅 */
+        .banner {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1));
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            animation: shine 6s infinite linear;
+        }
+        
+        .banner h1 {
+            font-size: 3rem;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .banner p {
+            font-size: 1.2rem;
+            color: #bdc3c7;
+            position: relative;
+        }
+        
+        /* 走马灯 */
+        .marquee-container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .marquee-content {
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+		
+		/* 修改排行榜容器为3列布局 */
+.rankings-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+/* 添加排行榜说明文字样式 */
+.ranking-description {
+    color: #bdc3c7;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 15px;
+    padding: 0 10px;
+    font-style: italic;
+}
+
+/* 自定义背景控制 */
+.background-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.background-btn {
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.background-btn:hover {
+    background: rgba(255, 215, 0, 0.4);
+    transform: scale(1.05);
+}
+
+.background-preview {
+    width: 60px;
+    height: 40px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    background-size: cover;
+    background-position: center;
+}
+
+.background-preview:hover {
+    transform: scale(1.1);
+    border-color: #ffd700;
+}
+
+.background-preview.active {
+    border-color: #ffd700;
+    box-shadow: 0 0 10px #ffd700;
+}
+
+.backgrounds-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.background-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+        
+        /* 数据输入区域 */
+        .input-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 2px solid rgba(52, 152, 219, 0.5);
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+        
+        .section-title {
+            color: #3498db;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(52, 152, 219, 0.3);
+            padding-bottom: 10px;
+        }
+        
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .player-input-card {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(41, 128, 185, 0.1));
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .player-input-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+        }
+        
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .player-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .player-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #bdc3c7;
+        }
+        
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .silver-input-container {
+            margin-top: 15px;
+        }
+        
+        .silver-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .silver-input::placeholder {
+            color: #95a5a6;
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(39, 174, 96, 0.4);
+            display: block;
+            margin: 30px auto 0;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(39, 174, 96, 0.6);
+        }
+        
+        /* 排行榜区域 */
+        .rankings-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+        
+      /* 简化排行榜样式 */
+.ranking-category {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.ranking-category::before {
+    display: none; /* 移除能量流动边框 */
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.category-icon {
+    font-size: 2rem;
+    margin-right: 15px;
+    color: #ffd700;
+}
+
+.category-title {
+    font-size: 1.5rem;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.ranking-description {
+    color: #bdc3c7;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 15px;
+    padding: 0 10px;
+    font-style: italic;
+}
+
+.ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    max-height: 320px;
+    padding-right: 5px;
+}
+
+.ranking-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ranking-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.ranking-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.5);
+    border-radius: 3px;
+}
+
+.ranking-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.ranking-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(3px);
+}
+
+.ranking-item.top-3 {
+    border: 1px solid #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.rank-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rank-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.rank-1 { background: #ffd700; color: #333; }
+.rank-2 { background: #c0c0c0; color: #333; }
+.rank-3 { background: #cd7f32; color: #333; }
+.rank-other { background: rgba(255, 255, 255, 0.2); color: white; }
+
+.player-rank-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.player-rank-name {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.rank-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+/* 简化背景控制 */
+.background-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.background-btn {
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.background-btn:hover {
+    background: rgba(255, 215, 0, 0.3);
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+	<!-- 自定义背景控制 -->
+<div class="background-controls">
+    <div>
+        <button class="background-btn" onclick="toggleBackgroundPanel()">🎨 背景设置</button>
+        <div class="background-section" id="background-panel" style="display: none;">
+            <div class="backgrounds-grid" id="backgrounds-grid">
+                <!-- 背景预览图将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+</div>
+        <!-- 顶部横幅 -->
+        <div class="banner">
+            <h1>🏆 幽街商人榮譽殿堂 🏆</h1>
+            <p>記錄歷代商人的輝煌成就</p>
+        </div>
+        
+        <!-- 走马灯 -->
+        <div class="marquee-container">
+            <div class="marquee-content" id="marquee-text">
+                🎉 歡迎來到幽街商人榮譽殿堂！見證傳奇商人的誕生 🎉
+            </div>
+        </div>
+        
+        <!-- 数据输入区域 -->
+        <div id="input-section" class="input-section">
+            <h2 class="section-title">📝 記錄本局戰績</h2>
+            <p style="text-align: center; margin-bottom: 20px; color: #bdc3c7;">
+                請輸入每位玩家實際獲得的銀兩數目，這將決定本局的勝出者
+            </p>
+            
+            <div class="player-grid" id="player-data-container">
+                <!-- 玩家数据卡片将在这里动态生成 -->
+            </div>
+            
+            <button id="save-results" class="save-btn">
+                💾 確認保存戰績
+            </button>
+        </div>
+        
+        <!-- 排行榜区域 -->
+        <div class="rankings-container">
+    <!-- 第一行 -->
+    <div class="ranking-category">
+        <div class="category-header">
+            <div class="category-icon">💰</div>
+            <h3 class="category-title">財富之王</h3>
+        </div>
+        <div class="ranking-description">(局中持有最多銀兩者)</div>
+        <div class="ranking-list" id="wealth-ranking"></div>
+    </div>
+    
+    <div class="ranking-category">
+        <div class="category-header">
+            <div class="category-icon">🔄</div>
+            <h3 class="category-title">交易大師</h3>
+        </div>
+        <div class="ranking-description">(局中成功交易最多次數者)</div>
+        <div class="ranking-list" id="trade-ranking"></div>
+    </div>
+    
+    <div class="ranking-category">
+        <div class="category-header">
+            <div class="category-icon">👑</div>
+            <h3 class="category-title">連勝為王</h3>
+        </div>
+        <div class="ranking-description">(擁有連續多局勝者)</div>
+        <div class="ranking-list" id="streak-ranking"></div>
+    </div>
+    
+    <!-- 第二行 -->
+    <div class="ranking-category">
+        <div class="category-header">
+            <div class="category-icon">🎯</div>
+            <h3 class="category-title">幸運之星</h3>
+        </div>
+        <div class="ranking-description">(局中穫得最多彩卷中獎者)</div>
+        <div class="ranking-list" id="luck-ranking"></div>
+    </div>
+    
+    <div class="ranking-category">
+        <div class="category-header">
+            <div class="category-icon">⏰</div>
+            <h3 class="category-title">持久商人</h3>
+        </div>
+        <div class="ranking-description">(遊戲時長最持久者)</div>
+        <div class="ranking-list" id="time-ranking"></div>
+    </div>
+</div>
+	
+	<!-- 在排行榜容器后面添加 -->
+<div class="records-section">
+    <div class="section-header">
+        <h2>📊 世界遊戲記錄</h2>
+        <div class="records-info">共 <span id="total-records">0</span> 場遊戲記錄</div>
+    </div>
+    
+    <div class="records-table-container">
+        <table class="records-table">
+            <thead>
+                <tr>
+                    <th>時間</th>
+                    <th>時長</th>
+                    <th>玩家</th>
+                    <th>交易</th>
+                    <th>中獎</th>
+                    <th>靈石</th>
+                    <th>銀兩</th>
+                    <th>勝出者</th>
+                </tr>
+            </thead>
+            <tbody id="records-table-body">
+                <!-- 记录将在这里动态生成 -->
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="table-controls">
+        <button id="prev-page" class="page-btn">⬅️ 上一頁</button>
+        <span id="page-info">第 1 頁</span>
+        <button id="next-page" class="page-btn">下一頁 ➡️</button>
+    </div>
+</div>
+
+    <script>
+	   // Supabase配置
+    const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 全局数据（只声明一次！）
+    let playerData = [];
+    let rankings = JSON.parse(localStorage.getItem('youseiHallOfFame')) || {
+        wealth: [],
+        trades: [],
+        luck: [],
+        time: [],
+        streak: []
+    };
+    let gameRecords = JSON.parse(localStorage.getItem('youseiGameRecords')) || [];
+    let currentPage = 1;
+    const recordsPerPage = 10;
+	
+	// 数据库操作函数 - 完整版本
+const db = {
+    // 保存游戏记录到数据库
+    async saveGameRecord(record) {
+        try {
+            console.log('💾 保存游戏记录到数据库...');
+            
+            // 1. 插入游戏记录
+            const { data: gameData, error: gameError } = await supabase
+                .from('game_records')
+                .insert({
+                    game_date: new Date().toISOString(),
+                    duration: record.duration
+                })
+                .select()
+                .single();
+
+            if (gameError) throw gameError;
+
+            // 2. 插入玩家战绩
+            const playerRecords = record.players.map(player => ({
+                game_id: gameData.id,
+                player_name: player.name,
+                trade_count: player.tradeCount || 0,
+                lottery_wins: player.lotteryWins || 0,
+                spirit_stones: player.spiritStones || 0,
+                silver: player.silver || 0,
+                is_winner: record.winner === player.name
+            }));
+
+            const { error: playersError } = await supabase
+                .from('player_records')
+                .insert(playerRecords);
+
+            if (playersError) throw playersError;
+
+            console.log('✅ 游戏记录已保存到数据库');
+            return true;
+        } catch (error) {
+            console.error('❌ 保存游戏记录失败:', error);
+            return false;
+        }
+    },
+
+    // 更新排行榜到数据库
+    async updateLeaderboards(rankings) {
+        try {
+            const leaderboardEntries = [];
+            
+            // 处理财富排行榜
+            rankings.wealth.forEach(item => {
+                leaderboardEntries.push({
+                    player_name: item.name,
+                    category: 'wealth',
+                    value: item.value
+                });
+            });
+
+            // 处理交易排行榜
+            rankings.trades.forEach(item => {
+                leaderboardEntries.push({
+                    player_name: item.name,
+                    category: 'trades',
+                    value: item.value
+                });
+            });
+
+            // 处理运气排行榜
+            rankings.luck.forEach(item => {
+                leaderboardEntries.push({
+                    player_name: item.name,
+                    category: 'luck',
+                    value: item.value
+                });
+            });
+
+            // 处理时长排行榜
+            rankings.time.forEach(item => {
+                leaderboardEntries.push({
+                    player_name: item.name,
+                    category: 'time',
+                    value: typeof item.value === 'string' ? 0 : item.value
+                });
+            });
+
+            // 处理连胜排行榜
+            const streakRanking = calculateWinStreaks();
+            streakRanking.forEach(item => {
+                leaderboardEntries.push({
+                    player_name: item.name,
+                    category: 'streak',
+                    value: item.value
+                });
+            });
+
+            // 批量插入排行榜数据
+            const { error } = await supabase
+                .from('leaderboards')
+                .insert(leaderboardEntries);
+
+            if (error) throw error;
+            console.log('✅ 排行榜数据已保存到数据库');
+            return true;
+        } catch (error) {
+            console.error('❌ 保存排行榜数据失败:', error);
+            return false;
+        }
+    },
+
+    // 从数据库加载排行榜
+    async loadLeaderboards() {
+        try {
+            const { data, error } = await supabase
+                .from('leaderboards')
+                .select('*')
+                .order('value', { ascending: false });
+
+            if (error) throw error;
+
+            // 按分类重新组织数据
+            const dbRankings = {
+                wealth: [],
+                trades: [],
+                luck: [],
+                time: [],
+                streak: []
+            };
+
+            data.forEach(item => {
+                if (dbRankings[item.category]) {
+                    dbRankings[item.category].push({
+                        name: item.player_name,
+                        value: item.value,
+                        time: item.achieved_at,
+                        date: new Date(item.achieved_at).toLocaleDateString('zh-TW')
+                    });
+                }
+            });
+
+            // 每个分类只保留前100名
+            Object.keys(dbRankings).forEach(category => {
+                dbRankings[category] = dbRankings[category]
+                    .sort((a, b) => b.value - a.value)
+                    .slice(0, 100);
+            });
+
+            return dbRankings;
+        } catch (error) {
+            console.error('❌ 加载排行榜数据失败:', error);
+            return null;
+        }
+    },
+
+    // 从数据库加载游戏记录
+    async loadGameRecords() {
+        try {
+            const { data, error } = await supabase
+                .from('game_records')
+                .select(`
+                    *,
+                    player_records(*)
+                `)
+                .order('game_date', { ascending: false })
+                .limit(100);
+
+            if (error) throw error;
+
+            // 转换为前端格式
+            const records = data.map(game => {
+                const players = game.player_records || [];
+                const winnerRecord = players.find(p => p.is_winner);
+                
+                return {
+                    id: game.id,
+                    timestamp: new Date(game.game_date).toLocaleString('zh-TW'),
+                    date: new Date(game.game_date).toLocaleDateString('zh-TW'),
+                    duration: game.duration,
+                    players: players.map(p => ({
+                        name: p.player_name,
+                        tradeCount: p.trade_count,
+                        lotteryWins: p.lottery_wins,
+                        spiritStones: p.spirit_stones,
+                        silver: p.silver
+                    })),
+                    winner: winnerRecord ? winnerRecord.player_name : null
+                };
+            });
+
+            return records;
+        } catch (error) {
+            console.error('❌ 加载游戏记录失败:', error);
+            return [];
+        }
+    }
+};
+
+    // 测试数据库连接函数
+    async function testSupabaseConnection() {
+        try {
+            console.log('🔗 测试Supabase连接...');
+            console.log('Supabase URL:', SUPABASE_URL);
+            
+            // 测试插入一条数据
+            const { data, error } = await supabase
+                .from('game_records')
+                .insert({
+                    game_date: new Date().toISOString(),
+                    duration: '连接测试'
+                })
+                .select();
+                
+            if (error) {
+                console.error('❌ 数据库连接失败:', error);
+                console.error('错误详情:', error.message);
+                return false;
+            }
+            
+            console.log('✅ 数据库连接成功! 测试数据:', data);
+            return true;
+        } catch (error) {
+            console.error('❌ 连接异常:', error);
+            return false;
+        }
+    }
+
+// 初始化
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM加载完成，开始初始化...');
+    
+    // 从数据库加载数据
+    console.log('🔄 从数据库加载数据...');
+    const dbRankings = await db.loadLeaderboards();
+    if (dbRankings) {
+        rankings = dbRankings;
+        console.log('✅ 排行榜数据已从数据库加载');
+    }
+    
+    const dbRecords = await db.loadGameRecords();
+    if (dbRecords && dbRecords.length > 0) {
+        gameRecords = dbRecords;
+        console.log('✅ 游戏记录已从数据库加载');
+    }
+    
+    loadPlayerData();
+    updateAllRankings();
+    setupEventListeners();
+    updateMarqueeWithTopPlayers();
+    updateRecordsTable();
+});
+
+    // 其余的函数保持不变...
+    function loadPlayerData() {
+        try {
+            // 直接从本地存储读取玩家数据
+            const savedPlayers = JSON.parse(localStorage.getItem('players')) || [];
+            
+            // 只要有玩家就显示输入表单
+            if (savedPlayers.length > 0) {
+                playerData = savedPlayers.map(player => ({
+                    name: player.name,
+                    wealth: player.wealth || 0,
+                    tradeCount: player.trades || 0,
+                    lotteryWins: player.wins || 0,
+                    spiritStones: getSpiritStonesFromAuctionData(player.name) || 0,
+                    color: player.color,
+                    startTime: new Date().toLocaleString('zh-TW'),
+                    gameDuration: getGameDurationFromStorage(),
+                    silver: 0
+                }));
+                
+                showInputSection();
+                return;
+            }
+        } catch (e) {
+            console.log('數據讀取失敗:', e);
+        }
+        
+        document.getElementById('input-section').style.display = 'none';
+        updateMarqueeWithTopPlayers();
+    }
+
+
+// 背景图片数组 - 使用高质量的奇幻风格图片URL
+const backgrounds = [
+    {
+        name: '神秘星空',
+        url: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&w=1200'
+    },
+    {
+        name: '魔法森林',
+        url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&w=1200'
+    },
+    {
+        name: '古代神殿',
+        url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&w=1200'
+    },
+    {
+        name: '龙之峡谷',
+        url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&w=1200'
+    },
+    {
+        name: '月光城堡',
+        url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?ixlib=rb-4.0.3&w=1200'
+    },
+    {
+        name: '奇幻山脉',
+        url: 'https://images.unsplash.com/photo-1464822759844-4c9a8537f727?ixlib=rb-4.0.3&w=1200'
+    },
+    {
+        name: '深渊海洋',
+        url: 'https://images.unsplash.com/photo-1439405326854-014607f694d7?ixlib=rb-4.0.3&w=1200'
+    },
+    {
+        name: '火焰之地',
+        url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&w=1200'
+    },
+    {
+        name: '冰封王座',
+        url: 'https://images.unsplash.com/photo-1491002052546-bf38f186af56?ixlib=rb-4.0.3&w=1200'
+    }
+];
+
+let currentBackground = 0;
+
+// 初始化背景选择器
+function initBackgroundSelector() {
+    const grid = document.getElementById('backgrounds-grid');
+    grid.innerHTML = '';
+    
+    backgrounds.forEach((bg, index) => {
+        const preview = document.createElement('div');
+        preview.className = `background-preview ${index === currentBackground ? 'active' : ''}`;
+        preview.style.backgroundImage = `url(${bg.url})`;
+        preview.title = bg.name;
+        preview.onclick = () => setBackground(index);
+        grid.appendChild(preview);
+    });
+}
+
+// 设置背景
+function setBackground(index) {
+    currentBackground = index;
+    const bg = backgrounds[index];
+    
+    // 设置背景图片
+    document.body.style.background = `linear-gradient(rgba(12, 26, 45, 0.8), rgba(26, 54, 88, 0.8)), url(${bg.url})`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundAttachment = 'fixed';
+    
+    // 更新激活状态
+    document.querySelectorAll('.background-preview').forEach((preview, i) => {
+        preview.classList.toggle('active', i === index);
+    });
+}
+
+// 切换背景面板
+function toggleBackgroundPanel() {
+    const panel = document.getElementById('background-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+// 在初始化时调用
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM加载完成，开始初始化...');
+    initBackgroundSelector();
+    setBackground(0); // 设置默认背景
+    
+    gameRecords = JSON.parse(localStorage.getItem('youseiGameRecords')) || [];
+    console.log('加载的游戏记录数量:', gameRecords.length);
+    
+    loadPlayerData();
+    updateAllRankings();
+    setupEventListeners();
+    updateMarqueeWithTopPlayers();
+    updateRecordsTable();
+});
+
+// 从拍卖行数据获取灵石数量
+function getSpiritStonesFromAuctionData(playerName) {
+    try {
+        const auctionData = JSON.parse(localStorage.getItem('auctionData')) || { players: {} };
+        return auctionData.players[playerName]?.spiritStones || 0;
+    } catch (e) {
+        console.log('获取灵石数据失败:', e);
+        return 0;
+    }
+}
+
+// 从存储获取游戏时长
+function getGameDurationFromStorage() {
+    const startTime = localStorage.getItem('gameStartTime');
+    const endTime = localStorage.getItem('gameEndTime');
+    
+    console.log('重新计算 - 开始:', startTime);
+    console.log('重新计算 - 结束:', endTime);
+    
+    if (startTime && endTime) {
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+        const durationMs = end - start;
+        const durationMinutes = Math.floor(durationMs / (1000 * 60));
+        
+        console.log('重新计算 - 结果:', durationMinutes + '分钟');
+        
+        if (durationMinutes < 60) {
+            return `${durationMinutes}分钟`;
+        } else {
+            const hours = Math.floor(durationMinutes / 60);
+            const mins = durationMinutes % 60;
+            return mins > 0 ? `${hours}小时${mins}分钟` : `${hours}小时`;
+        }
+    }
+    
+    return '未知时长';
+}
+
+// 获取玩家创建时间（简化处理）
+function getPlayerCreationTime(playerName) {
+    // 这里可以添加更精确的时间记录逻辑
+    return new Date().toLocaleString('zh-TW');
+}
+
+// 计算游戏时长（简化处理）
+function calculateGameDuration(playerName) {
+    // 这里可以添加实际的时长计算逻辑
+    return '约60分钟'; // 暂时返回固定值
+}
+
+        // 显示输入区域
+        function showInputSection() {
+            const section = document.getElementById('input-section');
+            section.style.display = 'block';
+            
+            const container = document.getElementById('player-data-container');
+            container.innerHTML = '';
+            
+            playerData.forEach((player, index) => {
+                const card = document.createElement('div');
+                card.className = 'player-input-card';
+                card.innerHTML = `
+                    <div class="player-header">
+                        <div class="player-name">${player.name}</div>
+                        <div style="color: ${player.color}">●</div>
+                    </div>
+                    <div class="player-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">靈石</div>
+                            <div class="stat-value">${player.spiritStones || 0}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">交易次數</div>
+                            <div class="stat-value">${player.tradeCount || 0}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">中獎次數</div>
+                            <div class="stat-value">${player.lotteryWins || 0}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">遊戲時長</div>
+                            <div class="stat-value">${player.gameDuration || '進行中'}</div>
+                        </div>
+                    </div>
+                    <div class="silver-input-container">
+                        <input type="number" 
+                               class="silver-input" 
+                               placeholder="💰 輸入實際銀兩數目" 
+                               data-player-index="${index}"
+                               min="0">
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+		
+		
+		// 计算连胜排行榜
+function calculateWinStreaks() {
+    const winCounts = {};
+    
+    // 统计每个玩家的胜场次数
+    gameRecords.forEach(record => {
+        if (record.winner) {
+            winCounts[record.winner] = (winCounts[record.winner] || 0) + 1;
+        }
+    });
+    
+    // 转换为数组并排序
+    const streakRanking = Object.entries(winCounts)
+        .map(([name, wins]) => ({
+            name: name,
+            value: wins,
+            time: new Date().toLocaleString('zh-TW'),
+            date: new Date().toLocaleDateString('zh-TW')
+        }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 100);
+    
+    return streakRanking;
+}
+
+ function saveResults() {
+    console.log('=== 开始保存战绩 ===');
+    
+    const silverInputs = document.querySelectorAll('.silver-input');
+    let hasData = false;
+    
+    console.log('找到输入框数量:', silverInputs.length);
+    
+    // 重置所有玩家的银两
+    playerData.forEach(player => {
+        console.log(`重置前 ${player.name} 的银两:`, player.silver);
+        player.silver = 0;
+    });
+    
+    silverInputs.forEach((input, i) => {
+        const index = parseInt(input.dataset.playerIndex);
+        const silverAmount = parseInt(input.value) || 0;
+        
+        console.log(`输入框 ${i}: 玩家${playerData[index].name} 输入:`, input.value, '转换为:', silverAmount);
+        
+        if (silverAmount > 0) {
+            hasData = true;
+            playerData[index].silver = silverAmount;
+            console.log(`✅ 玩家 ${playerData[index].name} 银两设置为: ${silverAmount}`);
+        }
+    });
+    
+    if (!hasData) {
+        alert('請至少為一位玩家輸入銀兩數目！');
+        return;
+    }
+    
+    console.log('保存前的playerData:', JSON.stringify(playerData.map(p => ({name: p.name, silver: p.silver})), null, 2));
+    
+    // 保存游戏记录
+    saveGameRecord();
+    
+    // 更新排行榜
+    updateRankings();
+    
+    alert('🎊 戰績保存成功！');
+    
+    // 隐藏输入区域
+    document.getElementById('input-section').style.display = 'none';
+    console.log('输入区域已隐藏');
+}
+		
+		
+		// 游戏记录数据
+
+
+async function saveGameRecord() {
+    const record = {
+        id: Date.now(),
+        timestamp: new Date().toLocaleString('zh-TW'),
+        date: new Date().toLocaleDateString('zh-TW'),
+        duration: getGameDurationFromStorage(),
+        players: playerData.map(player => ({
+            name: player.name,
+            tradeCount: player.tradeCount,
+            lotteryWins: player.lotteryWins,  
+            spiritStones: player.spiritStones,
+            silver: player.silver
+        })),
+        winner: findWinner(playerData)
+    };
+    
+    console.log('保存的游戏记录:', record);
+    
+    // 保存到本地存储
+    gameRecords.unshift(record);
+    gameRecords = gameRecords.slice(0, 100);
+    localStorage.setItem('youseiGameRecords', JSON.stringify(gameRecords));
+    
+    // 保存到数据库
+    const dbSuccess = await db.saveGameRecord(record);
+    if (dbSuccess) {
+        console.log('✅ 数据已同步到云端');
+        
+        // 更新排行榜到数据库
+        await db.updateLeaderboards(rankings);
+    } else {
+        console.log('💾 数据保存到本地存储');
+    }
+    
+    updateRecordsTable();
+}
+
+// 找出胜出者
+function findWinner(players) {
+    return players.reduce((prev, current) => 
+        (prev.silver || 0) > (current.silver || 0) ? prev : current
+    ).name;
+}
+
+// 更新记录表格 - 一局多行，每行一个玩家
+function updateRecordsTable() {
+    const tbody = document.getElementById('records-table-body');
+    const totalRecords = document.getElementById('total-records');
+    
+    // 计算实际游戏局数（不是记录条数）
+    const uniqueGameCount = new Set(gameRecords.map(record => record.id)).size;
+    totalRecords.textContent = uniqueGameCount;
+    
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    const pageRecords = gameRecords.slice(startIndex, endIndex);
+    
+    tbody.innerHTML = '';
+    
+    pageRecords.forEach(record => {
+        record.players.forEach((player, playerIndex) => {
+            const row = document.createElement('tr');
+            
+            // 如果是胜出者，添加特殊样式
+            if (record.winner === player.name) {
+                row.classList.add('winner-row');
+            }
+            
+            row.innerHTML = `
+                <td>${playerIndex === 0 ? record.timestamp : ''}</td>
+                <td>${playerIndex === 0 ? record.duration : ''}</td>
+                <td>${player.name}</td>
+                <td>${player.tradeCount || 0}</td>
+                <td>${player.lotteryWins || 0}</td>
+                <td>${player.spiritStones || 0}</td>
+                <td>${player.silver || 0}</td>
+                <td>${playerIndex === 0 ? (record.winner ? `<span class="winner-badge">${record.winner}</span>` : '-') : ''}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    });
+    
+    updatePaginationControls();
+}
+
+// 更新分页控件
+function updatePaginationControls() {
+    const totalPages = Math.ceil(gameRecords.length / recordsPerPage);
+    document.getElementById('page-info').textContent = `第 ${currentPage} 頁 / 共 ${totalPages} 頁`;
+    
+    document.getElementById('prev-page').disabled = currentPage === 1;
+    document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
+}
+
+
+        function updateRankings() {
+    const currentTime = new Date().toLocaleString('zh-TW');
+    const currentDate = new Date().toLocaleDateString('zh-TW');
+    
+    playerData.forEach(player => {
+        // 严格验证玩家数据
+        if (!player || !player.name || player.name.trim() === '' || 
+            player.name === 'undefined' || player.name === 'null') {
+            console.log('跳过无效玩家:', player);
+            return;
+        }
+        
+        const validPlayer = {
+            name: player.name.trim(),
+            silver: parseInt(player.silver) || 0,
+            tradeCount: parseInt(player.tradeCount) || 0,
+            lotteryWins: parseInt(player.lotteryWins) || 0,
+            gameDuration: player.gameDuration || '未知',
+            recordDate: player.recordDate || currentDate
+        };
+        
+        if (validPlayer.silver > 0) {
+            rankings.wealth.push({
+                name: validPlayer.name,
+                value: validPlayer.silver,
+                time: currentTime,
+                date: validPlayer.recordDate
+            });
+        }
+        
+        if (validPlayer.tradeCount > 0) {
+            rankings.trades.push({
+                name: validPlayer.name,
+                value: validPlayer.tradeCount,
+                time: currentTime,
+                date: validPlayer.recordDate
+            });
+        }
+        
+        if (validPlayer.lotteryWins > 0) {
+            rankings.luck.push({
+                name: validPlayer.name,
+                value: validPlayer.lotteryWins,
+                time: currentTime,
+                date: validPlayer.recordDate
+            });
+        }
+        
+        if (validPlayer.gameDuration && validPlayer.gameDuration !== '未知') {
+            rankings.time.push({
+                name: validPlayer.name,
+                value: validPlayer.gameDuration,
+                time: currentTime,
+                date: validPlayer.recordDate
+            });
+        }
+    });
+    
+    // 排序并限制数量
+    rankings.wealth = rankings.wealth.sort((a, b) => b.value - a.value).slice(0, 100);
+    rankings.trades = rankings.trades.sort((a, b) => b.value - a.value).slice(0, 100);
+    rankings.luck = rankings.luck.sort((a, b) => b.value - a.value).slice(0, 100);
+    rankings.time = rankings.time.slice(0, 100);
+    
+    localStorage.setItem('youseiHallOfFame', JSON.stringify(rankings));
+    updateAllRankings();
+}
+
+        // 更新所有排行榜显示
+       function updateAllRankings() {
+    updateRankingDisplay('wealth-ranking', rankings.wealth, '💰', '(局中持有最多銀兩者)');
+    updateRankingDisplay('trade-ranking', rankings.trades, '🔄', '(局中成功交易最多次數者)');
+    updateRankingDisplay('luck-ranking', rankings.luck, '🎯', '(局中穫得最多彩卷中獎者)');
+    updateRankingDisplay('time-ranking', rankings.time, '⏰', '(遊戲時長最持久者)');
+    
+    // 添加连胜排行榜
+    const streakRanking = calculateWinStreaks();
+    updateRankingDisplay('streak-ranking', streakRanking, '👑', '(擁有連續多局勝者)');
+}
+
+       // 更新单个排行榜显示（添加说明参数）
+function updateRankingDisplay(containerId, data, unit, description = '') {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    
+    // 添加说明文字
+    if (description) {
+        const descElement = container.previousElementSibling;
+        if (descElement && descElement.classList.contains('ranking-description')) {
+            descElement.textContent = description;
+        }
+    }
+    
+    // 过滤掉无效数据
+    const validData = data.filter(item => item.name && item.name !== 'undefined' && item.name !== 'null');
+    
+    validData.forEach((item, index) => {
+        const rankItem = document.createElement('div');
+        rankItem.className = `ranking-item ${index < 3 ? 'top-3' : ''}`;
+        
+        const rankClass = index < 3 ? `rank-${index + 1}` : 'rank-other';
+        
+        // 给前5名特殊称号
+        let title = '';
+        if (index === 0) title = '🏆 王者';
+        else if (index === 1) title = '🥈 宗师';
+        else if (index === 2) title = '🥉 大师';
+        else if (index === 3) title = '⭐ 精英';
+        else if (index === 4) title = '🔥 新星';
+        
+        rankItem.innerHTML = `
+            <div class="rank-info">
+                <div class="rank-number ${rankClass}">${index + 1}</div>
+                <div class="player-rank-info">
+                    <div class="player-rank-name">
+                        ${title ? `<span style="color: #ffd700; font-size: 0.8em;">${title}</span><br>` : ''}
+                        ${item.name}
+                    </div>
+                </div>
+            </div>
+            <div class="rank-value">${item.value}${unit}</div>
+        `;
+        container.appendChild(rankItem);
+    });
+    
+    if (validData.length === 0) {
+        container.innerHTML = '<div class="ranking-item" style="justify-content: center; color: #bdc3c7;">暫無記錄</div>';
+    }
+}
+
+        // 更新走马灯显示顶尖玩家
+        function updateMarqueeWithTopPlayers() {
+            const topWealth = rankings.wealth[0];
+            const topTrades = rankings.trades[0];
+            
+            let marqueeText = '🏆 幽街商人榮譽殿堂 🏆 ';
+            
+            if (topWealth) {
+                marqueeText += ` | 💰 財富之王: ${topWealth.name} (${topWealth.value}兩) `;
+            }
+            if (topTrades) {
+                marqueeText += ` | 🔄 交易大師: ${topTrades.name} (${topTrades.value}次) `;
+            }
+            
+            document.getElementById('marquee-text').textContent = marqueeText;
+        }
+
+        function setupEventListeners() {
+    console.log('设置事件监听器...');
+    
+    const saveButton = document.getElementById('save-results');
+    console.log('保存按钮元素:', saveButton);
+    
+    if (saveButton) {
+        saveButton.addEventListener('click', saveResults);
+        console.log('✅ 保存按钮事件监听器已绑定');
+    } else {
+        console.log('❌ 找不到保存按钮');
+    }
+    
+    // 分页按钮的事件监听器
+    document.getElementById('prev-page').addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            updateRecordsTable();
+        }
+    });
+    
+    document.getElementById('next-page').addEventListener('click', function() {
+        const totalPages = Math.ceil(gameRecords.length / recordsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            updateRecordsTable();
+        }
+    });
+}
+// 在排行榜代码末尾添加
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'save-results' || e.target.closest('#save-results')) {
+        console.log('🎯 事件委托捕获到保存按钮点击');
+        e.preventDefault();
+        e.stopPropagation();
+        saveResults();
+    }
+});
+
+
+
+        // 走马灯更新函数
+        function updateMarquee(text) {
+            document.getElementById('marquee-text').textContent = text;
+        }
+    </script>
+</body>
+
+</html>
+
+
