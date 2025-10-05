@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的幽街貨卡倉庫</title>
+    <!-- 🎯 添加Supabase库引用 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* 手机端专用样式 */
         * {
@@ -335,35 +337,43 @@
 </div>
 
 <script>
-    // 🎯 从Supabase获取真实数据
+    // 🎯 在脚本最顶部创建Supabase客户端
+    const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
+    
+    // 确保supabase对象存在
+    if (typeof window.supabase === 'undefined') {
+        window.supabase = supabase;
+    }
+    
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 🎯 修改loadPlayerDataFromSupabase函数，使用supabaseClient
     async function loadPlayerDataFromSupabase() {
         try {
             console.log('📱 从Supabase加载玩家数据...');
             
-            const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
-            const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
-            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            
             const urlParams = new URLSearchParams(window.location.search);
-            const playerId = urlParams.get('p'); // 🎯 从QR码获取英文ID
-            
-            console.log('🎯 请求玩家ID:', playerId);
+            const playerId = urlParams.get('p');
+            console.log('🎯 玩家ID:', playerId);
             
             if (!playerId) {
                 console.log('❌ 未找到玩家ID参数');
-                displayTestData(); // 备用测试数据
+                displayTestData();
                 return;
             }
             
-            // 🎯 从Supabase获取真实数据
-            const { data, error } = await supabase
+            // 🎯 使用supabaseClient而不是supabase
+            const { data, error } = await supabaseClient
                 .from('player_warehouses')
                 .select('*')
                 .eq('player_id', playerId);
                 
+            console.log('🔍 Supabase响应:', { data, error });
+            
             if (error) {
                 console.error('❌ Supabase查询错误:', error);
-                displayTestData(); // 备用方案
+                displayTestData();
                 return;
             }
             
@@ -371,23 +381,24 @@
                 const playerData = data[0];
                 console.log('✅ 获取到玩家数据:', playerData);
                 
-                // 🎯 显示真实玩家数据
                 document.getElementById('player-name').textContent = playerData.player_name;
                 document.getElementById('last-updated').textContent = '最後更新: ' + new Date(playerData.last_updated).toLocaleString();
                 
                 if (playerData.warehouse_data && playerData.warehouse_data.goodsCards) {
+                    console.log('🎯 渲染真实货卡数据:', playerData.warehouse_data.goodsCards);
                     renderCards(playerData.warehouse_data.goodsCards);
                 } else {
+                    console.log('⚠️ 仓库数据为空');
                     renderCards([]);
                 }
             } else {
                 console.log('❌ 未找到玩家数据');
-                displayTestData(); // 备用方案
+                displayTestData();
             }
             
         } catch (error) {
             console.error('❌ 数据加载异常:', error);
-            displayTestData(); // 备用方案
+            displayTestData();
         }
     }
 
@@ -517,4 +528,5 @@
 </body>
 
 </html>
+
 
