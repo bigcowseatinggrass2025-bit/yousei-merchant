@@ -9447,10 +9447,20 @@ cardEl.addEventListener('click', function() {
     });
     this.classList.add('selected');
     selectedGoodsCardId = index;
-    warehouseError.textContent = '';
     
-    // 显示选中卡片的信息
-    showSelectedCardInfo(card);
+    // 🎯 修复1：确保warehouseError存在
+    if (warehouseError) {
+        warehouseError.textContent = '';
+    } else {
+        console.warn('warehouseError元素未找到');
+    }
+    
+    // 🎯 修复2：检查函数是否存在再调用
+    if (typeof showSelectedCardInfo === 'function') {
+        showSelectedCardInfo(card);
+    } else {
+        console.warn('showSelectedCardInfo函数未定义');
+    }
 });
 
 // 修改顯示選中卡片信息
@@ -9461,6 +9471,19 @@ function showSelectedCardInfo(card) {
     const cardGoods = document.getElementById('card-info-goods');
     const cardBuyPrice = document.getElementById('card-info-buy-price');
     const cardSellPrice = document.getElementById('card-info-sell-price');
+    
+    // 🎯 添加null检查 - 确保所有元素都存在
+    if (!infoContainer || !cardName || !cardRarity || !cardGoods || !cardBuyPrice || !cardSellPrice) {
+        console.error('卡片信息显示元素未找到:', {
+            infoContainer: !!infoContainer,
+            cardName: !!cardName,
+            cardRarity: !!cardRarity,
+            cardGoods: !!cardGoods,
+            cardBuyPrice: !!cardBuyPrice,
+            cardSellPrice: !!cardSellPrice
+        });
+        return; // 如果任何元素缺失，直接返回
+    }
     
     // 設置卡片信息
     cardName.textContent = card.name;
@@ -11437,6 +11460,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
