@@ -6047,7 +6047,25 @@ document.getElementById('ranking-toggle').addEventListener('click', function() {
 					 // 初始化随机背景
     initRandomBackground();
 		    setupWarehouseCloseHandlers();
-			
+			// 🎯 定期同步仓库数据（每30秒检查一次）
+setInterval(() => {
+    const players = JSON.parse(localStorage.getItem('players')) || [];
+    let syncedCount = 0;
+    
+    players.forEach(player => {
+        if (player.goodsCards && player.goodsCards.length > 0) {
+            // 🎯 同步这个玩家的仓库数据
+            syncPlayerWarehouseToSupabase(player);
+            syncedCount++;
+            console.log(`🔄 定期同步: ${player.name} 的 ${player.goodsCards.length} 张货卡`);
+        }
+    });
+    
+    if (syncedCount > 0) {
+        localStorage.setItem('warehouse_refresh_trigger', Date.now());
+        console.log(`✅ 定期同步完成，更新了 ${syncedCount} 个玩家的数据`);
+    }
+}, 30000); // 30秒
 			
 			
 			// 靈石同步功能
@@ -10641,6 +10659,13 @@ function giveGoodsCardsToPlayer(playerIndex) {
         player.goodsCards.push(newCard);
     }
     
+    console.log('🎯 获得新货卡，当前数量:', player.goodsCards.length);
+    
+    // 🎯 添加同步到Supabase
+    syncPlayerWarehouseToSupabase(player);
+    localStorage.setItem('warehouse_refresh_trigger', Date.now());
+    console.log('✅ 获得新货卡后自动同步');
+    
     addEvent(`${player.name} 獲得了 ${cardsToGive} 張幽街貨物交易卡`, 'special');
     savePlayers();
 }
@@ -11498,6 +11523,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
