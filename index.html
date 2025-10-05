@@ -6119,24 +6119,36 @@ function initGame() {
 function setupQRModalEvents() {
     console.log('🔄 初始化QR弹窗事件...');
     
+    // 🎯 先解绑所有事件，避免重复绑定
+    const mobileViewBtn = document.getElementById('mobile-view-btn');
+    const copyLink = document.getElementById('copy-link');
+    
+    if (mobileViewBtn) {
+        mobileViewBtn.replaceWith(mobileViewBtn.cloneNode(true));
+    }
+    if (copyLink) {
+        copyLink.replaceWith(copyLink.cloneNode(true));
+    }
+    
+    // 重新获取元素
     const qrModal = document.getElementById('qr-modal');
     const closeQR = document.getElementById('close-qr');
     const closeQRBtn = document.getElementById('close-qr-btn');
-    const copyLink = document.getElementById('copy-link');
-    const mobileViewBtn = document.getElementById('mobile-view-btn');
+    const copyLinkNew = document.getElementById('copy-link');
+    const mobileViewBtnNew = document.getElementById('mobile-view-btn');
     
     // 调试信息
     console.log('找到的元素:', {
         qrModal: !!qrModal,
         closeQR: !!closeQR,
         closeQRBtn: !!closeQRBtn,
-        copyLink: !!copyLink,
-        mobileViewBtn: !!mobileViewBtn
+        copyLink: !!copyLinkNew,
+        mobileViewBtn: !!mobileViewBtnNew
     });
     
     // 1. 绑定手机查看按钮
-    if (mobileViewBtn) {
-        mobileViewBtn.addEventListener('click', function(e) {
+    if (mobileViewBtnNew) {
+        mobileViewBtnNew.addEventListener('click', function(e) {
             console.log('📱 手机查看按钮被点击');
             e.preventDefault();
             e.stopPropagation();
@@ -6166,9 +6178,8 @@ function setupQRModalEvents() {
             // 显示真实玩家名称
             document.getElementById('qr-player-name').textContent = currentPlayer.name;
             
-            // 🎯 使用本地URL进行测试（因为你在本地测试）
-            const playerId = currentPlayer.id || currentPlayer.uniqueId || currentPlayer.name;
-            generateQRCode(playerId, currentPlayer.name);
+            // 🎯 生成QR码
+            generateQRCode(currentPlayer.id, currentPlayer.name);
             
             // 显示QR码弹窗
             document.getElementById('qr-modal').style.display = 'flex';
@@ -6199,20 +6210,36 @@ function setupQRModalEvents() {
     }
     
     // 4. 绑定复制链接按钮
-    if (copyLink) {
-        copyLink.addEventListener('click', function(e) {
+    if (copyLinkNew) {
+        copyLinkNew.addEventListener('click', function(e) {
             console.log('📋 复制链接按钮被点击');
             e.preventDefault();
             e.stopPropagation();
             
-            const testUrl = 'https://bigcowseatinggrass2025-bit.github.io/yousei-merchant/warehouse.html';
+            if (window.currentPlayerIndex === undefined) {
+                alert('請先打開倉庫！');
+                return;
+            }
             
-            navigator.clipboard.writeText(testUrl).then(function() {
+            const players = JSON.parse(localStorage.getItem('players')) || [];
+            const currentPlayer = players[window.currentPlayerIndex];
+            
+            if (!currentPlayer) {
+                alert('玩家資料錯誤！');
+                return;
+            }
+            
+            // 🎯 修复：使用正确的GitHub链接
+            const warehouseUrl = `https://bigcowseatinggrass2025-bit.github.io/yousei-merchant/warehouse.html?p=${currentPlayer.uniqueId}`;
+            
+            console.log('📋 复制链接:', warehouseUrl);
+            
+            navigator.clipboard.writeText(warehouseUrl).then(function() {
                 alert('✅ 鏈接已複製到剪貼板！');
             }).catch(function() {
                 // 备用方案
                 const textArea = document.createElement('textarea');
-                textArea.value = testUrl;
+                textArea.value = warehouseUrl;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand('copy');
@@ -11410,6 +11437,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
