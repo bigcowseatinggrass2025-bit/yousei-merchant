@@ -513,9 +513,29 @@
             setTimeout(() => this.style.display = 'none', 2000);
         });
 
+        // 🧹 清理函数（放在 loadPlayerDataFromSupabase 前面）
+async function cleanupExpiredWarehouses() {
+    try {
+        const 四小时前 = new Date(Date.now() - 4 * 60 * 60 * 1000);
+        
+        const { error } = await supabaseClient
+            .from('player_warehouses')
+            .delete()
+            .lt('created_at', 四小时前.toISOString());
+        
+        if (!error) {
+            console.log('🧹 已清理4小时前的过期仓库数据');
+        }
+    } catch (error) {
+        console.log('清理数据时出错:', error);
+    }
+}
+
         // 🎯 从Supabase加载真实数据
         async function loadPlayerDataFromSupabase() {
             try {
+                  // 🧹 新增这一行！调用清理函数
+                 await cleanupExpiredWarehouses();
                 console.log('📱 从Supabase加载玩家数据...');
                 console.log('🎯 玩家ID:', playerId);
                 
@@ -758,5 +778,6 @@
     </script>
 </body>
 </html>
+
 
 
