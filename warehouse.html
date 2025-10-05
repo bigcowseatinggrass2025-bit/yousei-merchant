@@ -334,162 +334,187 @@
     </div>
 </div>
 
-    <script>
-       // 在warehouse.html中
-const urlParams = new URLSearchParams(window.location.search);
-const playerId = urlParams.get('p');      // 从Bitly的p参数读取
-const playerName = urlParams.get('n') || '未知玩家'; // 从Bitly的n参数读取
-
-        // 显示玩家信息
-        document.getElementById('player-name').textContent = playerName;
-        document.getElementById('last-updated').textContent = '最後更新: ' + new Date().toLocaleString();
-
-        let currentCards = [];
-
-        // 模拟从Supabase获取数据
-        function loadPlayerGoodsCards() {
-            console.log('加載玩家貨卡數據:', playerId, playerName);
+<script>
+    // 🎯 从Supabase获取真实数据
+    async function loadPlayerDataFromSupabase() {
+        try {
+            console.log('📱 从Supabase加载玩家数据...');
             
-            // 这里暂时显示测试数据，后面会连接Supabase
-            displayTestData();
-        }
-
-        // 显示测试数据
-        function displayTestData() {
-            const testCards = [
-                {
-                    name: "幽魂貨卡",
-                    rarity: "ghost",
-                    goodsCount: 2,
-                    buyPrice: 16,
-                    sellPrice: 50,
-                    goods: [
-                        { name: "番貨", color: "goods-fanhuo" },
-                        { name: "文玩", color: "goods-wenwan" }
-                    ]
-                },
-                {
-                    name: "妖精貨卡", 
-                    rarity: "fairy",
-                    goodsCount: 3,
-                    buyPrice: 25,
-                    sellPrice: 75,
-                    goods: [
-                        { name: "異獸", color: "goods-yishou" },
-                        { name: "鹽鐵", color: "goods-yantie" },
-                        { name: "火器", color: "goods-huoqi" }
-                    ]
-                },
-                {
-                    name: "仙使貨卡",
-                    rarity: "immortal", 
-                    goodsCount: 4,
-                    buyPrice: 45,
-                    sellPrice: 120,
-                    goods: [
-                        { name: "番貨", color: "goods-fanhuo" },
-                        { name: "文玩", color: "goods-wenwan" },
-                        { name: "異獸", color: "goods-yishou" },
-                        { name: "奇物", color: "goods-qiwu" }
-                    ]
-                }
-            ];
-
-            currentCards = testCards;
-            renderCards(testCards);
-        }
-
-        // 显示卡片详情
-        function showCardDetail(cardIndex) {
-            const card = currentCards[cardIndex];
-            if (!card) return;
-
-            // 更新详情面板内容
-            document.getElementById('detail-title').textContent = card.name;
-            document.getElementById('detail-buy-price').textContent = card.buyPrice + '顆';
-            document.getElementById('detail-sell-price').textContent = card.sellPrice + '兩';
+            const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
+            const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             
-            // 更新货物标签
-            const goodsTags = document.getElementById('detail-goods');
-            goodsTags.innerHTML = card.goods.map(good => 
-                `<div class="goods-tag ${good.color}">[${good.name.charAt(0)}]${good.name}</div>`
-            ).join('');
+            const urlParams = new URLSearchParams(window.location.search);
+            const playerId = urlParams.get('p'); // 🎯 从QR码获取英文ID
             
-            // 显示详情面板
-            document.getElementById('detail-panel').style.display = 'block';
-        }
-
-        // 渲染货卡
-        function renderCards(cards) {
-            const container = document.getElementById('cards-container');
+            console.log('🎯 请求玩家ID:', playerId);
             
-            if (cards.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <p>📭 倉庫中沒有貨物交易卡</p>
-                        <p>回到遊戲中獲取更多貨卡吧！</p>
-                    </div>
-                `;
+            if (!playerId) {
+                console.log('❌ 未找到玩家ID参数');
+                displayTestData(); // 备用测试数据
                 return;
             }
-
-            const cardsHtml = cards.map((card, index) => `
-                <div class="warehouse-card ${card.rarity}" onclick="showCardDetail(${index})">
-                    <div class="card-name">${card.name}</div>
-                    <div class="card-goods">
-                        ${card.goods.map(good => 
-                            `<div class="goods-circle ${good.color}" title="${good.name}">${good.name.charAt(0)}</div>`
-                        ).join('')}
-                    </div>
-                    <div class="card-prices">
-                        <div>靈石: ${card.buyPrice}顆</div>
-                        <div>價格: ${card.sellPrice}兩</div>
-                    </div>
-                    <div class="card-rarity">${getRarityName(card.rarity)}</div>
-                </div>
-            `).join('');
-
-            container.innerHTML = `<div class="cards-grid">${cardsHtml}</div>`;
+            
+            // 🎯 从Supabase获取真实数据
+            const { data, error } = await supabase
+                .from('player_warehouses')
+                .select('*')
+                .eq('player_id', playerId);
+                
+            if (error) {
+                console.error('❌ Supabase查询错误:', error);
+                displayTestData(); // 备用方案
+                return;
+            }
+            
+            if (data && data.length > 0) {
+                const playerData = data[0];
+                console.log('✅ 获取到玩家数据:', playerData);
+                
+                // 🎯 显示真实玩家数据
+                document.getElementById('player-name').textContent = playerData.player_name;
+                document.getElementById('last-updated').textContent = '最後更新: ' + new Date(playerData.last_updated).toLocaleString();
+                
+                if (playerData.warehouse_data && playerData.warehouse_data.goodsCards) {
+                    renderCards(playerData.warehouse_data.goodsCards);
+                } else {
+                    renderCards([]);
+                }
+            } else {
+                console.log('❌ 未找到玩家数据');
+                displayTestData(); // 备用方案
+            }
+            
+        } catch (error) {
+            console.error('❌ 数据加载异常:', error);
+            displayTestData(); // 备用方案
         }
+    }
 
-        // 获取稀有度中文名称
-        function getRarityName(rarity) {
-            const rarityNames = {
-                'ghost': '幽魂',
-                'fairy': '妖精', 
-                'immortal': '仙使',
-                'king': '大王',
-                'celestial': '天尊'
-            };
-            return rarityNames[rarity] || rarity;
-        }
+    // 🎯 显示测试数据（备用方案）
+    function displayTestData() {
+        const testCards = [
+            {
+                name: "幽魂貨卡",
+                rarity: "ghost",
+                goodsCount: 2,
+                buyPrice: 16,
+                sellPrice: 50,
+                goods: [
+                    { name: "番貨", color: "goods-fanhuo" },
+                    { name: "文玩", color: "goods-wenwan" }
+                ]
+            },
+            {
+                name: "妖精貨卡", 
+                rarity: "fairy",
+                goodsCount: 3,
+                buyPrice: 25,
+                sellPrice: 75,
+                goods: [
+                    { name: "異獸", color: "goods-yishou" },
+                    { name: "鹽鐵", color: "goods-yantie" },
+                    { name: "火器", color: "goods-huoqi" }
+                ]
+            }
+        ];
 
-        // 关闭详情面板
-        document.getElementById('close-detail').addEventListener('click', function() {
-            document.getElementById('detail-panel').style.display = 'none';
-        });
+        currentCards = testCards;
+        renderCards(testCards);
+        
+        // 显示测试提示
+        document.getElementById('player-name').textContent = '測試模式';
+        document.getElementById('last-updated').textContent = '最後更新: ' + new Date().toLocaleString();
+    }
 
-        // 刷新按钮事件
-        document.getElementById('refresh-btn').addEventListener('click', function() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('cards-container').innerHTML = `
-                <div class="loading">
-                    <p>🔄 刷新資料中...</p>
+    // 🎯 渲染货卡（保持不变）
+    function renderCards(cards) {
+        const container = document.getElementById('cards-container');
+        
+        if (cards.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>📭 倉庫中沒有貨物交易卡</p>
+                    <p>回到遊戲中獲取更多貨卡吧！</p>
                 </div>
             `;
-            
-            setTimeout(() => {
-                loadPlayerGoodsCards();
-                document.getElementById('last-updated').textContent = '最後更新: ' + new Date().toLocaleString();
-                document.getElementById('detail-panel').style.display = 'none';
-            }, 1000);
-        });
+            return;
+        }
 
-        // 页面加载时获取数据
-        window.addEventListener('load', function() {
-            setTimeout(loadPlayerGoodsCards, 500);
-        });
-    </script>
+        const cardsHtml = cards.map((card, index) => `
+            <div class="warehouse-card ${card.rarity}" onclick="showCardDetail(${index})">
+                <div class="card-name">${card.name}</div>
+                <div class="card-goods">
+                    ${card.goods.map(good => 
+                        `<div class="goods-circle ${good.color}" title="${good.name}">${good.name.charAt(0)}</div>`
+                    ).join('')}
+                </div>
+                <div class="card-prices">
+                    <div>靈石: ${card.buyPrice}顆</div>
+                    <div>價格: ${card.sellPrice}兩</div>
+                </div>
+                <div class="card-rarity">${getRarityName(card.rarity)}</div>
+            </div>
+        `).join('');
+
+        container.innerHTML = `<div class="cards-grid">${cardsHtml}</div>`;
+    }
+
+    // 🎯 显示卡片详情（保持不变）
+    function showCardDetail(cardIndex) {
+        const card = currentCards[cardIndex];
+        if (!card) return;
+
+        document.getElementById('detail-title').textContent = card.name;
+        document.getElementById('detail-buy-price').textContent = card.buyPrice + '顆';
+        document.getElementById('detail-sell-price').textContent = card.sellPrice + '兩';
+        
+        const goodsTags = document.getElementById('detail-goods');
+        goodsTags.innerHTML = card.goods.map(good => 
+            `<div class="goods-tag ${good.color}">[${good.name.charAt(0)}]${good.name}</div>`
+        ).join('');
+        
+        document.getElementById('detail-panel').style.display = 'block';
+    }
+
+    // 🎯 获取稀有度中文名称（保持不变）
+    function getRarityName(rarity) {
+        const rarityNames = {
+            'ghost': '幽魂',
+            'fairy': '妖精', 
+            'immortal': '仙使',
+            'king': '大王',
+            'celestial': '天尊'
+        };
+        return rarityNames[rarity] || rarity;
+    }
+
+    let currentCards = [];
+
+    // 🎯 关闭详情面板
+    document.getElementById('close-detail').addEventListener('click', function() {
+        document.getElementById('detail-panel').style.display = 'none';
+    });
+
+    // 🎯 刷新按钮事件 - 改为重新加载Supabase数据
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        document.getElementById('cards-container').innerHTML = `
+            <div class="loading">
+                <p>🔄 刷新資料中...</p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            loadPlayerDataFromSupabase();
+        }, 1000);
+    });
+
+    // 🎯 页面加载时获取真实数据
+    window.addEventListener('load', function() {
+        setTimeout(loadPlayerDataFromSupabase, 500);
+    });
+</script>
 </body>
 
 </html>
+
