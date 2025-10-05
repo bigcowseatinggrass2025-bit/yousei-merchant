@@ -545,7 +545,7 @@ function showCardDetail(cardIndex) {
     window.addEventListener('load', function() {
         setTimeout(loadPlayerDataFromSupabase, 500);
     });
-    // 🎯 直接在这里粘贴自动刷新代码块
+// 🎯 自动刷新数据 - 完整版本
 let autoRefreshInterval;
 
 function startAutoRefresh() {
@@ -553,13 +553,12 @@ function startAutoRefresh() {
         clearInterval(autoRefreshInterval);
     }
     
-    // 设置为10秒刷新一次（平衡实时性和性能）
-autoRefreshInterval = setInterval(() => {
-    console.log('🔄 自动刷新数据...');
-    loadPlayerDataFromSupabase();
-}, 10000); // 10秒
+    autoRefreshInterval = setInterval(() => {
+        console.log('🔄 自动刷新数据...');
+        loadPlayerDataFromSupabase();
+    }, 10000); // 10秒
     
-    console.log('✅ 自动刷新已启动（20秒间隔）');
+    console.log('✅ 自动刷新已启动（10秒间隔）');
 }
 
 function stopAutoRefresh() {
@@ -570,6 +569,15 @@ function stopAutoRefresh() {
     }
 }
 
+// 🎯 监听主游戏的刷新触发
+window.addEventListener('storage', function(event) {
+    if (event.key === 'warehouse_refresh_trigger') {
+        console.log('📢 收到主游戏刷新指令，立即刷新数据');
+        loadPlayerDataFromSupabase();
+    }
+});
+
+// 页面可见性控制
 document.addEventListener('visibilitychange', function() {
     if (document.hidden) {
         stopAutoRefresh();
@@ -578,6 +586,7 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
+// 页面加载时启动
 window.addEventListener('load', function() {
     loadPlayerDataFromSupabase();
     setTimeout(() => {
@@ -585,34 +594,16 @@ window.addEventListener('load', function() {
     }, 3000);
 });
 
+// 刷新按钮事件
 document.getElementById('refresh-btn').addEventListener('click', function() {
     console.log('🔄 手动刷新数据');
     loadPlayerDataFromSupabase();
 });
-    // 🎯 监听主游戏的刷新触发
-window.addEventListener('storage', function(event) {
-    if (event.key === 'warehouse_refresh_trigger') {
-        console.log('📢 收到主游戏刷新指令，立即刷新数据');
-        loadPlayerDataFromSupabase();
-    }
-});
-
-// 🎯 监听当前页面的storage事件（同源页面通信）
-window.addEventListener('storage', function(event) {
-    if (event.key === 'warehouse_manual_refresh') {
-        console.log('🔄 手动触发刷新');
-        loadPlayerDataFromSupabase();
-    }
-});
-
-// 🎯 添加手动触发函数（供其他页面调用）
-function triggerManualRefresh() {
-    localStorage.setItem('warehouse_manual_refresh', Date.now());
-}
 </script>
 </body>
 
 </html>
+
 
 
 
