@@ -438,27 +438,43 @@
         document.getElementById('last-updated').textContent = '最後更新: ' + new Date().toLocaleString();
     }
 
-    // 🎯 渲染货卡（保持不变）
-    function renderCards(cards) {
-        const container = document.getElementById('cards-container');
-        
-        if (cards.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <p>📭 倉庫中沒有貨物交易卡</p>
-                    <p>回到遊戲中獲取更多貨卡吧！</p>
-                </div>
-            `;
-            return;
-        }
+    // 🎯 添加货物名称完整映射
+const goodsNameMapping = {
+    "番": "番貨",
+    "文": "文玩", 
+    "異": "異獸",
+    "鹽": "鹽錠",
+    "炮": "火器",
+    "奇": "奇物"
+};
 
-        const cardsHtml = cards.map((card, index) => `
+// 🎯 修改renderCards函数中的货物显示
+function renderCards(cards) {
+    const container = document.getElementById('cards-container');
+    
+    if (!cards || cards.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>📭 倉庫中沒有貨物交易卡</p>
+                <p>回到遊戲中獲取更多貨卡吧！</p>
+            </div>
+        `;
+        return;
+    }
+
+    currentCards = cards;
+    console.log('🎯 渲染真實卡片數據:', cards);
+
+    const cardsHtml = cards.map((card, index) => {
+        return `
             <div class="warehouse-card ${card.rarity}" onclick="showCardDetail(${index})">
                 <div class="card-name">${card.name}</div>
                 <div class="card-goods">
-                    ${card.goods.map(good => 
-                        `<div class="goods-circle ${good.color}" title="${good.name}">${good.name.charAt(0)}</div>`
-                    ).join('')}
+                    ${card.goods.map(good => {
+                        const shortName = good.name;
+                        const fullName = goodsNameMapping[shortName] || shortName;
+                        return `<div class="goods-circle ${good.color}" title="${fullName}">${shortName}</div>`;
+                    }).join('')}
                 </div>
                 <div class="card-prices">
                     <div>靈石: ${card.buyPrice}顆</div>
@@ -466,27 +482,32 @@
                 </div>
                 <div class="card-rarity">${getRarityName(card.rarity)}</div>
             </div>
-        `).join('');
+        `;
+    }).join('');
 
-        container.innerHTML = `<div class="cards-grid">${cardsHtml}</div>`;
-    }
+    container.innerHTML = `<div class="cards-grid">${cardsHtml}</div>`;
+}
 
-    // 🎯 显示卡片详情（保持不变）
-    function showCardDetail(cardIndex) {
-        const card = currentCards[cardIndex];
-        if (!card) return;
+// 🎯 修改showCardDetail函数
+function showCardDetail(cardIndex) {
+    const card = currentCards[cardIndex];
+    if (!card) return;
 
-        document.getElementById('detail-title').textContent = card.name;
-        document.getElementById('detail-buy-price').textContent = card.buyPrice + '顆';
-        document.getElementById('detail-sell-price').textContent = card.sellPrice + '兩';
-        
-        const goodsTags = document.getElementById('detail-goods');
-        goodsTags.innerHTML = card.goods.map(good => 
-            `<div class="goods-tag ${good.color}">[${good.name.charAt(0)}]${good.name}</div>`
-        ).join('');
-        
-        document.getElementById('detail-panel').style.display = 'block';
-    }
+    console.log('🎯 顯示卡片詳情:', card);
+
+    document.getElementById('detail-title').textContent = card.name;
+    document.getElementById('detail-buy-price').textContent = card.buyPrice + '顆';
+    document.getElementById('detail-sell-price').textContent = card.sellPrice + '兩';
+    
+    const goodsTags = document.getElementById('detail-goods');
+    goodsTags.innerHTML = card.goods.map(good => {
+        const shortName = good.name;
+        const fullName = goodsNameMapping[shortName] || shortName;
+        return `<div class="goods-tag ${good.color}">[${shortName}]${fullName}</div>`;
+    }).join('');
+    
+    document.getElementById('detail-panel').style.display = 'block';
+}
 
     // 🎯 获取稀有度中文名称（保持不变）
     function getRarityName(rarity) {
@@ -528,5 +549,6 @@
 </body>
 
 </html>
+
 
 
