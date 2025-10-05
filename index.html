@@ -5939,7 +5939,6 @@ async function syncPlayerWarehouseToSupabase(player) {
         return false;
     }
 }
-// 🎯 修改QR码生成函数
 function generateQRCode(playerId, playerName) {
     const players = JSON.parse(localStorage.getItem('players')) || [];
     const currentPlayer = players[window.currentPlayerIndex];
@@ -5949,7 +5948,7 @@ function generateQRCode(playerId, playerName) {
         return;
     }
     
-    // 🎯 确保玩家有uniqueId，如果没有就生成
+    // 🎯 确保玩家有uniqueId
     if (!currentPlayer.uniqueId) {
         currentPlayer.uniqueId = 'p' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
         localStorage.setItem('players', JSON.stringify(players));
@@ -5958,10 +5957,10 @@ function generateQRCode(playerId, playerName) {
     // 🎯 同步数据到Supabase
     syncPlayerWarehouseToSupabase(currentPlayer);
     
-    // 🎯 使用新的Bitly链接
-    const warehouseUrl = `http://bit.ly/yg-warehouse?p=${currentPlayer.uniqueId}`;
+    // 🎯 直接使用GitHub链接（放弃Bitly）
+    const warehouseUrl = `https://bigcowseatinggrass2025-bit.github.io/yousei-merchant/warehouse.html?p=${currentPlayer.uniqueId}`;
     
-    console.log('🎯 新Bitly QR码URL:', warehouseUrl);
+    console.log('🎯 直接GitHub QR码URL:', warehouseUrl);
     
     const qrCodeContainer = document.getElementById('qrcode');
     if (qrCodeContainer) {
@@ -11411,6 +11410,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
