@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的幽街貨卡倉庫</title>
+    <!-- 🎯 添加Supabase库引用 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* 手机端专用样式 */
         * {
@@ -319,143 +321,91 @@
             color: #bbb;
             font-size: 0.9rem;
         }
-		
-		
-/* 添加隐私保护遮罩样式 */
-.privacy-mask {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1a2a3a, #2c3e50);
-    z-index: 9999;
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: #ffd700;
-    font-size: 2rem;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-}
 
+        /* 隐私保护遮罩样式 */
+        .privacy-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a2a3a, #0d1b2a);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ffd700;
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
 
+        .privacy-mask::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            opacity: 0.3;
+        }
 
-.privacy-text {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    font-size: 4rem;
-    font-weight: bold;
-    letter-spacing: 15px;
-    animation: pulse 2s infinite;
-}
+        .privacy-mask.show {
+            opacity: 1;
+        }
 
-.privacy-hint {
-    position: absolute;
-    bottom: 100px;
-    color: #bbb;
-    font-size: 1rem;
-    text-align: center;
-}
+        .privacy-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 4rem;
+            font-weight: bold;
+            letter-spacing: 15px;
+            animation: pulse 2s infinite;
+            z-index: 1;
+        }
 
-@keyframes pulse {
-    0% { opacity: 0.7; }
-    50% { opacity: 1; }
-    100% { opacity: 0.7; }
-}
+        .privacy-hint {
+            position: absolute;
+            bottom: 100px;
+            color: #bbb;
+            font-size: 1rem;
+            text-align: center;
+            z-index: 1;
+        }
 
-/* 幽街浮动按钮 */
-.youjie-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #ffd700, #ffed4e);
-    border: none;
-    border-radius: 50%;
-    color: #1a2a3a;
-    font-size: 0.9rem;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 1000;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-    transition: all 0.3s ease;
-}
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
 
-.youjie-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
-}
-.privacy-mask {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1a2a3a, #0d1b2a);
-    z-index: 9999;
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: #ffd700;
-    font-size: 2rem;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-    opacity: 0;
-    transition: opacity 2s ease;
-}
+        /* 幽街浮动按钮 */
+        .youjie-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border: none;
+            border-radius: 50%;
+            color: #1a2a3a;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            transition: all 0.3s ease;
+        }
 
-.privacy-mask::before {
-    content: '';
-    position: absolute;
-    top: 20px;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-    border: 2px solid #ffd700;
-    border-radius: 10px;
-    opacity: 0.3;
-}
-
-.privacy-mask.show {
-    opacity: 1;
-}
-
-.privacy-text {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    font-size: 4rem;
-    font-weight: bold;
-    letter-spacing: 15px;
-    animation: pulse 2s infinite;
-    z-index: 1;
-}
-
-.privacy-hint {
-    position: absolute;
-    bottom: 100px;
-    color: #bbb;
-    font-size: 1rem;
-    text-align: center;
-    z-index: 1;
-}
-
-@keyframes pulse {
-    0% { opacity: 0.7; }
-    50% { opacity: 1; }
-    100% { opacity: 0.7; }
-}
-/*淡入淡出效果*/
-.privacy-mask {
-    opacity: 0;
-    transition: opacity 2s ease;
-}
-.privacy-mask.show {
-    opacity: 1;
-}
-
-
+        .youjie-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
     </style>
 </head>
 <body>
@@ -511,12 +461,11 @@
         
         <div class="footer">
             <p>幽街商人 - 手機倉庫查看</p>
-            <p>數據自動更新 | v1.1</p>
+            <p>數據自動更新 | v1.2</p>
         </div>
     </div>
-	
-	
-	    <!-- 新增的隐私保护元素 -->
+    
+    <!-- 新增的隐私保护元素 -->
     <div class="privacy-mask" id="privacy-mask">
         <div class="privacy-text">幽街商人</div>
         <div class="privacy-hint">點擊螢幕返回</div>
@@ -525,10 +474,16 @@
     <button class="youjie-btn" id="youjie-btn">幽街</button>
 
     <script>
-        // 从URL获取玩家信息
+        // 🎯 在脚本最顶部创建Supabase客户端
+        const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 从URL获取玩家信息 - 修复参数名
         const urlParams = new URLSearchParams(window.location.search);
-        const playerId = urlParams.get('p');
-        const playerName = urlParams.get('name') || '未知玩家';
+        const playerId = urlParams.get('p'); // 修复：改为 'p'
+        const playerName = urlParams.get('name') || '幽街商人'; // 修复：默认名称
 
         // 显示玩家信息
         document.getElementById('player-name').textContent = playerName;
@@ -538,36 +493,77 @@
         
         // 货物名称映射
         const goodsNameMapping = {
-            '番': '番貨',
-            '文': '文玩', 
-            '異': '異獸',
-            '鹽': '鹽鐵',
-            '火': '火器',
-            '奇': '奇物'
+            "番": "番貨",
+            "文": "文玩", 
+            "異": "異獸",
+            "鹽": "鹽錠",
+            "炮": "火器",
+            "奇": "奇物"
         };
-		
-		// 幽街按钮点击显示遮罩
-document.getElementById('youjie-btn').addEventListener('click', function() {
-    const mask = document.getElementById('privacy-mask');
-    mask.style.display = 'flex';
-    setTimeout(() => mask.classList.add('show'), 10);
-});
 
-// 点击遮罩返回
-document.getElementById('privacy-mask').addEventListener('click', function() {
-    this.classList.remove('show');
-    setTimeout(() => this.style.display = 'none', 2000);
-});
+        // 🎯 隐私保护功能
+        document.getElementById('youjie-btn').addEventListener('click', function() {
+            const mask = document.getElementById('privacy-mask');
+            mask.style.display = 'flex';
+            setTimeout(() => mask.classList.add('show'), 10);
+        });
 
-        // 模拟从Supabase获取数据
-        function loadPlayerGoodsCards() {
-            console.log('加載玩家貨卡數據:', playerId, playerName);
-            
-            // 这里暂时显示测试数据，后面会连接Supabase
-            displayTestData();
+        document.getElementById('privacy-mask').addEventListener('click', function() {
+            this.classList.remove('show');
+            setTimeout(() => this.style.display = 'none', 2000);
+        });
+
+        // 🎯 从Supabase加载真实数据
+        async function loadPlayerDataFromSupabase() {
+            try {
+                console.log('📱 从Supabase加载玩家数据...');
+                console.log('🎯 玩家ID:', playerId);
+                
+                if (!playerId) {
+                    console.log('❌ 未找到玩家ID参数');
+                    displayTestData();
+                    return;
+                }
+                
+                const { data, error } = await supabaseClient
+                    .from('player_warehouses')
+                    .select('*')
+                    .eq('player_id', playerId);
+                    
+                console.log('🔍 Supabase响应:', { data, error });
+                
+                if (error) {
+                    console.error('❌ Supabase查询错误:', error);
+                    displayTestData();
+                    return;
+                }
+                
+                if (data && data.length > 0) {
+                    const playerData = data[0];
+                    console.log('✅ 获取到玩家数据:', playerData);
+                    
+                    document.getElementById('player-name').textContent = playerData.player_name || playerName;
+                    document.getElementById('last-updated').textContent = '最後更新: ' + new Date(playerData.last_updated).toLocaleString();
+                    
+                    if (playerData.warehouse_data && playerData.warehouse_data.goodsCards) {
+                        console.log('🎯 渲染真实货卡数据:', playerData.warehouse_data.goodsCards);
+                        renderCards(playerData.warehouse_data.goodsCards);
+                    } else {
+                        console.log('⚠️ 仓库数据为空');
+                        renderCards([]);
+                    }
+                } else {
+                    console.log('❌ 未找到玩家数据');
+                    displayTestData();
+                }
+                
+            } catch (error) {
+                console.error('❌ 数据加载异常:', error);
+                displayTestData();
+            }
         }
 
-        // 显示测试数据
+        // 🎯 显示测试数据（备用方案）
         function displayTestData() {
             const testCards = [
                 {
@@ -592,53 +588,14 @@ document.getElementById('privacy-mask').addEventListener('click', function() {
                         { name: "鹽", color: "goods-yantie" },
                         { name: "火", color: "goods-huoqi" }
                     ]
-                },
-                {
-                    name: "仙使貨卡",
-                    rarity: "immortal", 
-                    goodsCount: 4,
-                    buyPrice: 45,
-                    sellPrice: 120,
-                    goods: [
-                        { name: "番", color: "goods-fanhuo" },
-                        { name: "文", color: "goods-wenwan" },
-                        { name: "異", color: "goods-yishou" },
-                        { name: "奇", color: "goods-qiwu" }
-                    ]
-                },
-                {
-                    name: "大王貨卡",
-                    rarity: "king",
-                    goodsCount: 5,
-                    buyPrice: 80,
-                    sellPrice: 200,
-                    goods: [
-                        { name: "番", color: "goods-fanhuo" },
-                        { name: "文", color: "goods-wenwan" },
-                        { name: "異", color: "goods-yishou" },
-                        { name: "鹽", color: "goods-yantie" },
-                        { name: "火", color: "goods-huoqi" }
-                    ]
-                },
-                {
-                    name: "天尊貨卡",
-                    rarity: "celestial",
-                    goodsCount: 6,
-                    buyPrice: 150,
-                    sellPrice: 350,
-                    goods: [
-                        { name: "番", color: "goods-fanhuo" },
-                        { name: "文", color: "goods-wenwan" },
-                        { name: "異", color: "goods-yishou" },
-                        { name: "鹽", color: "goods-yantie" },
-                        { name: "火", color: "goods-huoqi" },
-                        { name: "奇", color: "goods-qiwu" }
-                    ]
                 }
             ];
 
             currentCards = testCards;
             renderCards(testCards);
+            
+            document.getElementById('player-name').textContent = playerName + ' (測試模式)';
+            document.getElementById('last-updated').textContent = '最後更新: ' + new Date().toLocaleString();
         }
 
         // 🎯 标签筛选功能
@@ -647,9 +604,7 @@ document.getElementById('privacy-mask').addEventListener('click', function() {
             
             filterTabs.forEach(tab => {
                 tab.addEventListener('click', function() {
-                    // 移除所有active类
                     filterTabs.forEach(t => t.classList.remove('active'));
-                    // 添加当前active类
                     this.classList.add('active');
                     
                     const filter = this.dataset.filter;
@@ -680,19 +635,17 @@ document.getElementById('privacy-mask').addEventListener('click', function() {
             const card = currentCards[cardIndex];
             if (!card) return;
 
-            // 更新详情面板内容
             document.getElementById('detail-title').textContent = card.name;
             document.getElementById('detail-buy-price').textContent = card.buyPrice + '顆';
             document.getElementById('detail-sell-price').textContent = card.sellPrice + '兩';
             
-            // 更新货物标签
             const goodsTags = document.getElementById('detail-goods');
             goodsTags.innerHTML = card.goods.map(good => {
-                const fullName = goodsNameMapping[good.name] || good.name;
-                return `<div class="goods-tag ${good.color}">${fullName}</div>`;
+                const shortName = good.name;
+                const fullName = goodsNameMapping[shortName] || shortName;
+                return `<div class="goods-tag ${good.color}">[${shortName}]${fullName}</div>`;
             }).join('');
             
-            // 显示详情面板
             document.getElementById('detail-panel').style.display = 'block';
         }
 
@@ -718,8 +671,9 @@ document.getElementById('privacy-mask').addEventListener('click', function() {
                         <div class="card-name">${card.name}</div>
                         <div class="card-goods">
                             ${card.goods.map(good => {
-                                const fullName = goodsNameMapping[good.name] || good.name;
-                                return `<div class="goods-circle ${good.color}" title="${fullName}">${good.name}</div>`;
+                                const shortName = good.name;
+                                const fullName = goodsNameMapping[shortName] || shortName;
+                                return `<div class="goods-circle ${good.color}" title="${fullName}">${shortName}</div>`;
                             }).join('')}
                         </div>
                         <div class="card-prices">
@@ -733,7 +687,7 @@ document.getElementById('privacy-mask').addEventListener('click', function() {
 
             container.innerHTML = `<div class="cards-grid">${cardsHtml}</div>`;
             
-            // 🎯 初始化筛选功能
+            // 初始化筛选功能
             setTimeout(() => {
                 setupFilterTabs();
             }, 100);
@@ -756,29 +710,49 @@ document.getElementById('privacy-mask').addEventListener('click', function() {
             document.getElementById('detail-panel').style.display = 'none';
         });
 
+        // 🎯 自动刷新数据
+        let autoRefreshInterval;
+
+        function startAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            
+            autoRefreshInterval = setInterval(() => {
+                console.log('🔄 自动刷新数据...');
+                loadPlayerDataFromSupabase();
+            }, 10000);
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
         // 刷新按钮事件
         document.getElementById('refresh-btn').addEventListener('click', function() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('cards-container').innerHTML = `
-                <div class="loading">
-                    <p>🔄 刷新資料中...</p>
-                </div>
-            `;
-            
-            setTimeout(() => {
-                loadPlayerGoodsCards();
-                document.getElementById('last-updated').textContent = '最後更新: ' + new Date().toLocaleString();
-                document.getElementById('detail-panel').style.display = 'none';
-            }, 1000);
+            console.log('🔄 手动刷新数据');
+            loadPlayerDataFromSupabase();
         });
 
-         修复加载函数
-window.addEventListener('load', function() {
-    setTimeout(loadPlayerDataFromSupabase, 500);  // 改成 loadPlayerDataFromSupabase
-});
+        // 页面可见性控制
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopAutoRefresh();
+            } else {
+                startAutoRefresh();
+            }
+        });
+
+        // 🎯 页面加载时获取真实数据
+        window.addEventListener('load', function() {
+            loadPlayerDataFromSupabase();
+            setTimeout(() => {
+                startAutoRefresh();
+            }, 3000);
+        });
     </script>
-	
 </body>
 </html>
-
-
