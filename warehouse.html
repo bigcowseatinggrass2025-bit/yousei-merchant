@@ -527,7 +527,7 @@
     <script>
         // 从URL获取玩家信息
         const urlParams = new URLSearchParams(window.location.search);
-        const playerId = urlParams.get('player');
+        const playerId = urlParams.get('p');
         const playerName = urlParams.get('name') || '未知玩家';
 
         // 显示玩家信息
@@ -780,3 +780,4 @@ document.getElementById('privacy-mask').addEventListener('click', function() {
 	
 </body>
 </html>
+
