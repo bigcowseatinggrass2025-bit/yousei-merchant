@@ -539,19 +539,21 @@
                 }
                 
                 if (data && data.length > 0) {
-                    const playerData = data[0];
-                    console.log('✅ 获取到玩家数据:', playerData);
-                    
-                    document.getElementById('player-name').textContent = playerData.player_name || playerName;
-                    document.getElementById('last-updated').textContent = '最後更新: ' + new Date(playerData.last_updated).toLocaleString();
-                    
-                    if (playerData.warehouse_data && playerData.warehouse_data.goodsCards) {
-                        console.log('🎯 渲染真实货卡数据:', playerData.warehouse_data.goodsCards);
-                        renderCards(playerData.warehouse_data.goodsCards);
-                    } else {
-                        console.log('⚠️ 仓库数据为空');
-                        renderCards([]);
-                    }
+    const playerData = data[0];
+    console.log('✅ 获取到玩家数据:', playerData);
+    
+    document.getElementById('player-name').textContent = playerData.player_name || playerName;
+    // 修复：添加这行来更新时间显示
+    document.getElementById('last-updated').textContent = '最後更新: ' + new Date().toLocaleString();
+    
+    if (playerData.warehouse_data && playerData.warehouse_data.goodsCards) {
+        console.log('🎯 渲染真实货卡数据:', playerData.warehouse_data.goodsCards);
+        renderCards(playerData.warehouse_data.goodsCards);
+    } else {
+        console.log('⚠️ 仓库数据为空');
+        renderCards([]);
+    }
+}
                 } else {
                     console.log('❌ 未找到玩家数据');
                     displayTestData();
@@ -756,3 +758,4 @@
     </script>
 </body>
 </html>
+
