@@ -9818,7 +9818,7 @@ function useGoodsCard() {
     // 更新玩家的靈石數量
     updatePlayerSpiritStones(player.name, spiritStonesReward);
 	
-	 if (!player.spiritStones) player.spiritStones = 0;
+    if (!player.spiritStones) player.spiritStones = 0;
     player.spiritStones += spiritStonesReward;
     
     // 65%機率觸發酒鬼遊戲
@@ -9838,11 +9838,15 @@ function useGoodsCard() {
     
     savePlayers();
     renderPlayers();
+    
+    // 🎯 在這裡添加自動同步
+    syncPlayerWarehouseToSupabase(player);
+    console.log('✅ 貨卡使用後自動同步到 Supabase');
+    
     warehouseModal.style.display = 'none';
     
     selectedGoodsCardId = null;
 }
-
 function triggerDrunkardGame(playerIndex) {
     currentPlayerForDrunkard = playerIndex;
     const player = players[playerIndex];
@@ -11490,6 +11494,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
