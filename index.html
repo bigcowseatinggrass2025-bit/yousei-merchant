@@ -9831,6 +9831,14 @@ function useGoodsCard() {
     // 移除使用的卡片
     player.goodsCards.splice(selectedGoodsCardId, 1);
     
+    // 🎯 同步数据到Supabase（只调用一次）
+    syncPlayerWarehouseToSupabase(player);
+    console.log('✅ 货卡使用后自动同步到 Supabase');
+    
+    // 🎯 触发手机页面刷新（通过Storage Event）
+    localStorage.setItem('warehouse_refresh_trigger', Date.now());
+    console.log('📢 触发手机页面刷新');
+    
     // 隱藏選中信息
     document.getElementById('selected-card-info').style.display = 'none';
     
@@ -9838,10 +9846,6 @@ function useGoodsCard() {
     
     savePlayers();
     renderPlayers();
-    
-    // 🎯 在這裡添加自動同步
-    syncPlayerWarehouseToSupabase(player);
-    console.log('✅ 貨卡使用後自動同步到 Supabase');
     
     warehouseModal.style.display = 'none';
     
@@ -11494,6 +11498,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
