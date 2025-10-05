@@ -5939,20 +5939,20 @@ async function syncPlayerWarehouseToSupabase(player) {
     }
 }
 function generateQRCode(playerId, playerName) {
-    // 🎯 修复：使用完整的线上URL
-    const warehouseUrl = `https://bigcowseatinggrass2025-bit.github.io/yousei-merchant/warehouse.html?player=${playerId || playerName}&name=${encodeURIComponent(playerName)}`;
+    const players = JSON.parse(localStorage.getItem('players')) || [];
+    const currentPlayer = players[window.currentPlayerIndex];
     
-    console.log('🎯 生成QR码URL:', warehouseUrl);
+    // 🎯 使用Bitly短链接 + 短参数
+    const effectiveId = currentPlayer?.uniqueId || playerId || 'unknown';
+    const shortName = playerName.length > 6 ? playerName.substring(0, 6) : playerName;
+    
+    const warehouseUrl = `http://bit.ly/42oSdlr?p=${effectiveId}&n=${shortName}`;
+    
+    console.log('🎯 Bitly QR码URL:', warehouseUrl);
     
     const qrCodeContainer = document.getElementById('qrcode');
     if (qrCodeContainer) {
         qrCodeContainer.innerHTML = '';
-        
-        if (typeof QRCode === 'undefined') {
-            console.error('❌ QRCode库未加载！');
-            return;
-        }
-        
         new QRCode(qrCodeContainer, {
             text: warehouseUrl,
             width: 200,
@@ -5962,7 +5962,7 @@ function generateQRCode(playerId, playerName) {
             correctLevel: QRCode.CorrectLevel.L
         });
         
-        console.log('✅ QR码生成成功');
+        console.log('✅ Bitly QR码生成成功');
     }
 }
 	
@@ -11398,6 +11398,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
