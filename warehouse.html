@@ -545,10 +545,54 @@ function showCardDetail(cardIndex) {
     window.addEventListener('load', function() {
         setTimeout(loadPlayerDataFromSupabase, 500);
     });
+    // 🎯 直接在这里粘贴自动刷新代码块
+let autoRefreshInterval;
+
+function startAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+    
+    autoRefreshInterval = setInterval(() => {
+        console.log('🔄 自动刷新数据...');
+        loadPlayerDataFromSupabase();
+    }, 20000);
+    
+    console.log('✅ 自动刷新已启动（20秒间隔）');
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+        console.log('⏹️ 自动刷新已停止');
+    }
+}
+
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        stopAutoRefresh();
+    } else {
+        startAutoRefresh();
+    }
+});
+
+window.addEventListener('load', function() {
+    loadPlayerDataFromSupabase();
+    setTimeout(() => {
+        startAutoRefresh();
+    }, 3000);
+});
+
+document.getElementById('refresh-btn').addEventListener('click', function() {
+    console.log('🔄 手动刷新数据');
+    loadPlayerDataFromSupabase();
+});
 </script>
 </body>
 
 </html>
+
 
 
 
