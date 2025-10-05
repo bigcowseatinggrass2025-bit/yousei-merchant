@@ -5958,10 +5958,10 @@ function generateQRCode(playerId, playerName) {
     // 🎯 同步数据到Supabase
     syncPlayerWarehouseToSupabase(currentPlayer);
     
-    // 🎯 超短QR码URL（只传递英文ID）
-    const warehouseUrl = `http://bit.ly/42oSdlr?p=${currentPlayer.uniqueId}`;
+    // 🎯 使用新的Bitly链接
+    const warehouseUrl = `http://bit.ly/yg-warehouse?p=${currentPlayer.uniqueId}`;
     
-    console.log('🎯 超短QR码URL:', warehouseUrl);
+    console.log('🎯 新Bitly QR码URL:', warehouseUrl);
     
     const qrCodeContainer = document.getElementById('qrcode');
     if (qrCodeContainer) {
@@ -11411,6 +11411,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
