@@ -5491,7 +5491,7 @@
 
 
     
-<!-- 仓库模态框结构 -->
+ <!-- 仓库模态框结构 -->
 <div class="warehouse-modal" id="warehouse-modal">
     <div class="warehouse-content">
         <!-- 右上角区域 -->
@@ -5502,39 +5502,39 @@
         <h2>幽街貨物倉庫</h2>
         <p>您獲得的幽街貨物交易卡</p>
         
-        <!-- 🎯 在这里添加卡片信息显示区域 -->
-        <div id="selected-card-info" class="selected-card-info" style="display: none;">
-            <h3>選中貨卡信息</h3>
-            <div class="card-info-content">
-                <div class="card-info-row">
-                    <span>名稱:</span>
-                    <span id="card-info-name">-</span>
-                </div>
-                <div class="card-info-row">
-                    <span>稀有度:</span>
-                    <span id="card-info-rarity">-</span>
-                </div>
-                <div class="card-info-row">
-                    <span>貨物:</span>
-                    <div id="card-info-goods" class="card-info-goods"></div>
-                </div>
-                <div class="card-info-row">
-                    <span>獲得靈石:</span>
-                    <span id="card-info-buy-price">-</span>
-                </div>
-                <div class="card-info-row">
-                    <span>賣出價格:</span>
-                    <span id="card-info-sell-price">-</span>
-                </div>
-            </div>
-        </div>
-        
         <!-- 错误信息显示 -->
         <div id="warehouse-error" class="error-message"></div>
         
         <!-- 仓库卡片区域 -->
         <div class="warehouse-cards" id="warehouse-cards">
             <!-- 货卡内容 -->
+        </div>
+        
+        <!-- 🎯 移到卡片库下面，简化显示 -->
+        <div id="selected-card-info" class="selected-card-info" style="display: none; margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+            
+            <div>
+                <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                    <span style="color: #bbb;">名稱:</span>
+                    <span id="card-info-name">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                    <span style="color: #bbb;">稀有度:</span>
+                    <span id="card-info-rarity">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                    <span style="color: #bbb;">貨物:</span>
+                    <div id="card-info-goods" style="display: flex; gap: 5px;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                    <span style="color: #bbb;">獲得靈石:</span>
+                    <span id="card-info-buy-price">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                    <span style="color: #bbb;">賣出價格:</span>
+                    <span id="card-info-sell-price">-</span>
+                </div>
+            </div>
         </div>
         
         <!-- 操作按钮保持在底部 -->
@@ -11490,6 +11490,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
