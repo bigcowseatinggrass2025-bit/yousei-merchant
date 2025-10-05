@@ -772,12 +772,13 @@ document.getElementById('privacy-mask').addEventListener('click', function() {
             }, 1000);
         });
 
-        // 页面加载时获取数据
-        window.addEventListener('load', function() {
-            setTimeout(loadPlayerGoodsCards, 500);
-        });
+         修复加载函数
+window.addEventListener('load', function() {
+    setTimeout(loadPlayerDataFromSupabase, 500);  // 改成 loadPlayerDataFromSupabase
+});
     </script>
 	
 </body>
 </html>
+
 
