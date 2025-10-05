@@ -335,10 +335,10 @@
 </div>
 
     <script>
-        // 从URL获取玩家信息
-        const urlParams = new URLSearchParams(window.location.search);
-        const playerId = urlParams.get('player');
-        const playerName = urlParams.get('name') || '未知玩家';
+       // 在warehouse.html中
+const urlParams = new URLSearchParams(window.location.search);
+const playerId = urlParams.get('p');      // 从Bitly的p参数读取
+const playerName = urlParams.get('n') || '未知玩家'; // 从Bitly的n参数读取
 
         // 显示玩家信息
         document.getElementById('player-name').textContent = playerName;
@@ -491,4 +491,5 @@
         });
     </script>
 </body>
+
 </html>
