@@ -5938,18 +5938,20 @@ async function syncPlayerWarehouseToSupabase(player) {
         return false;
     }
 }
-// 🎯 QR码生成函数
 function generateQRCode(playerId, playerName) {
-    // 🎯 极简参数 - 本地测试专用
-    const warehouseUrl = `warehouse.html?p=${playerId}`;
-    // 或者只用名称
-    // const warehouseUrl = `warehouse.html?n=${playerName.substring(0, 3)}`;
+    // 🎯 修复：使用完整的线上URL
+    const warehouseUrl = `https://bigcowseatinggrass2025-bit.github.io/yousei-merchant/warehouse.html?player=${playerId || playerName}&name=${encodeURIComponent(playerName)}`;
     
-    console.log('🎯 极简URL:', warehouseUrl);
+    console.log('🎯 生成QR码URL:', warehouseUrl);
     
     const qrCodeContainer = document.getElementById('qrcode');
     if (qrCodeContainer) {
         qrCodeContainer.innerHTML = '';
+        
+        if (typeof QRCode === 'undefined') {
+            console.error('❌ QRCode库未加载！');
+            return;
+        }
         
         new QRCode(qrCodeContainer, {
             text: warehouseUrl,
@@ -11396,6 +11398,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
