@@ -553,10 +553,11 @@ function startAutoRefresh() {
         clearInterval(autoRefreshInterval);
     }
     
-    autoRefreshInterval = setInterval(() => {
-        console.log('🔄 自动刷新数据...');
-        loadPlayerDataFromSupabase();
-    }, 20000);
+    // 设置为10秒刷新一次（平衡实时性和性能）
+autoRefreshInterval = setInterval(() => {
+    console.log('🔄 自动刷新数据...');
+    loadPlayerDataFromSupabase();
+}, 10000); // 10秒
     
     console.log('✅ 自动刷新已启动（20秒间隔）');
 }
@@ -588,10 +589,31 @@ document.getElementById('refresh-btn').addEventListener('click', function() {
     console.log('🔄 手动刷新数据');
     loadPlayerDataFromSupabase();
 });
+    // 🎯 监听主游戏的刷新触发
+window.addEventListener('storage', function(event) {
+    if (event.key === 'warehouse_refresh_trigger') {
+        console.log('📢 收到主游戏刷新指令，立即刷新数据');
+        loadPlayerDataFromSupabase();
+    }
+});
+
+// 🎯 监听当前页面的storage事件（同源页面通信）
+window.addEventListener('storage', function(event) {
+    if (event.key === 'warehouse_manual_refresh') {
+        console.log('🔄 手动触发刷新');
+        loadPlayerDataFromSupabase();
+    }
+});
+
+// 🎯 添加手动触发函数（供其他页面调用）
+function triggerManualRefresh() {
+    localStorage.setItem('warehouse_manual_refresh', Date.now());
+}
 </script>
 </body>
 
 </html>
+
 
 
 
