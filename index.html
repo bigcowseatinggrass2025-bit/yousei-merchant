@@ -5898,27 +5898,28 @@
 
     <script>
 	// ==================== 数据同步到Supabase ====================
+// 🎯 增强数据同步函数
 async function syncPlayerWarehouseToSupabase(player) {
     try {
-        console.log('🔄 同步仓库数据到Supabase:', player.name);
+        console.log('🔄 同步数据到Supabase:', player.name);
         
-        // 使用排行榜的Supabase配置
         const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // 准备仓库数据
+        // 准备完整的仓库数据
         const warehouseData = {
+            playerName: player.name, // 🎯 保存中文名称
             goodsCards: player.goodsCards || [],
             lastSynced: new Date().toISOString(),
-            playerName: player.name
+            totalCards: player.goodsCards ? player.goodsCards.length : 0
         };
         
         const { data, error } = await supabase
             .from('player_warehouses')
             .upsert({
-                player_id: player.uniqueId,
-                player_name: player.name,
+                player_id: player.uniqueId, // 🎯 英文ID作为主键
+                player_name: player.name,   // 🎯 中文名称
                 warehouse_data: warehouseData,
                 last_updated: new Date().toISOString()
             }, {
@@ -5930,7 +5931,7 @@ async function syncPlayerWarehouseToSupabase(player) {
             return false;
         }
         
-        console.log('✅ 仓库数据同步成功:', player.name);
+        console.log('✅ 数据同步成功:', player.name);
         return true;
         
     } catch (error) {
@@ -5938,17 +5939,29 @@ async function syncPlayerWarehouseToSupabase(player) {
         return false;
     }
 }
+// 🎯 修改QR码生成函数
 function generateQRCode(playerId, playerName) {
     const players = JSON.parse(localStorage.getItem('players')) || [];
     const currentPlayer = players[window.currentPlayerIndex];
     
-    // 🎯 使用Bitly短链接 + 短参数
-    const effectiveId = currentPlayer?.uniqueId || playerId || 'unknown';
-    const shortName = playerName.length > 6 ? playerName.substring(0, 6) : playerName;
+    if (!currentPlayer) {
+        alert('玩家資料錯誤！');
+        return;
+    }
     
-    const warehouseUrl = `http://bit.ly/42oSdlr?p=${effectiveId}&n=${shortName}`;
+    // 🎯 确保玩家有uniqueId，如果没有就生成
+    if (!currentPlayer.uniqueId) {
+        currentPlayer.uniqueId = 'p' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+        localStorage.setItem('players', JSON.stringify(players));
+    }
     
-    console.log('🎯 Bitly QR码URL:', warehouseUrl);
+    // 🎯 同步数据到Supabase
+    syncPlayerWarehouseToSupabase(currentPlayer);
+    
+    // 🎯 超短QR码URL（只传递英文ID）
+    const warehouseUrl = `http://bit.ly/42oSdlr?p=${currentPlayer.uniqueId}`;
+    
+    console.log('🎯 超短QR码URL:', warehouseUrl);
     
     const qrCodeContainer = document.getElementById('qrcode');
     if (qrCodeContainer) {
@@ -5962,7 +5975,7 @@ function generateQRCode(playerId, playerName) {
             correctLevel: QRCode.CorrectLevel.L
         });
         
-        console.log('✅ Bitly QR码生成成功');
+        console.log('✅ QR码生成成功，数据已同步');
     }
 }
 	
@@ -11398,6 +11411,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
