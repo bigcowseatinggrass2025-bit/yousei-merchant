@@ -1814,15 +1814,30 @@ function formatTimestamp(timestamp) {
 
     // 更新所有排行榜显示
     function updateAllRankings() {
-        updateRankingDisplay('wealth-ranking', rankings.wealth, '💰', '(局中持有最多銀兩者)');
-        updateRankingDisplay('trade-ranking', rankings.trades, '🔄', '(局中成功交易最多次數者)');
-        updateRankingDisplay('luck-ranking', rankings.luck, '🎯', '(局中穫得最多彩卷中獎者)');
-        updateRankingDisplay('time-ranking', rankings.time, '⏰', '(遊戲時長最持久者)');
-        
-        // 添加连胜排行榜
-        const streakRanking = calculateWinStreaks();
-        updateRankingDisplay('streak-ranking', streakRanking, '👑', '(擁有連續多局勝者)');
+    console.log('🔄 强制刷新所有排行榜数据');
+    
+    // 重新从数据库加载最新数据
+    loadLatestData();
+    
+    // 原有代码保持不变
+    updateRankingDisplay('wealth-ranking', rankings.wealth, '💰', '(局中持有最多銀兩者)');
+    updateRankingDisplay('trade-ranking', rankings.trades, '🔄', '(局中成功交易最多次數者)');
+    updateRankingDisplay('luck-ranking', rankings.luck, '🎯', '(局中穫得最多彩卷中獎者)');
+    updateRankingDisplay('time-ranking', rankings.time, '⏰', '(遊戲時長最持久者)');
+    
+    const streakRanking = calculateWinStreaks();
+    updateRankingDisplay('streak-ranking', streakRanking, '👑', '(擁有連續多局勝者)');
+}
+
+// 新增这个简单函数
+async function loadLatestData() {
+    // 重新从数据库加载排行榜
+    const dbRankings = await db.loadLeaderboards();
+    if (dbRankings) {
+        rankings = dbRankings;
+        console.log('✅ 排行榜数据已刷新');
     }
+}
 
     // 找到这个函数中的相关部分
     function updateRankingDisplay(containerId, data, unit, description = '') {
@@ -2070,4 +2085,5 @@ if (category.name === '⏰ 持久商人') {
     }
     </script>
 </body>
+
 </html>
