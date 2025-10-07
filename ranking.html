@@ -902,7 +902,7 @@ body {
     <div class="ranking-category">
         <div class="category-header">
             <div class="category-icon">⏰</div>
-            <h3 class="category-title">持久商人</h3>
+            <h3 class="category-title">堅守商魂</h3>
         </div>
         <div class="ranking-description">(遊戲時長最持久者)</div>
         <div class="ranking-list" id="time-ranking"></div>
@@ -1893,12 +1893,12 @@ async function loadLatestData() {
             else if (index < 5) title = '精英商人';
             else if (index < 10) title = '資深商人';
             
-// 特殊处理持久商人的显示值
+// 特殊处理堅守商魂的显示值
 let displayValue = item.value;
 if (containerId === 'time-ranking') {
     // 使用輔助函數來解析顯示值
     displayValue = parseDuration(item.displayValue || item.value);
-    unit = ''; // 持久商人不需要单位
+    unit = ''; // 堅守商魂不需要单位
 }
             
             rankItem.innerHTML = `
@@ -1960,7 +1960,7 @@ function parseDurationForMarquee(player) {
         // 停止当前动画
         marqueeText.style.animation = 'none';
         
-        // 固定顺序：财富之王 > 交易大师 > 连胜为王 > 幸运之星 > 持久商人
+        // 固定顺序：财富之王 > 交易大师 > 连胜为王 > 幸运之星 > 堅守商魂
         const categories = [
             { 
                 name: '💰 財富之王', 
@@ -1987,7 +1987,7 @@ function parseDurationForMarquee(player) {
                 unit: '次' 
             },
             { 
-                name: '⏰ 持久商人', 
+                name: '⏰ 堅守商魂', 
                 description: '(遊戲時長最高者)',
                 data: rankings.time, 
                 unit: '' 
@@ -2005,8 +2005,8 @@ function parseDurationForMarquee(player) {
                     const player = category.data[i];
                     let displayValue = player.value;
                     
-                    // 处理持久商人的显示
-if (category.name === '⏰ 持久商人') {
+                    // 处理堅守商魂的显示
+if (category.name === '⏰ 堅守商魂') {
     // 統一處理各種數據格式
     if (typeof player.value === 'object' && player.value.displayValue) {
         // 處理 {displayValue: "19分钟", numericValue: 19} 格式
@@ -2104,4 +2104,5 @@ if (category.name === '⏰ 持久商人') {
     }
     </script>
 </body>
+
 </html>
