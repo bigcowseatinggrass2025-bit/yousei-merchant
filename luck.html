@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幽街商人 - 彩蛋系统</title>
+    <style>
+        /* 基础样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: #1a1a2e;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 添加背景圖片 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://imgur.com/W4ItYBv.jpg'); /* 替換為您的圖片URL */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.3; /* 調整透明度 */
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            background: rgba(26, 26, 46, 0.8); /* 添加半透明背景 */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px); /* 毛玻璃效果 */
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        h1 {
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        /* 彩蛋模态框样式 */
+        .egg-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6); /* 从 0.9 改为 0.6，降低黑色透明度 */
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            /* 添加背景图片 */
+            background-image: url('https://imgur.com/W4ItYBv.jpg');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+        }
+		
+/* 七彩變色特殊獎勵效果 */
+.egg-option.special-reward {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid transparent;
+    color: #fff;
+    text-shadow: 0 0 10px #fff;
+    position: relative;
+    overflow: hidden;
+    animation: rainbow-border 3s linear infinite, rainbow-text 3s linear infinite;
+}
+
+@keyframes rainbow-border {
+    0% { border-color: #ff0000; box-shadow: 0 0 20px #ff0000; }
+    14% { border-color: #ff7f00; box-shadow: 0 0 20px #ff7f00; }
+    28% { border-color: #ffff00; box-shadow: 0 0 20px #ffff00; }
+    42% { border-color: #00ff00; box-shadow: 0 0 20px #00ff00; }
+    57% { border-color: #0000ff; box-shadow: 0 0 20px #0000ff; }
+    71% { border-color: #4b0082; box-shadow: 0 0 20px #4b0082; }
+    85% { border-color: #9400d3; box-shadow: 0 0 20px #9400d3; }
+    100% { border-color: #ff0000; box-shadow: 0 0 20px #ff0000; }
+}
+
+@keyframes rainbow-text {
+    0% { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+    14% { color: #ff7f00; text-shadow: 0 0 10px #ff7f00; }
+    28% { color: #ffff00; text-shadow: 0 0 10px #ffff00; }
+    42% { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+    57% { color: #0000ff; text-shadow: 0 0 10px #0000ff; }
+    71% { color: #4b0082; text-shadow: 0 0 10px #4b0082; }
+    85% { color: #9400d3; text-shadow: 0 0 10px #9400d3; }
+    100% { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+}
+
+/* 更華麗的七彩背景效果 */
+.egg-option.special-reward::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        #ff0000, #ff7f00, #ffff00, #00ff00,
+        #0000ff, #4b0082, #9400d3, #ff0000
+    );
+    background-size: 400% 400%;
+    border-radius: 8px;
+    z-index: -1;
+    animation: rainbow-bg 4s linear infinite;
+    opacity: 0.3;
+}
+
+@keyframes rainbow-bg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* 添加閃爍星星效果 */
+.egg-option.special-reward::after {
+    content: '✨';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 1.2rem;
+    animation: twinkle 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+    from { opacity: 0.3; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1.2); }
+}
+        
+        .egg-content {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 1000px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 30px rgba(142, 68, 173, 0.7);
+            border: 3px solid transparent;
+            animation: egg-glow 2s infinite alternate;
+        }
+        
+        @keyframes egg-glow {
+            from {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
+                           0 0 40px rgba(255, 0, 255, 0.3);
+                border-color: #ffd700;
+            }
+            to {
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.8),
+                           0 0 60px rgba(255, 0, 255, 0.5),
+                           0 0 80px rgba(0, 255, 255, 0.3);
+                border-color: #ff00ff;
+            }
+        }
+        
+        .egg-title {
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            animation: text-pulse 2s infinite alternate;
+        }
+        
+        @keyframes text-pulse {
+            from { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7); }
+            to { text-shadow: 0 0 20px rgba(255, 215, 0, 0.9), 
+                            0 0 30px rgba(255, 215, 0, 0.7),
+                            0 0 40px rgba(255, 215, 0, 0.5); }
+        }
+        
+        /* 三区域布局 */
+        .egg-triple-grid {
+            display: flex;
+            gap: 20px;
+            margin: 25px 0;
+            justify-content: center;
+        }
+        
+        .egg-section {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .egg-section-title {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        
+        .egg-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(80px, auto); /* 強制行高 */
+    gap: 15px;
+    align-items: stretch; /* 拉伸對齊 */
+}
+        
+        .egg-option {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #fff;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            transition: all 0.3s;
+            min-height: 70px;
+            cursor: default;
+        }
+        
+        .egg-option.active {
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            transform: scale(1.05);
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+        
+        .egg-option.selected {
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+            animation: selected-pulse 1s infinite alternate;
+        }
+        
+        .multiplier-option.selected {
+            background: rgba(255, 105, 180, 0.2);
+            border: 2px solid #ff69b4;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
+            color: #ff69b4;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.7);
+            animation: selected-pulse 1s infinite alternate;
+        }
+        
+        .special-option.selected {
+            background: rgba(50, 205, 50, 0.2);
+            border: 2px solid #32cd32;
+            box-shadow: 0 0 20px rgba(50, 205, 50, 0.7);
+            color: #32cd32;
+            text-shadow: 0 0 10px rgba(50, 205, 50, 0.7);
+            animation: selected-pulse 1s infinite alternate;
+        }
+        
+        @keyframes selected-pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+        
+        .egg-instruction {
+            margin: 15px 0;
+            color: #ffd700; /* 改為金色 */
+            font-size: 1.2rem; /* 增大字體 */
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            animation: text-pulse 2s infinite alternate; /* 添加脈衝動畫 */
+        }
+        
+        .overlay-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+        }
+
+        .overlay-result-text {
+            font-size: 1.1rem;
+            color: #ffd700;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .egg-result {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+            display: none;
+            position: relative;
+            z-index: 10002; /* 确保在遮罩上方 */
+        }
+        
+        .egg-result-text {
+            font-size: 1.2rem;
+            color: #ffd700;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .egg-button {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        
+        .egg-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+        }
+        
+        .egg-button:active {
+            transform: translateY(1px);
+        }
+        
+        .egg-button:disabled {
+            background: linear-gradient(135deg, #555, #333);
+            color: #999;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        /* 触发按钮样式 */
+        .trigger-button {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 30px;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(142, 68, 173, 0.5);
+        }
+        
+        .trigger-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(142, 68, 173, 0.7);
+        }
+        
+        .trigger-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 觸發按鈕添加過渡效果 */
+        .trigger-button {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .trigger-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+        
+        .trigger-button:hover::before {
+            left: 100%;
+        }
+        
+        /* 全局遮罩样式 */
+        .overlay-mask {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95); /* 從 0.85 改為 0.95，更黑 */
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .overlay-content {
+            background: linear-gradient(135deg, #0f0c29, #302b63);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+        }
+
+        .overlay-content h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .overlay-content p {
+            color: #fff;
+            font-size: 1.2rem;
+        }
+        
+        /* 礼花效果样式 */
+        .confetti-piece {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+		/* 遮罩內的按鈕樣式 */
+.overlay-button {
+    background: linear-gradient(135deg, #ff1493, #ff69b4);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-top: 20px;
+    transition: all 0.3s;
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.5);
+}
+
+.overlay-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(255, 20, 147, 0.7);
+}
+
+.overlay-button.disabled {
+    background: linear-gradient(135deg, #555, #333);
+    opacity: 0.5;
+    pointer-events: none;
+}
+/* 前往珍品鋪按鈕樣式 */
+.pet-shop-btn {
+    background: linear-gradient(135deg, #32cd32, #00ff00);
+    margin-left: 10px;
+}
+
+.pet-shop-btn:hover {
+    box-shadow: 0 0 20px rgba(50, 205, 50, 0.7);
+}
+    </style>
+</head>
+<body>
+<!-- 全局遮罩 -->
+<div class="overlay-mask" id="overlayMask">
+    <div class="overlay-content">
+        <h2>彩蛋活動已結束</h2>
+        <p>請從商會取得得獎內容</p>
+        <!-- 添加结果显示区域 -->
+        <div class="overlay-result" id="overlay-result">
+            <p class="overlay-result-text" id="overlay-result-text"></p>
+        </div>
+        <!-- 添加前往抽卡機按鈕 -->
+        <button class="overlay-button card-machine-btn" id="overlay-card-machine-btn" style="display: none;">前往抽卡機</button>
+        <!-- 添加前往珍品鋪按鈕 -->
+        <button class="overlay-button pet-shop-btn" id="overlay-pet-shop-btn" style="display: none;">前往珍品鋪</button>
+    </div>
+</div>
+
+<div class="container">
+    <h1>幽街商人 - 彩蛋慶祝活動</h1>
+    <p>點擊下方按鈕進行彩蛋活動</p>
+    <button class="trigger-button" id="trigger-egg">進行彩蛋活動</button>
+</div>
+
+<!-- 彩蛋模态框 -->
+<div class="egg-modal" id="egg-modal">
+    <div class="egg-content">
+        <h2 class="egg-title">彩蛋驚喜活動</h2>
+        
+        <div class="egg-triple-grid">
+            <!-- 左侧原彩蛋选项 -->
+            <div class="egg-section">
+                <div class="egg-section-title">基礎獎勵</div>
+                <div class="egg-grid" id="egg-grid">
+                    <!-- 这里会动态生成8个随机选项 -->
+                </div>
+            </div>
+            
+            <!-- 中间倍數选项 -->
+            <div class="egg-section">
+                <div class="egg-section-title">追加獎勵</div>
+                <div class="egg-grid" id="multiplier-grid">
+                    <!-- 这里会动态生成8个随机选项 -->
+                </div>
+            </div>
+            
+            <!-- 右侧特殊选项 -->
+            <div class="egg-section">
+                <div class="egg-section-title">特殊獎勵</div>
+                <div class="egg-grid" id="special-grid">
+                    <!-- 这里会动态生成8个随机选项 -->
+                </div>
+            </div>
+        </div>
+        
+        <p class="egg-instruction" id="egg-instruction"></p>
+        
+        <div class="egg-result" id="egg-result">
+            <p class="egg-result-text" id="egg-result-text"></p>
+        </div>
+        
+        <button class="egg-button" id="egg-action-button">開始</button>
+    </div>
+</div>
+
+<!-- 背景音乐 -->
+<audio id="bgm-sound" loop>
+    <source src="sounds/eggluck32.mp3" type="audio/mpeg">
+</audio>
+
+<!-- 闪灯音效 -->
+<audio id="flash-sound" loop>
+    <source src="sounds/flash-sound43.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 所有可能的奖励选项
+        const allBasicRewards = [
+            '全體抽取5張卡片回到手牌',
+            '全體從商會取得2個貨物',
+            '全體從商會取得80銀兩',
+            '全體與成功交易互動3次',
+            '全體從商會取得30銀兩',
+            '全體抽取3張卡片回到手牌',
+            '全體抽取10張卡片回到手牌',
+            '沒有基礎獎勵',
+            '全體獲得50銀兩',
+            '全體獲得1個特殊貨物',
+            '全體抽取7張卡片回到手牌',
+            '全體從商會取得3個貨物',
+            '全體與成功交易互動2次',
+            '全體下一次抽卡機免費10抽兩次',
+            '全體從商會取得30銀兩',
+            '全體抽取3張卡片回到手牌',
+            '全體抽取6張卡片回到手牌',
+            '全體下一次抽卡機免費10抽一次',
+            '全體獲得擴展攤位一個',
+            '沒有基礎獎勵'
+        ];
+
+        const allMultiplierRewards = [
+            '基礎X2倍',
+            '基礎X3倍',
+            '+20銀兩',
+            '+50銀兩',
+            '+2張卡片',
+            '+3張卡片',
+            '+2個貨物',
+            '+沒有追加',
+            '+80銀兩',
+            '+15銀兩',
+            '+1張卡片',
+            '+1個貨物',
+            '+50銀兩',
+            '+40銀兩',
+            '+2張卡片',
+            '+2個貨物',
+            '+30銀兩',
+            '+沒有追加',
+            '1個貨物',
+            '+60銀兩'
+        ];
+
+        const allSpecialRewards = [
+            '最多手牌者+3手牌',
+            '最少手牌者+3手牌',
+            '場上最多貨物者+2貨物',
+            '場上最少貨物者+2貨物',
+            '場上最多道具卡的+50銀兩',
+            '場上最少道具卡的+50銀兩',
+            '最多白銀者+50銀兩',
+            '沒有特殊獎勵',
+            '最多靈石者+50銀兩',
+            '最少靈石者+80銀兩',
+            '最多彩卷號碼者+3手牌',
+            '最多少手牌者穫珍品鋪200銀兩禮遇卡',
+            '最多幽街貨卡者+2手牌',
+            '交易次數最少者+2手牌',
+            '交易次數最多者+3手牌',
+            '最少手牌者+2手牌',
+            '最少幽街貨卡者+2手牌',
+            '白銀最少者下次從抽卡機免費10抽一次',
+            '貨物最少者獲得擴展攤位一個',
+            '沒有特殊獎勵'
+        ];
+
+        // 获取DOM元素
+        const triggerButton = document.getElementById('trigger-egg');
+        const eggModal = document.getElementById('egg-modal');
+        const eggGrid = document.getElementById('egg-grid');
+        const multiplierGrid = document.getElementById('multiplier-grid');
+        const specialGrid = document.getElementById('special-grid');
+        const eggInstruction = document.getElementById('egg-instruction');
+        const eggResult = document.getElementById('egg-result');
+        const eggResultText = document.getElementById('egg-result-text');
+        const eggActionButton = document.getElementById('egg-action-button');
+        const eggSound = document.getElementById('bgm-sound');
+        const overlayMask = document.getElementById('overlayMask');
+        const flashSound = document.getElementById('flash-sound');
+        
+        let options = [];
+        let multiplierOptions = [];
+        let specialOptions = [];
+        let selectedIndex = -1;
+        let multiplierIndex = -1;
+        let specialIndex = -1;
+        let isActive = false;
+        
+        // 初始化随机奖励
+        initializeRandomRewards();
+        
+        // 触发彩蛋
+        triggerButton.addEventListener('click', function() {
+            createConfetti();
+            openEggModal();
+        });
+		
+		// 遮罩內的前往珍品鋪按鈕事件
+const overlayPetShopBtn = document.getElementById('overlay-pet-shop-btn');
+overlayPetShopBtn.addEventListener('click', function() {
+    const petShopBtn = this;
+    petShopBtn.style.opacity = '0.5';
+    petShopBtn.style.pointerEvents = 'none';
+    petShopBtn.classList.add('disabled');
+    
+    const width = 800;
+    const height = 600;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+    
+    // 打开藏品铺新窗口
+    const newWindow = window.open(
+        'https://bigcowseatinggrass2025-bit.github.io/yousei-merchant/buyeq.html', 
+        'petShopWindow',
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+    );
+    
+    // 如果彈窗被阻擋，恢復按鈕狀態
+    if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+        petShopBtn.style.opacity = '1';
+        petShopBtn.style.pointerEvents = 'auto';
+        petShopBtn.classList.remove('disabled');
+        alert('請允許彈出視窗以前往珍品鋪！');
+    }
+});
+		
+		// 遮罩內的前往抽卡機按鈕事件
+const overlayCardMachineBtn = document.getElementById('overlay-card-machine-btn');
+overlayCardMachineBtn.addEventListener('click', function() {
+    const cardMachineBtn = this;
+    cardMachineBtn.style.opacity = '0.5';
+    cardMachineBtn.style.pointerEvents = 'none';
+    cardMachineBtn.classList.add('disabled');
+    
+    const width = 800;
+    const height = 600;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+    
+    const newWindow = window.open(
+        'https://bigcowseatinggrass2025-bit.github.io/yousei-merchant/card.html', 
+        'cardMachineWindow',
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+    );
+    
+    // 如果彈窗被阻擋，恢復按鈕狀態
+    if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+        cardMachineBtn.style.opacity = '1';
+        cardMachineBtn.style.pointerEvents = 'auto';
+        cardMachineBtn.classList.remove('disabled');
+        alert('請允許彈出視窗以前往抽卡機！');
+    }
+});
+        
+        // 打开彩蛋模态框
+        function openEggModal() {
+            eggModal.style.display = 'flex';
+            
+            // 播放彩蛋音乐
+            if (eggSound) {
+                eggSound.currentTime = 0;
+                eggSound.play().catch(e => console.log("彩蛋音乐播放失败:", e));
+            }
+            
+            // 设置随机提示文本
+            setRandomInstruction();
+            
+            // 重置状态
+            resetEggModal();
+        }
+        
+        // 设置随机提示文本
+        function setRandomInstruction() {
+            const instructions = [
+                '手上最多卡片者點擊開始按鈕',
+                '手上最少卡片者點擊開始按鈕',
+                '場上最多道具卡者點擊開始按鈕',
+                '場上最少道具卡者點擊開始按鈕',
+                '持貨物最多者點擊開始按鈕',
+                '持貨物最少者點擊開始按鈕'
+            ];
+            const randomInstruction = instructions[Math.floor(Math.random() * instructions.length)];
+            eggInstruction.textContent = randomInstruction;
+        }
+        
+        // 初始化随机奖励
+        function initializeRandomRewards() {
+            // 随机选择8个基础奖励
+            const selectedBasic = getRandomItems(allBasicRewards, 8);
+            // 随机选择8个追加奖励
+            const selectedMultiplier = getRandomItems(allMultiplierRewards, 8);
+            // 随机选择8个特殊奖励
+            const selectedSpecial = getRandomItems(allSpecialRewards, 8);
+            
+            // 更新DOM显示
+            updateRewardDisplay('egg-grid', selectedBasic, 'egg-option');
+            updateRewardDisplay('multiplier-grid', selectedMultiplier, 'multiplier-option');
+            updateRewardDisplay('special-grid', selectedSpecial, 'special-option');
+            
+            // 更新选项引用
+            options = eggGrid.querySelectorAll('.egg-option');
+            multiplierOptions = multiplierGrid.querySelectorAll('.multiplier-option');
+            specialOptions = specialGrid.querySelectorAll('.special-option');
+        }
+        
+        // 辅助函数：从数组中随机选择指定数量的项目
+        function getRandomItems(array, count) {
+            const shuffled = [...array].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+        
+// 辅助函数：更新DOM显示
+function updateRewardDisplay(containerId, rewards, className) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // 清空现有内容
+    
+    rewards.forEach((reward, index) => {
+        const option = document.createElement('div');
+        option.className = `egg-option ${className}`;
+        option.setAttribute('data-index', index);
+        option.textContent = reward;
+        
+        // 檢查是否為特殊獎勵（包含"免費10抽"、"80銀兩"或"擴展攤位"的項目）
+        if (reward.includes('免費10抽') || reward.includes('80銀兩') || reward.includes('擴展攤位')) {
+            option.classList.add('special-reward');
+        }
+        
+        container.appendChild(option);
+    });
+}
+        
+       // 重置彩蛋模态框
+function resetEggModal() {
+    options.forEach(option => {
+        option.classList.remove('active', 'selected');
+    });
+    
+    multiplierOptions.forEach(option => {
+        option.classList.remove('active', 'selected');
+    });
+    
+    specialOptions.forEach(option => {
+        option.classList.remove('active', 'selected');
+    });
+    
+    // 重置前往抽卡機按鈕狀態
+    const overlayCardMachineBtn = document.getElementById('overlay-card-machine-btn');
+    overlayCardMachineBtn.style.display = 'none';
+    overlayCardMachineBtn.style.opacity = '1';
+    overlayCardMachineBtn.style.pointerEvents = 'auto';
+    overlayCardMachineBtn.classList.remove('disabled');
+    
+    // 重置前往珍品鋪按鈕狀態
+    const overlayPetShopBtn = document.getElementById('overlay-pet-shop-btn');
+    overlayPetShopBtn.style.display = 'none';
+    overlayPetShopBtn.style.opacity = '1';
+    overlayPetShopBtn.style.pointerEvents = 'auto';
+    overlayPetShopBtn.classList.remove('disabled');
+    
+    eggResult.style.display = 'none';
+    eggActionButton.textContent = '開始';
+    eggActionButton.disabled = false;
+    
+    selectedIndex = -1;
+    multiplierIndex = -1;
+    specialIndex = -1;
+    isActive = false;
+}
+        
+        // 开始按钮点击事件
+        eggActionButton.addEventListener('click', function() {
+            if (!isActive) {
+                // 开始彩蛋选择过程
+                startEggSelection();
+            }
+        });
+        
+        function startEggSelection() {
+            // 禁用触发按钮
+            triggerButton.disabled = true;
+            
+            isActive = true;
+            eggActionButton.textContent = '等待...';
+            eggActionButton.disabled = true;
+            eggInstruction.textContent = '彩蛋選擇中...';
+            
+            // 首先进行基础奖励选择
+            selectBasicReward();
+        }
+        
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff'];
+            
+            for (let i = 0; i < 70; i++) { // 70個禮花粒子
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-piece';
+                
+                // 隨機顏色
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // 隨機位置（從按鈕中心發射）
+                const buttonRect = triggerButton.getBoundingClientRect();
+                const startX = buttonRect.left + buttonRect.width / 2;
+                const startY = buttonRect.top + buttonRect.height / 2;
+                
+                // 隨機大小和形狀
+                const size = Math.random() * 8 + 4;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                
+                // 隨機旋轉
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                // 設置初始位置
+                confetti.style.left = `${startX}px`;
+                confetti.style.top = `${startY}px`;
+                
+                document.body.appendChild(confetti);
+                
+                // 動畫
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 10 + 5;
+                const x = Math.cos(angle) * speed;
+                const y = Math.sin(angle) * speed;
+                
+                // 創建動畫
+                const animation = confetti.animate([
+                    {
+                        opacity: 1,
+                        transform: `translate(0, 0) rotate(0deg)`
+                    },
+                    {
+                        opacity: 0,
+                        transform: `translate(${x * 100}px, ${y * 100}px) rotate(${Math.random() * 720}deg)`
+                    }
+                ], {
+                    duration: Math.random() * 1000 + 1500,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)'
+                });
+                
+                // 動畫結束後移除元素
+                animation.onfinish = () => {
+                    confetti.remove();
+                };
+            }
+        }
+        
+        // 在selectBasicReward函数中添加音效控制
+        function selectBasicReward() {
+            // 播放闪灯音效
+            flashSound.currentTime = 0;
+            flashSound.volume = 0.8;
+            flashSound.play().catch(e => console.log("闪灯音效播放失败:", e));
+            
+            // 随机闪光效果
+            let flashCount = 0;
+            const maxFlashes = 25;
+            const flashInterval = 150;
+            
+            const flashIntervalId = setInterval(() => {
+                // 移除所有active类
+                options.forEach(option => {
+                    option.classList.remove('active');
+                });
+                
+                // 随机选择一个选项高亮
+                const randomIndex = Math.floor(Math.random() * options.length);
+                options[randomIndex].classList.add('active');
+                
+                flashCount++;
+                
+                if (flashCount >= maxFlashes) {
+                    clearInterval(flashIntervalId);
+                    
+                    // 停止闪灯音效
+                    flashSound.pause();
+                    
+                    // 确定最终选择
+                    const finalIndex = Math.floor(Math.random() * options.length);
+                    
+                    // 移除所有active类，只保留selected
+                    options.forEach(option => {
+                        option.classList.remove('active');
+                    });
+                    
+                    options[finalIndex].classList.add('selected');
+                    selectedIndex = finalIndex;
+                    
+                    // 完成后进行倍數奖励选择
+                    setTimeout(selectMultiplierReward, 800);
+                }
+            }, flashInterval);
+        }
+        
+       function selectMultiplierReward() {
+    // 播放闪灯音效
+    flashSound.currentTime = 0;
+    flashSound.play().catch(e => console.log("闪灯音效播放失败:", e));
+    
+    // 随机闪光效果
+    let flashCount = 0;
+    const maxFlashes = 25;
+    const flashInterval = 150;
+    
+    const flashIntervalId = setInterval(() => {
+        // 移除所有active类
+        multiplierOptions.forEach(option => {
+            option.classList.remove('active');
+        });
+        
+        // 随机选择一个选项高亮
+        const randomIndex = Math.floor(Math.random() * multiplierOptions.length);
+        multiplierOptions[randomIndex].classList.add('active');
+        
+        flashCount++;
+        
+        if (flashCount >= maxFlashes) {
+            clearInterval(flashIntervalId);
+            
+            // 停止闪灯音效
+            flashSound.pause();
+            
+            // 先清除所有active类，确保没有残留的高亮
+            multiplierOptions.forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            // 添加一个短暂的延迟，确保视觉上完全清除
+            setTimeout(() => {
+                // 确定最终选择
+                const finalIndex = Math.floor(Math.random() * multiplierOptions.length);
+                
+                multiplierOptions[finalIndex].classList.add('selected');
+                multiplierIndex = finalIndex;
+                
+                // 完成后进行特殊奖励选择
+                setTimeout(selectSpecialReward, 800);
+            }, 50); // 50ms的延迟确保浏览器有足够时间渲染清除效果
+        }
+    }, flashInterval);
+}
+
+        function selectMultiplierReward() {
+    // 播放闪灯音效
+    flashSound.currentTime = 0;
+    flashSound.play().catch(e => console.log("闪灯音效播放失败:", e));
+    
+    // 随机闪光效果
+    let flashCount = 0;
+    const maxFlashes = 25;
+    const flashInterval = 150;
+    
+    const flashIntervalId = setInterval(() => {
+        // 移除所有active类
+        multiplierOptions.forEach(option => {
+            option.classList.remove('active');
+        });
+        
+        // 随机选择一个选项高亮
+        const randomIndex = Math.floor(Math.random() * multiplierOptions.length);
+        multiplierOptions[randomIndex].classList.add('active');
+        
+        flashCount++;
+        
+        if (flashCount >= maxFlashes) {
+            clearInterval(flashIntervalId);
+            
+            // 停止闪灯音效
+            flashSound.pause();
+            
+            // 确定最终选择
+            const finalIndex = Math.floor(Math.random() * multiplierOptions.length);
+            
+            // 移除所有active类，只保留selected
+            multiplierOptions.forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            multiplierOptions[finalIndex].classList.add('selected');
+            multiplierIndex = finalIndex;
+            
+            // 完成后进行特殊奖励选择
+            setTimeout(selectSpecialReward, 800);
+        }
+    }, flashInterval);
+}
+
+function selectSpecialReward() {
+    // 播放闪灯音效
+    flashSound.currentTime = 0;
+    flashSound.play().catch(e => console.log("闪灯音效播放失败:", e));
+    
+    // 随机闪光效果
+    let flashCount = 0;
+    const maxFlashes = 25;
+    const flashInterval = 150;
+    
+    const flashIntervalId = setInterval(() => {
+        // 移除所有active类
+        specialOptions.forEach(option => {
+            option.classList.remove('active');
+        });
+        
+        // 随机选择一个选项高亮
+        const randomIndex = Math.floor(Math.random() * specialOptions.length);
+        specialOptions[randomIndex].classList.add('active');
+        
+        flashCount++;
+        
+        if (flashCount >= maxFlashes) {
+            clearInterval(flashIntervalId);
+            
+            // 停止闪灯音效
+            flashSound.pause();
+            
+            // 确定最终选择
+            const finalIndex = Math.floor(Math.random() * specialOptions.length);
+            
+            // 移除所有active类，只保留selected
+            specialOptions.forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            specialOptions[finalIndex].classList.add('selected');
+            specialIndex = finalIndex;
+            
+            // 完成后显示结果
+            setTimeout(showResult, 800);
+        }
+    }, flashInterval);
+}
+        
+        function showResult() {
+    // 获取结果
+    const basicReward = options[selectedIndex].textContent;
+    const multiplierReward = multiplierOptions[multiplierIndex].textContent;
+    const specialReward = specialOptions[specialIndex].textContent;
+    
+    // 檢查是否有免費10抽獎勵
+    const hasFreeDraw = basicReward.includes('免費10抽') || 
+                       multiplierReward.includes('免費10抽') || 
+                       specialReward.includes('免費10抽');
+    
+    // 檢查是否有珍品鋪獎勵
+    const hasPetShop = basicReward.includes('珍品鋪') || 
+                      multiplierReward.includes('珍品鋪') || 
+                      specialReward.includes('珍品鋪');
+    
+    // 更新说明文本
+    eggInstruction.textContent = '恭喜獲得獎勵！';
+    
+    // 8秒后显示全局遮罩（包含结果）
+    setTimeout(() => {
+        // 设置遮罩内的结果文本
+        const overlayResultText = document.getElementById('overlay-result-text');
+        overlayResultText.textContent = `基礎獎勵: ${basicReward} | 追加獎勵: ${multiplierReward} | 特殊獎勵: ${specialReward}`;
+        
+        // 顯示或隱藏前往抽卡機按鈕
+        const overlayCardMachineBtn = document.getElementById('overlay-card-machine-btn');
+        if (hasFreeDraw) {
+            overlayCardMachineBtn.style.display = 'inline-block';
+        } else {
+            overlayCardMachineBtn.style.display = 'none';
+        }
+        
+        // 顯示或隱藏前往珍品鋪按鈕
+        const overlayPetShopBtn = document.getElementById('overlay-pet-shop-btn');
+        if (hasPetShop) {
+            overlayPetShopBtn.style.display = 'inline-block';
+        } else {
+            overlayPetShopBtn.style.display = 'none';
+        }
+        
+        // 显示全局遮罩
+        overlayMask.style.display = 'flex';
+        
+        // 启用触发按钮
+        triggerButton.disabled = false;
+        
+        // 重新初始化随机奖励，为下一次使用做准备
+        initializeRandomRewards();
+    }, 8000);
+}
+    });
+</script>
+</body>
+</html>
