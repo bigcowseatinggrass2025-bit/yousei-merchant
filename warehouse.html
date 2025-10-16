@@ -933,33 +933,45 @@ function processScratchCardURL(url) {
     try {
         let scratchData = null;
         
-        // 🆕 處理新格式：scratch:{base64數據}
         if (url.startsWith('scratch:')) {
             try {
                 const base64Data = url.replace('scratch:', '');
                 const decodedData = JSON.parse(atob(base64Data));
                 console.log('🎯 解析scratch格式QR碼:', decodedData);
                 
-                // 🆕 直接生成刮刮樂數據，不保存到localStorage
+                // 🆕 生成刮刮樂數據
                 scratchData = {
                     id: decodedData.id,
                     quantity: decodedData.q,
                     totalCost: decodedData.c,
                     timestamp: new Date(decodedData.t).toISOString(),
+                    used: false,
                     cards: generateScratchCards(decodedData.q)
                 };
                 
-                // 🆕 修复：打开刮刮乐页面时传递base64数据
+                // 🆕 關鍵修復：保存到 localStorage
+                const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+                allScratches[scratchData.id] = scratchData;
+                localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+                console.log('💾 數據已保存到virtualScratchCards');
+                
+                // 打開刮刮樂頁面
                 const scratchPageURL = `scratch-card.html?data=${base64Data}`;
                 window.open(scratchPageURL, '_blank');
-                return; // 🆕 重要：直接返回，不执行后面的代码
+                return;
                 
             } catch (e) {
-                console.error('❌ scratch格式解析失敗:', e);
-                alert('QR碼格式錯誤: ' + e.message);
+                console.error('❌ 解析失敗:', e);
+                alert('QR碼格式錯誤');
                 return;
             }
         }
+        // ... 其他格式處理保持不變 ...
+    } catch (error) {
+        console.error('URL解析錯誤:', error);
+        alert("URL格式錯誤");
+    }
+}
         // 🆕 處理舊格式：scratch-card.html?id=xxx
         else if (url.includes('scratch-card.html')) {
             const match = url.match(/id=([^&]+)/);
@@ -1352,6 +1364,7 @@ window.addEventListener('message', function(event) {
     </script>
 </body>
 </html>
+
 
 
 
