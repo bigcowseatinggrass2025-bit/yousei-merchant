@@ -802,7 +802,6 @@ function createCameraInterface(stream) {
     });
 
 
-// 🆕 修复的QR扫描功能
 function startQRScanning(video, hint, stream) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -819,40 +818,38 @@ function startQRScanning(video, hint, stream) {
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // 🆕 优化扫描参数
                 const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert",
+                    inversionAttempts: "attemptBoth",  // 🆕 尝试两种反转
+                    // 🆕 添加调试信息
                 });
                 
                 if (code) {
-                    console.log('🎯 扫描到QR码:', code.data);
+                    console.log('🎯 扫描成功! 次数:', scanCount);
                     console.log('📍 QR码位置:', code.location);
+                    
                     hint.textContent = '✅ 掃描成功！';
                     hint.style.color = '#27ae60';
                     
-                    // 停止扫描
                     clearInterval(scanInterval);
                     closeCameraInterface(stream);
-                    
-                    // 处理QR码内容
                     processScratchCardURL(code.data);
                 } else {
-                    // 显示扫描状态
-                    hint.innerHTML = `🔍 掃描中...<br>次數: ${scanCount}`;
+                    // 🆕 每10次显示一次状态
                     if (scanCount % 10 === 0) {
-                        console.log('🔄 扫描中...', scanCount);
+                        hint.textContent = `🔍 掃描中... ${scanCount}次`;
                     }
                 }
             } catch (error) {
-                console.error('❌ 扫描错误:', error);
-                hint.textContent = '❌ 掃描錯誤';
-                hint.style.color = '#e74c3c';
+                console.error('扫描错误:', error);
             }
         }
     }
     
-    // 开始扫描，300ms间隔（更快）
-    scanInterval = setInterval(scanQRCode, 300);
-    console.log('🔄 QR扫描已启动，间隔300ms');
+    // 🆕 缩短扫描间隔到200ms
+    scanInterval = setInterval(scanQRCode, 200);
+    console.log('🔄 QR扫描启动，间隔200ms');
     
     return scanInterval;
 }
@@ -1310,6 +1307,7 @@ function openScratchCardPage(scratchId) {
     </script>
 </body>
 </html>
+
 
 
 
