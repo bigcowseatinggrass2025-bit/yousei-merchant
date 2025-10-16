@@ -833,66 +833,117 @@ function createCameraInterface(stream) {
     });
 }
 
-        // 處理刮刮樂URL
-        function processScratchCardURL(url) {
-            console.log('🔗 處理URL:', url);
-            
+       // 處理刮刮樂URL
+function processScratchCardURL(url) {
+    console.log('🔗 處理URL:', url);
+    
+    try {
+        let scratchId;
+        
+        // 🆕 新增：處理 scratch: 格式的QR碼
+        if (url.startsWith('scratch:')) {
             try {
-                let scratchId;
-                
-                if (url.includes('http')) {
-                    const urlObj = new URL(url);
-                    scratchId = urlObj.searchParams.get('id');
-                } else if (url.includes('scratch-card.html')) {
-                    const match = url.match(/id=([^&]+)/);
-                    scratchId = match ? match[1] : null;
-                } else {
-                    scratchId = url;
-                }
-                
-                console.log('🎯 提取的刮刮樂ID:', scratchId);
-                
-                if (scratchId) {
-                    saveScratchCardAndOpen(scratchId, url);
-                } else {
-                    alert("無效的刮刮樂URL");
-                }
-            } catch (error) {
-                console.error('URL解析錯誤:', error);
-                const scratchId = url.trim();
-                if (scratchId) {
-                    saveScratchCardAndOpen(scratchId, url);
-                } else {
-                    alert("URL格式錯誤");
-                }
+                const base64Data = url.replace('scratch:', '');
+                const decodedData = JSON.parse(atob(base64Data));
+                scratchId = decodedData.id;
+                console.log('🎯 解析scratch格式QR碼，ID:', scratchId);
+            } catch (e) {
+                console.error('❌ scratch格式解析失敗:', e);
             }
         }
+        // 原有的URL解析邏輯
+        else if (url.includes('http')) {
+            const urlObj = new URL(url);
+            scratchId = urlObj.searchParams.get('id');
+        } else if (url.includes('scratch-card.html')) {
+            const match = url.match(/id=([^&]+)/);
+            scratchId = match ? match[1] : null;
+        } else {
+            scratchId = url;
+        }
+        
+        console.log('🎯 提取的刮刮樂ID:', scratchId);
+        
+        if (scratchId) {
+            saveScratchCardAndOpen(scratchId, url);
+        } else {
+            alert("無效的刮刮樂URL");
+        }
+    } catch (error) {
+        console.error('URL解析錯誤:', error);
+        const scratchId = url.trim();
+        if (scratchId) {
+            saveScratchCardAndOpen(scratchId, url);
+        } else {
+            alert("URL格式錯誤");
+        }
+    }
+}
 
         // 保存刮刮樂數據並打開頁面
         function saveScratchCardAndOpen(scratchId, url) {
-            console.log('💾 保存刮刮樂數據:', scratchId);
-            
-            const scratchData = {
-                id: scratchId,
-                quantity: 3,
-                totalCost: 15,
-                timestamp: new Date().toISOString(),
-                used: false,
-                cards: [
-                    {id: 1, prize: "100兩", isScratched: false, claimed: false},
-                    {id: 2, prize: "多謝惠顧", isScratched: false, claimed: false},
-                    {id: 3, prize: "50兩", isScratched: false, claimed: false}
-                ]
-            };
-            
-            const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-            allScratches[scratchId] = scratchData;
-            localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
-            
-            updateLottoButton();
-            openScratchCardPage(scratchId);
+    console.log('💾 保存刮刮樂數據:', scratchId);
+    
+    // 🆕 從URL中提取數量、金額信息（如果有的話）
+    let quantity = 3; // 默認值
+    let totalCost = 15; // 默認值
+    
+    try {
+        if (url.startsWith('scratch:')) {
+            const base64Data = url.replace('scratch:', '');
+            const decodedData = JSON.parse(atob(base64Data));
+            quantity = decodedData.q || quantity;
+            totalCost = decodedData.c || totalCost;
         }
-
+    } catch (e) {
+        console.log('使用默認的刮刮樂參數');
+    }
+    
+    const scratchData = {
+        id: scratchId,
+        quantity: quantity,
+        totalCost: totalCost,
+        timestamp: new Date().toISOString(),
+        used: false,
+        cards: generateScratchCards(quantity) // 🆕 動態生成卡片
+    };
+    
+    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+    allScratches[scratchId] = scratchData;
+    localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+    
+    updateLottoButton();
+    openScratchCardPage(scratchId);
+}
+        // 🆕 添加刮刮樂卡片生成函數（與主網頁一致）
+function generateScratchCards(quantity) {
+    const cards = [];
+    const prizes = ["多謝惠顧", "2兩", "5兩", "10兩", "50兩", "100兩"];
+    const weights = [75, 8, 7, 5, 3, 2];
+    
+    for (let i = 0; i < quantity; i++) {
+        let random = Math.random() * 100;
+        let prizeIndex = 0;
+        let accumulated = 0;
+        
+        for (let j = 0; j < weights.length; j++) {
+            accumulated += weights[j];
+            if (random <= accumulated) {
+                prizeIndex = j;
+                break;
+            }
+        }
+        
+        cards.push({
+            id: `card_${i + 1}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            prize: prizes[prizeIndex],
+            isScratched: false,
+            claimed: false
+        });
+    }
+    
+    return cards;
+}
         // 打開刮刮樂頁面
         function openScratchCardPage(scratchId) {
             const scratchPageURL = `scratch-card.html?id=${scratchId}`;
@@ -1179,5 +1230,6 @@ function createCameraInterface(stream) {
     </script>
 </body>
 </html>
+
 
 
