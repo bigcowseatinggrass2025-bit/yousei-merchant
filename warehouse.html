@@ -705,13 +705,13 @@
     }
 
             navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'environment',
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                }
-            }).then(stream => {
-                createCameraInterface(stream);
+    video: {
+        facingMode: 'environment',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+    }
+}).then(stream => {
+    createCameraInterfaceHybrid(stream); 
             }).catch(error => {
                 console.error('❌ 相機錯誤:', error);
                 let errorMsg = "無法訪問相機：";
@@ -725,6 +725,189 @@
                 alert(errorMsg);
             });
         }
+        // 🆕 混合检测策略
+function createCameraInterfaceHybrid(stream) {
+    console.log('🎯 启动混合QR检测策略');
+    
+    const cameraHTML = `
+        <div class="camera-overlay" id="camera-overlay">
+            <div class="camera-container">
+                <div class="camera-header">
+                    <div class="camera-title">掃描QR碼</div>
+                    <button class="close-camera" id="close-camera">×</button>
+                </div>
+                <div style="position: relative; display: inline-block;">
+                    <video id="camera-video" autoplay playsinline muted></video>
+                    <div class="scan-frame"></div>
+                </div>
+                <div class="camera-hint" id="camera-hint">啟動混合檢測...</div>
+                <div class="camera-buttons">
+                    <button class="manual-input-btn" id="manual-input-btn">手動輸入URL</button>
+                    <button class="test-scratch-btn" id="test-scratch-btn">測試刮刮樂</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', cameraHTML);
+    
+    const video = document.getElementById('camera-video');
+    const hint = document.getElementById('camera-hint');
+    
+    video.srcObject = stream;
+    
+    video.play().then(() => {
+        console.log('✅ 視頻播放成功，開始混合檢測');
+        startHybridQRScanning(video, hint, stream);
+    }).catch(error => {
+        console.error('❌ 播放失敗:', error);
+        hint.textContent = '❌ 播放失敗: ' + error.message;
+    });
+    
+    // 關閉相機和按钮事件（保持原有代码）
+    document.getElementById('close-camera').addEventListener('click', function() {
+        closeCameraInterface(stream);
+    });
+    
+    document.getElementById('manual-input-btn').addEventListener('click', function() {
+        closeCameraInterface(stream);
+        const url = prompt("請輸入刮刮樂URL:", "scratch:eyJpZCI6InNjcmF0Y2hfMTcxMDAwMDAwMDAwMCIsInEiOjMsImMiOjE1LCJ0IjoxNzEwMDAwMDAwMDAwfQ==");
+        if (url) processScratchCardURL(url);
+    });
+    
+    document.getElementById('test-scratch-btn').addEventListener('click', function() {
+        closeCameraInterface(stream);
+        const testData = { id: 'test_' + Date.now(), q: 3, c: 15, t: Date.now() };
+        const base64Data = btoa(JSON.stringify(testData));
+        const testUrl = `scratch:${base64Data}`;
+        processScratchCardURL(testUrl);
+    });
+}
+
+// 🆕 核心混合检测函数
+function startHybridQRScanning(video, hint, stream) {
+    console.log('🔍 检查浏览器原生QR支持...');
+    
+    // 🆕 先尝试原生检测
+    if ('BarcodeDetector' in window) {
+        console.log('🚀 使用原生QR检测');
+        hint.textContent = '🚀 高速掃描中...';
+        startNativeQRDetection(video, hint, stream);
+    } else {
+        console.log('🔄 浏览器不支持原生检测，使用优化版jsQR');
+        hint.textContent = '🔍 掃描中...';
+        startOptimizedQRScanning(video, hint, stream);
+    }
+}
+
+// 🆕 原生QR检测
+async function startNativeQRDetection(video, hint, stream) {
+    try {
+        const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+        console.log('✅ 原生QR检测器创建成功');
+        
+        let scanCount = 0;
+        const maxScans = 100; // 最大扫描次数
+        
+        async function detectFrame() {
+            if (scanCount++ > maxScans) {
+                console.log('🔄 原生检测超时，切换到jsQR');
+                startOptimizedQRScanning(video, hint, stream);
+                return;
+            }
+            
+            try {
+                const barcodes = await barcodeDetector.detect(video);
+                
+                if (barcodes.length > 0) {
+                    const qrCode = barcodes[0];
+                    console.log('🎯 原生檢測成功! 次数:', scanCount, '内容:', qrCode.rawValue);
+                    
+                    hint.textContent = '✅ 掃描成功！';
+                    closeCameraInterface(stream);
+                    processScratchCardURL(qrCode.rawValue);
+                    return;
+                }
+                
+                // 继续检测
+                requestAnimationFrame(detectFrame);
+                
+            } catch (error) {
+                console.error('原生检测出错:', error);
+                console.log('🔄 切换到jsQR检测');
+                startOptimizedQRScanning(video, hint, stream);
+            }
+        }
+        
+        // 开始原生检测
+        detectFrame();
+        
+    } catch (error) {
+        console.error('无法创建原生检测器:', error);
+        startOptimizedQRScanning(video, hint, stream);
+    }
+}
+
+// 🆕 优化版jsQR检测
+function startOptimizedQRScanning(video, hint, stream) {
+    console.log('🔄 启动优化版jsQR检测');
+    hint.textContent = '🔍 掃描中...';
+    
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    let lastScanTime = 0;
+    let scanCount = 0;
+    
+    function scanQRCode() {
+        const now = Date.now();
+        scanCount++;
+        
+        // 🆕 动态频率：50ms间隔（20fps）
+        if (now - lastScanTime < 50) {
+            requestAnimationFrame(scanQRCode);
+            return;
+        }
+        lastScanTime = now;
+        
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            try {
+                // 🆕 优化：固定尺寸，只扫描中心区域
+                canvas.width = 300;
+                canvas.height = 300;
+                
+                const centerX = (video.videoWidth - 300) / 2;
+                const centerY = (video.videoHeight - 300) / 2;
+                ctx.drawImage(video, centerX, centerY, 300, 300, 0, 0, 300, 300);
+                
+                const imageData = ctx.getImageData(0, 0, 300, 300);
+                const code = jsQR(imageData.data, 300, 300, {
+                    inversionAttempts: "attemptBoth",
+                });
+                
+                if (code) {
+                    console.log('🎯 jsQR檢測成功! 次数:', scanCount);
+                    hint.textContent = '✅ 掃描成功！';
+                    closeCameraInterface(stream);
+                    processScratchCardURL(code.data);
+                    return;
+                }
+                
+                // 更新扫描状态
+                if (scanCount % 10 === 0) {
+                    hint.textContent = `🔍 掃描中... ${scanCount}次`;
+                }
+                
+            } catch (error) {
+                console.error('jsQR扫描错误:', error);
+            }
+        }
+        
+        requestAnimationFrame(scanQRCode);
+    }
+    
+    // 启动优化扫描
+    scanQRCode();
+}
 
         // 創建相機界面 - 修復版本
 function createCameraInterface(stream) {
@@ -1307,6 +1490,7 @@ function openScratchCardPage(scratchId) {
     </script>
 </body>
 </html>
+
 
 
 
