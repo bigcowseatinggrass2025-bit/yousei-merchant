@@ -9032,7 +9032,7 @@ document.getElementById('confirm-scratch-purchase').addEventListener('click', fu
     }
 });
 
-// 生成虚拟刮刮乐QR码
+// 🆕 修復的QR碼生成函數
 function generateScratchCardQRCode(quantity, totalCost) {
     const qrContainer = document.getElementById('virtual-scratch-qrcode');
     qrContainer.innerHTML = '';
@@ -9040,24 +9040,21 @@ function generateScratchCardQRCode(quantity, totalCost) {
     // 创建唯一ID
     const scratchId = 'scratch_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     
-    // 🆕 只保存基本資訊到localStorage（備用）
-    const virtualScratchData = {
-    id: scratchId,
-    quantity: quantity,
-    totalCost: totalCost,
-    timestamp: new Date().toISOString(),
-    used: false,
-    cards: generateScratchCards(quantity) // 🆕 添加这行！
-};
-    
-    // 🆕 QR碼包含數量、金額、ID（Base64編碼）
+    // 🆕 QR碼數據（Base64編碼）- 新格式
     const qrData = {
         id: scratchId,
         q: quantity,      // 數量
         c: totalCost,     // 金額
         t: Date.now()     // 時間戳
     };
-    const qrContent = `https://bigcowseatinggrass2025-bit.github.io/yousei-merchant/scratch-card.html?id=${scratchId}`;
+    
+    // 🆕 新格式：scratch:{base64數據}
+    const base64Data = btoa(JSON.stringify(qrData));
+    const qrContent = `scratch:${base64Data}`;
+    
+    console.log('生成的QR碼數據:', qrData);
+    console.log('Base64編碼:', base64Data);
+    console.log('QR碼內容:', qrContent);
     
     // 生成QR码
     new QRCode(qrContainer, {
@@ -9069,12 +9066,19 @@ function generateScratchCardQRCode(quantity, totalCost) {
         correctLevel: QRCode.CorrectLevel.H
     });
     
-    // 保存基本資訊到localStorage
+    // 🆕 可選：同時保存到localStorage作為備份
+    const virtualScratchData = {
+        id: scratchId,
+        quantity: quantity,
+        totalCost: totalCost,
+        timestamp: new Date().toISOString(),
+        used: false,
+        cards: generateScratchCards(quantity)
+    };
+    
     let existingScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
     existingScratches[scratchId] = virtualScratchData;
     localStorage.setItem('virtualScratchCards', JSON.stringify(existingScratches));
-    
-    console.log('生成的QR碼數據:', qrData);
 }
 
 function generateScratchCards(quantity) {
@@ -11810,6 +11814,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
