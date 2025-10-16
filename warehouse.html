@@ -694,13 +694,15 @@
         }
 
         // 🆕 修復的相機功能
-        function openQRScanner() {
-            console.log('📷 開啟相機...');
-            
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                alert('您的瀏覽器不支持相機功能');
-                return;
-            }
+       function openQRScanner() {
+    console.log('📷 開啟相機...');
+    console.log('📍 浏览器支持:', !!navigator.mediaDevices?.getUserMedia);
+    console.log('📍 jsQR库:', typeof jsQR);
+    
+    if (typeof jsQR === 'undefined') {
+        alert('❌ jsQR庫未加載，請刷新頁面');
+        return;
+    }
 
             navigator.mediaDevices.getUserMedia({
                 video: {
@@ -800,40 +802,60 @@ function createCameraInterface(stream) {
     });
 
 
-// 🆕 QR掃描功能
+// 🆕 修复的QR扫描功能
 function startQRScanning(video, hint, stream) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     let scanInterval;
+    let scanCount = 0;
     
     function scanQRCode() {
+        scanCount++;
+        
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
-            
-            if (code) {
-                console.log('🎯 掃描到QR碼:', code.data);
-                hint.textContent = '✅ 掃描成功！';
-                hint.style.color = '#27ae60';
+            try {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
-                // 停止掃描
-                clearInterval(scanInterval);
-                closeCameraInterface(stream);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
                 
-                // 處理QR碼內容
-                processScratchCardURL(code.data);
+                if (code) {
+                    console.log('🎯 扫描到QR码:', code.data);
+                    console.log('📍 QR码位置:', code.location);
+                    hint.textContent = '✅ 掃描成功！';
+                    hint.style.color = '#27ae60';
+                    
+                    // 停止扫描
+                    clearInterval(scanInterval);
+                    closeCameraInterface(stream);
+                    
+                    // 处理QR码内容
+                    processScratchCardURL(code.data);
+                } else {
+                    // 显示扫描状态
+                    hint.innerHTML = `🔍 掃描中...<br>次數: ${scanCount}`;
+                    if (scanCount % 10 === 0) {
+                        console.log('🔄 扫描中...', scanCount);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ 扫描错误:', error);
+                hint.textContent = '❌ 掃描錯誤';
+                hint.style.color = '#e74c3c';
             }
         }
     }
     
-    // 開始掃描，500ms間隔
-    scanInterval = setInterval(scanQRCode, 500);
+    // 开始扫描，300ms间隔（更快）
+    scanInterval = setInterval(scanQRCode, 300);
+    console.log('🔄 QR扫描已启动，间隔300ms');
+    
+    return scanInterval;
 }
-
 // 🆕 關閉相機界面
 function closeCameraInterface(stream) {
     const cameraOverlay = document.getElementById('camera-overlay');
@@ -1288,6 +1310,7 @@ function openScratchCardPage(scratchId) {
     </script>
 </body>
 </html>
+
 
 
 
