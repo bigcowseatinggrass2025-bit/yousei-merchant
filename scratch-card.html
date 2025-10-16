@@ -706,17 +706,17 @@
     }
 
 function claimPrize() {
-    console.log('🎯 开始兑奖流程');
+    console.log('🎯 ULTIMATE: 开始兑奖流程');
     
-    const scratchId = currentScratchData.id; // 🆕 先保存ID
+    const scratchId = currentScratchData.id;
+    const prizeAmount = totalWinnings;
     
-    // 🆕 关键：直接从 localStorage 删除数据
+    // 1. 从 localStorage 彻底删除数据
     const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-    delete allScratches[scratchId]; // 🆕 彻底删除
+    delete allScratches[scratchId];
     localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
-    console.log('🗑️ 已从localStorage彻底删除:', scratchId);
     
-    // 🆕 通知仓库页面
+    // 2. 通知仓库页面
     if (window.opener && !window.opener.closed) {
         window.opener.postMessage({ 
             type: 'SCRATCH_CARD_COMPLETED', 
@@ -724,33 +724,24 @@ function claimPrize() {
         }, '*');
     }
     
-    // 關閉界面
     closeClaimConfirmation();
     
-    // 🆕 显示完成页面，阻止任何操作
+    // 🆕 终极方案：重定向到完成页面
     setTimeout(() => {
-        // 🆕 完全清空页面，显示最终状态
-        document.body.innerHTML = `
-            <div style="background: linear-gradient(135deg, #1a2a3a, #2c3e50); color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center;">
-                <div style="font-size: 4rem;">🎊</div>
-                <h1 style="color: #ffd700; margin: 20px 0;">兌獎完成</h1>
-                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin: 20px 0;">
-                    <h2 style="color: #27ae60; font-size: 2.5rem;">${totalWinnings}兩</h2>
-                    <p>已成功兌換獎金</p>
-                </div>
-                <p style="color: #bbb; margin: 30px 0;">請向幽街商人領取實體獎金</p>
-                <p style="color: #7f8c8d; font-size: 0.9rem;">此頁面已完成使命，請關閉</p>
-            </div>
-        `;
+        // 🆕 创建唯一的完成页面URL
+        const completionUrl = `scratch-card-completed.html?prize=${prizeAmount}&t=${Date.now()}`;
+        
+        // 🆕 重定向到新页面（彻底离开当前页面）
+        window.location.href = completionUrl;
         
     }, 300);
 }
-
     // 初始化
     window.addEventListener('load', loadScratchData);
 </script>
 </body>
 </html>
+
 
 
 
