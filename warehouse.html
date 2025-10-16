@@ -825,106 +825,122 @@
 
             // 視頻播放成功後開始掃描
             video.play().then(() => {
-                console.log('✅ 視頻播放成功，開始QR掃描');
-                hint.textContent = '✅ 相機就緒！對準QR碼';
-                video.style.border = '3px solid #27ae60';
-                
-                scanInterval = setInterval(scanQRCode, 500);
-                
-            }).catch(error => {
-                console.error('❌ 播放失敗:', error);
-                hint.textContent = '❌ 相機啟動失敗';
-            });
-            
-            // 關閉相機
-            document.getElementById('close-camera').addEventListener('click', function() {
-                if (scanInterval) clearInterval(scanInterval);
-                stream.getTracks().forEach(track => track.stop());
-                document.getElementById('camera-overlay').remove();
-            });
-            
-            // 手動輸入
-            document.getElementById('manual-input-btn').addEventListener('click', function() {
-                if (scanInterval) clearInterval(scanInterval);
-                const url = prompt("請輸入刮刮樂URL:", "scratch-card.html?id=test123");
-                if (url) {
-                    stream.getTracks().forEach(track => track.stop());
-                    document.getElementById('camera-overlay').remove();
-                    processScratchCardURL(url);
-                }
-            });
-            
-            // 測試功能
-            document.getElementById('test-scratch-btn').addEventListener('click', function() {
-                if (scanInterval) clearInterval(scanInterval);
-                
-                // 🆕 創建測試QR數據
-                const testData = {
-                    id: 'test_' + Date.now(),
-                    q: 1,  // 1張
-                    c: 5,  // 5兩
-                    t: Date.now()
-                };
-                const testUrl = `scratch:${btoa(JSON.stringify(testData))}`;  // ✅ QR數據格式
-                
-                stream.getTracks().forEach(track => track.stop());
-                document.getElementById('camera-overlay').remove();
-                processScratchCardURL(testUrl);
-            });
+        console.log('✅ 視頻播放成功，開始QR掃描');
+        hint.textContent = '✅ 相機就緒！對準QR碼';
+        video.style.border = '3px solid #27ae60';
+        
+        scanInterval = setInterval(scanQRCode, 500);
+        
+    }).catch(error => {
+        console.error('❌ 播放失敗:', error);
+        hint.textContent = '❌ 相機啟動失敗';
+    });
+    
+    // 關閉相機
+    document.getElementById('close-camera').addEventListener('click', function() {
+        if (scanInterval) clearInterval(scanInterval);
+        stream.getTracks().forEach(track => track.stop());
+        document.getElementById('camera-overlay').remove();
+    });
+    
+    // 手動輸入
+    document.getElementById('manual-input-btn').addEventListener('click', function() {
+        if (scanInterval) clearInterval(scanInterval);
+        const url = prompt("請輸入刮刮樂URL:", "scratch-card.html?id=test123");
+        if (url) {
+            stream.getTracks().forEach(track => track.stop());
+            document.getElementById('camera-overlay').remove();
+            processScratchCardURL(url);
         }
+    });
+    
+    // 測試功能
+    document.getElementById('test-scratch-btn').addEventListener('click', function() {
+        if (scanInterval) clearInterval(scanInterval);
+        const testScratchId = 'test_' + Date.now();
+        const testUrl = `scratch-card.html?id=${testScratchId}`;
+        
+        stream.getTracks().forEach(track => track.stop());
+        document.getElementById('camera-overlay').remove();
+        processScratchCardURL(testUrl);
+    });
+}
 
-        // 處理刮刮樂URL
-        function processScratchCardURL(url) {
-            console.log('🔗 原始掃描內容:', url);
-            
-            let finalUrl = url;
-            
-            // 🆕 如果是scratch:格式，直接傳遞給刮刮樂頁面
-            if (url.includes('scratch:')) {
-                finalUrl = `scratch-card.html?data=${encodeURIComponent(url)}`;
-            } else {
-                // 原有邏輯處理其他格式
-                let scratchId = null;
-                
-                if (url.includes('http') && url.includes('scratch-card.html')) {
-                    try {
-                        const urlObj = new URL(url);
-                        scratchId = urlObj.searchParams.get('id') || urlObj.searchParams.get('data');
-                    } catch (e) {
-                        console.error('URL解析錯誤:', e);
-                    }
-                } else if (url.includes('scratch-card.html')) {
-                    const match = url.match(/(?:id|data)=([^&]+)/);
-                    scratchId = match ? match[1] : null;
-                } else {
-                    scratchId = url.trim();
-                }
-                
-                if (scratchId) {
-                    finalUrl = `scratch-card.html?data=${encodeURIComponent(scratchId)}`;
-                }
+       // 處理刮刮樂URL
+function processScratchCardURL(url) {
+    console.log('🔗 原始掃描內容:', url);
+    
+    let finalUrl = url;
+    
+    // 🆕 如果是scratch:格式，直接傳遞給刮刮樂頁面
+    if (url.includes('scratch:')) {
+        finalUrl = `scratch-card.html?data=${encodeURIComponent(url)}`;
+    } else {
+        // 原有邏輯處理其他格式
+        let scratchId = null;
+        
+        if (url.includes('http') && url.includes('scratch-card.html')) {
+            try {
+                const urlObj = new URL(url);
+                scratchId = urlObj.searchParams.get('id') || urlObj.searchParams.get('data');
+            } catch (e) {
+                console.error('URL解析錯誤:', e);
             }
-            
-            console.log('🎯 最終打開的URL:', finalUrl);
-            window.open(finalUrl, '_blank');
+        } else if (url.includes('scratch-card.html')) {
+            const match = url.match(/(?:id|data)=([^&]+)/);
+            scratchId = match ? match[1] : null;
+        } else {
+            scratchId = url.trim();
         }
-
-        // ✅ 替換為這個新函數！
+        
+        if (scratchId) {
+            finalUrl = `scratch-card.html?data=${encodeURIComponent(scratchId)}`;
+        }
+    }
+    
+    console.log('🎯 最終打開的URL:', finalUrl);
+    window.open(finalUrl, '_blank');
+}
         function saveScratchCardAndOpen(scratchId, url) {
-            console.log('💾 處理數據:', scratchId);
-            
-            // 直接打開刮刮樂頁面，傳遞數據
-            const finalUrl = `scratch-card.html?data=${encodeURIComponent(scratchId)}`;
-            console.log('🎯 打開刮刮樂:', finalUrl);
-            
-            updateLottoButton();
-            window.open(finalUrl, '_blank');
-        }
+    console.log('💾 查找刮刮樂數據:', scratchId);
+    
+    // 🆕 從localStorage讀取主網頁保存的真實資料
+    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+    const originalData = allScratches[scratchId];
+    
+    if (originalData) {
+        console.log('✅ 找到真實刮刮樂數據:', originalData);
+        
+        // 🆕 直接使用主網頁的真實資料，不創建測試資料
+        // 資料已經包含正確的 quantity 和 totalCost
+        
+        // 確保資料狀態正確
+        originalData.used = false;
+        originalData.timestamp = new Date().toISOString();
+        
+        // 🆕 重新保存（確保格式一致）
+        allScratches[scratchId] = originalData;
+        localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+        
+        console.log('🎯 使用真實資料 - 張數:', originalData.quantity, '金額:', originalData.totalCost);
+        
+        updateLottoButton();
+        openScratchCardPage(scratchId);
+        
+    } else {
+        console.error('❌ 找不到對應的刮刮樂數據，ID:', scratchId);
+        
+        // 🆕 調試：顯示所有可用的刮刮樂
+        const availableIds = Object.keys(allScratches);
+        console.log('🔍 當前可用的刮刮樂ID:', availableIds);
+        
+        alert('錯誤：找不到刮刮樂數據\n請確認：\n1. 主網頁已保存數據\n2. QR碼ID正確\n3. 在同一瀏覽器中操作');
+    }
+}
 
+        // 打開刮刮樂頁面
         function openScratchCardPage(scratchId) {
-            // 使用data參數傳遞
-            const scratchPageURL = `scratch-card.html?data=${encodeURIComponent(scratchId)}`;
-            console.log('🎯 打開刮刮樂頁面:', scratchPageURL);
+            const scratchPageURL = `scratch-card.html?id=${scratchId}`;
             window.open(scratchPageURL, '_blank');
         }
 
@@ -1211,12 +1227,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
