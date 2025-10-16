@@ -693,8 +693,10 @@
         }
     }
 
-    // 🆕 修復的兌獎函數
+   // 🆕 修复的兌獎函數
 function claimPrize() {
+    console.log('🎯 开始兑奖流程');
+    
     // 標記所有卡片為已兌獎
     currentScratchData.cards.forEach(card => {
         card.claimed = true;
@@ -702,24 +704,28 @@ function claimPrize() {
     
     // 標記整個刮刮樂為已使用
     currentScratchData.used = true;
+    console.log('✅ 刮刮乐标记为已使用:', currentScratchData.id);
     
     // 🆕 通知父頁面（倉庫頁面）
     if (window.opener && !window.opener.closed) {
+        console.log('📢 发送完成消息给仓库页面');
         window.opener.postMessage({ 
             type: 'SCRATCH_CARD_COMPLETED', 
-            scratchId: currentScratchData.id 
+            scratchId: currentScratchData.id,
+            timestamp: Date.now()
         }, '*');
-        console.log('📢 已發送完成消息給倉庫頁面');
     } else {
-        console.log('⚠️ 無法找到父頁面，可能是在新標籤頁中打開');
+        console.log('⚠️ 无法找到父页面');
     }
     
-    // 🆕 如果是舊格式，保存到localStorage
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('id')) {
+    // 🆕 保存状态到localStorage（兼容旧格式）
+    try {
         const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
         allScratches[currentScratchData.id] = currentScratchData;
         localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+        console.log('💾 状态已保存到localStorage');
+    } catch (e) {
+        console.error('保存到localStorage失败:', e);
     }
     
     // 關閉界面
@@ -728,9 +734,20 @@ function claimPrize() {
     // 顯示兌獎成功訊息
     setTimeout(() => {
         alert(`🎉 成功兌換 ${totalWinnings}兩 獎金！`);
-        // 不重置頁面，讓用戶看到完成狀態
+        console.log('💰 兑奖完成，总奖金:', totalWinnings);
+        
+        // 🆕 更新界面状态
         renderCards();
         hideClaimButton();
+        
+        // 🆕 可选：自动关闭页面
+        setTimeout(() => {
+            if (!window.opener || window.opener.closed) {
+                console.log('🔄 自动关闭刮刮乐页面');
+                window.close();
+            }
+        }, 2000);
+        
     }, 300);
 }
 
@@ -739,6 +756,7 @@ function claimPrize() {
 </script>
 </body>
 </html>
+
 
 
 
