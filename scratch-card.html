@@ -251,16 +251,15 @@
     let currentCard = null;
     let totalWinnings = 0;
 
-  // 🆕 修复的URL参数获取函数
-function getScratchIdFromURL() {
+  function getScratchIdFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
-    
-    // 🆕 优先检查 data 参数（新格式）
     const dataParam = urlParams.get('data');
     if (dataParam) {
-        // 🆕 如果是base64数据，直接返回（包含scratch:前缀）
-        return dataParam;
+        return dataParam; // 应该返回 base64 数据
     }
+    const idParam = urlParams.get('id');
+    return idParam;
+}
     
     // 🆕 兼容旧的 id 参数
     const idParam = urlParams.get('id');
@@ -312,7 +311,7 @@ function processQRCodeData(qrData) {
     try {
         console.log('🎯 解析QR碼數據:', qrData);
         
-        // 🆕 修复：检查是否包含scratch:前缀
+        // 🆕 确保能处理带或不带 scratch: 前缀的数据
         let base64Data = qrData;
         if (qrData.startsWith('scratch:')) {
             base64Data = qrData.replace('scratch:', '');
@@ -726,6 +725,7 @@ function claimPrize() {
 </script>
 </body>
 </html>
+
 
 
 
