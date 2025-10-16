@@ -1038,14 +1038,20 @@ function openScratchCardPage(scratchId) {
             }
         });
 
-        // 監聽刮刮樂完成消息
-        window.addEventListener('message', function(event) {
-            if (event.data && event.data.type === 'SCRATCH_CARD_COMPLETED') {
-                console.log('🎉 收到刮刮樂完成通知');
-                updateLottoButton();
-                showTemporaryMessage('刮刮樂已完成兌獎', 'success');
-            }
-        });
+       // 🆕 修复的消息監聽
+window.addEventListener('message', function(event) {
+    console.log('📨 收到消息:', event.data);
+    
+    if (event.data && event.data.type === 'SCRATCH_CARD_COMPLETED') {
+        console.log('🎉 收到刮刮樂完成通知');
+        
+        // 🆕 立即更新樂透按鈕狀態
+        updateLottoButton();
+        
+        // 🆕 顯示成功提示
+        showTemporaryMessage('刮刮樂已完成兌獎', 'success');
+    }
+});
 
         // 顯示臨時提示
         function showTemporaryMessage(message, type = 'info') {
@@ -1307,6 +1313,7 @@ function openScratchCardPage(scratchId) {
     </script>
 </body>
 </html>
+
 
 
 
