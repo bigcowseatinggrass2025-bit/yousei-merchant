@@ -767,7 +767,7 @@ function createCameraInterface(stream) {
         hint.style.color = '#27ae60';
         
         // 🆕 開始QR掃描
-        startQRScanning(video, hint, stream);
+        startStableQRScanning(video, hint, stream);
         
     }).catch(error => {
         console.error('❌ 播放失敗:', error);
@@ -1352,6 +1352,7 @@ window.addEventListener('message', function(event) {
     </script>
 </body>
 </html>
+
 
 
 
