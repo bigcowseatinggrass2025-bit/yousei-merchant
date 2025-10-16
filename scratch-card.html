@@ -251,19 +251,21 @@
     let currentCard = null;
     let totalWinnings = 0;
 
-    // 🆕 修复的URL参数获取函数
-    function getScratchIdFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        // 🆕 优先检查 data 参数（新格式）
-        const dataParam = urlParams.get('data');
-        if (dataParam) {
-            return dataParam; // 返回 base64 数据
-        }
-        // 🆕 兼容旧的 id 参数
-        const idParam = urlParams.get('id');
-        return idParam;
+  // 🆕 修复的URL参数获取函数
+function getScratchIdFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // 🆕 优先检查 data 参数（新格式）
+    const dataParam = urlParams.get('data');
+    if (dataParam) {
+        // 🆕 如果是base64数据，直接返回（包含scratch:前缀）
+        return dataParam;
     }
-
+    
+    // 🆕 兼容旧的 id 参数
+    const idParam = urlParams.get('id');
+    return idParam;
+}
     function loadScratchData() {
         const scratchParam = getScratchIdFromURL();
         
@@ -305,37 +307,41 @@
         renderCards();
     }
 
-    // 🆕 處理QR碼數據
-    function processQRCodeData(qrData) {
-        try {
-            console.log('🎯 解析QR碼數據:', qrData);
-            
-            const base64Data = qrData.replace('scratch:', '');
-            const qrInfo = JSON.parse(atob(base64Data));
-            
-            console.log('✅ QR數據解析成功:', qrInfo);
-            
-            // 生成刮刮樂卡片
-            const cards = generateScratchCards(qrInfo.q);
-            
-            // 創建刮刮樂數據
-            currentScratchData = {
-                id: qrInfo.id,
-                quantity: qrInfo.q,
-                totalCost: qrInfo.c,
-                timestamp: new Date(qrInfo.t).toISOString(),
-                used: false,
-                cards: cards
-            };
-            
-            updatePurchaseInfo();
-            renderCards();
-            
-        } catch (error) {
-            console.error('❌ QR碼數據解析錯誤:', error);
-            showError('無效的QR碼格式: ' + error.message);
+  // 🆕 處理QR碼數據 - 修复版本
+function processQRCodeData(qrData) {
+    try {
+        console.log('🎯 解析QR碼數據:', qrData);
+        
+        // 🆕 修复：检查是否包含scratch:前缀
+        let base64Data = qrData;
+        if (qrData.startsWith('scratch:')) {
+            base64Data = qrData.replace('scratch:', '');
         }
+        
+        const qrInfo = JSON.parse(atob(base64Data));
+        console.log('✅ QR數據解析成功:', qrInfo);
+        
+        // 生成刮刮樂卡片
+        const cards = generateScratchCards(qrInfo.q);
+        
+        // 創建刮刮樂數據
+        currentScratchData = {
+            id: qrInfo.id,
+            quantity: qrInfo.q,
+            totalCost: qrInfo.c,
+            timestamp: new Date(qrInfo.t).toISOString(),
+            used: false,
+            cards: cards
+        };
+        
+        updatePurchaseInfo();
+        renderCards();
+        
+    } catch (error) {
+        console.error('❌ QR碼數據解析錯誤:', error);
+        showError('無效的QR碼格式: ' + error.message);
     }
+}
 
     // 🆕 根據數量生成隨機卡片
     function generateScratchCards(quantity) {
@@ -720,6 +726,7 @@ function claimPrize() {
 </script>
 </body>
 </html>
+
 
 
 
