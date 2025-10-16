@@ -707,22 +707,19 @@ function openQRScanner() {
     }
 }
 
-// 創建相機界面 - 修復顯示版本
+// 創建相機界面 - 使用測試頁面的成功代碼
 function createCameraInterface(stream) {
     console.log('🎬 開始創建相機界面');
     
+    // 使用測試頁面的簡單HTML結構
     const cameraHTML = `
-        <div class="camera-overlay" id="camera-overlay">
-            <div class="camera-container">
-                <div class="camera-header">
-                    <div class="camera-title">掃描QR碼</div>
-                    <button class="close-camera" id="close-camera">×</button>
-                </div>
-                <video id="camera-video" autoplay playsinline muted 
-                       style="width: 100%; height: 400px; background: #000; display: block; object-fit: cover !important;"></video>
-                <div class="scan-frame"></div>
-                <div class="camera-hint" id="camera-hint">相機就緒！對準QR碼掃描</div>
-                <button class="manual-input-btn" id="manual-input-btn">手動輸入URL</button>
+        <div id="camera-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <div style="background:white; padding:20px; border-radius:10px; text-align:center;">
+                <h3 style="color:black; margin-bottom:15px;">掃描QR碼</h3>
+                <video id="camera-video" autoplay playsinline muted style="width:300px; height:400px; background:#000; border:3px solid green; display:block;"></video>
+                <div id="camera-hint" style="color:black; margin:10px 0;">相機啟動中...</div>
+                <button onclick="document.getElementById('camera-overlay').remove(); stream.getTracks().forEach(track => track.stop());" style="padding:10px; margin:5px;">關閉</button>
+                <button class="manual-input-btn" style="padding:10px; margin:5px;">手動輸入URL</button>
             </div>
         </div>
     `;
@@ -732,27 +729,22 @@ function createCameraInterface(stream) {
     const video = document.getElementById('camera-video');
     const hint = document.getElementById('camera-hint');
     
+    // 使用測試頁面的成功邏輯
     video.srcObject = stream;
     
-    // 確保視頻播放
-    video.play().then(() => {
-        console.log('✅ 視頻播放成功');
-        hint.textContent = '相機啟動成功！尺寸: ' + video.videoWidth + 'x' + video.videoHeight;
-        hint.style.color = '#27ae60';
-    }).catch(error => {
-        console.error('❌ 視頻播放失敗:', error);
-        hint.textContent = '播放失敗: ' + error.message;
-        hint.style.color = '#e74c3c';
-    });
-    
-    // 關閉相機
-    document.getElementById('close-camera').addEventListener('click', function() {
-        stream.getTracks().forEach(track => track.stop());
-        document.getElementById('camera-overlay').remove();
-    });
+    video.onloadedmetadata = () => {
+        hint.textContent = '✅ 相機啟動成功！';
+        video.play().then(() => {
+            hint.textContent = '🎉 相機就緒！尺寸: ' + video.videoWidth + 'x' + video.videoHeight;
+            video.style.border = '3px solid green';
+        }).catch(e => {
+            hint.textContent = '❌ 播放失敗: ' + e.message;
+            video.style.border = '3px solid red';
+        });
+    };
     
     // 手動輸入URL
-    document.getElementById('manual-input-btn').addEventListener('click', function() {
+    document.querySelector('.manual-input-btn').addEventListener('click', function() {
         const url = prompt("請輸入刮刮樂URL:");
         if (url) {
             stream.getTracks().forEach(track => track.stop());
@@ -1205,6 +1197,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
