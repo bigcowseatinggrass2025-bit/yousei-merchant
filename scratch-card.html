@@ -675,50 +675,51 @@
     }
 
     // 🆕 修復的兌獎函數
-    function claimPrize() {
-        // 標記所有卡片為已兌獎
-        currentScratchData.cards.forEach(card => {
-            card.claimed = true;
-        });
-        
-        // 標記整個刮刮樂為已使用
-        currentScratchData.used = true;
-        
-        // 🆕 通知父頁面（倉庫頁面）
-        if (window.opener && !window.opener.closed) {
-            window.opener.postMessage({ 
-                type: 'SCRATCH_CARD_COMPLETED', 
-                scratchId: currentScratchData.id 
-            }, '*');
-            console.log('📢 已發送完成消息給倉庫頁面');
-        } else {
-            console.log('⚠️ 無法找到父頁面，可能是在新標籤頁中打開');
-        }
-        
-        // 🆕 如果是舊格式，保存到localStorage
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('id')) {
-            const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-            allScratches[currentScratchData.id] = currentScratchData;
-            localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
-        }
-        
-        // 關閉界面
-        closeClaimConfirmation();
-        
-        // 顯示兌獎成功訊息
-        setTimeout(() => {
-            alert(`🎉 成功兌換 ${totalWinnings}兩 獎金！`);
-            // 不重置頁面，讓用戶看到完成狀態
-            renderCards();
-            hideClaimButton();
-        }, 300);
+function claimPrize() {
+    // 標記所有卡片為已兌獎
+    currentScratchData.cards.forEach(card => {
+        card.claimed = true;
+    });
+    
+    // 標記整個刮刮樂為已使用
+    currentScratchData.used = true;
+    
+    // 🆕 通知父頁面（倉庫頁面）
+    if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({ 
+            type: 'SCRATCH_CARD_COMPLETED', 
+            scratchId: currentScratchData.id 
+        }, '*');
+        console.log('📢 已發送完成消息給倉庫頁面');
+    } else {
+        console.log('⚠️ 無法找到父頁面，可能是在新標籤頁中打開');
     }
+    
+    // 🆕 如果是舊格式，保存到localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('id')) {
+        const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+        allScratches[currentScratchData.id] = currentScratchData;
+        localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+    }
+    
+    // 關閉界面
+    closeClaimConfirmation();
+    
+    // 顯示兌獎成功訊息
+    setTimeout(() => {
+        alert(`🎉 成功兌換 ${totalWinnings}兩 獎金！`);
+        // 不重置頁面，讓用戶看到完成狀態
+        renderCards();
+        hideClaimButton();
+    }, 300);
+}
 
     // 初始化
     window.addEventListener('load', loadScratchData);
 </script>
 </body>
 </html>
+
 
 
