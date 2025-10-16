@@ -9035,21 +9035,33 @@ document.getElementById('confirm-scratch-purchase').addEventListener('click', fu
 // 生成虚拟刮刮乐QR码
 function generateScratchCardQRCode(quantity, totalCost) {
     const qrContainer = document.getElementById('virtual-scratch-qrcode');
-    qrContainer.innerHTML = ''; // 清空之前的QR码
+    qrContainer.innerHTML = '';
     
     // 创建唯一ID
     const scratchId = 'scratch_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     
-    // 生成刮刮樂數據
-    const scratchCards = generateScratchCards(quantity);
+    // 🆕 只保存基本資訊到localStorage（備用）
+    const virtualScratchData = {
+        id: scratchId,
+        quantity: quantity,
+        totalCost: totalCost,
+        timestamp: new Date().toISOString(),
+        used: false
+        // 🆕 移除cards，不保存具體獎金
+    };
     
-    // 生成刮刮樂副網頁的URL
-    const baseUrl = window.location.href.replace(/\/[^\/]*$/, '/scratch-card.html');
-    const qrContent = `${baseUrl}?id=${scratchId}`;
+    // 🆕 QR碼包含數量、金額、ID（Base64編碼）
+    const qrData = {
+        id: scratchId,
+        q: quantity,      // 數量
+        c: totalCost,     // 金額
+        t: Date.now()     // 時間戳
+    };
+    const qrContent = `scratch:${btoa(JSON.stringify(qrData))}`;
     
     // 生成QR码
     new QRCode(qrContainer, {
-        text: qrContent,
+        text: qrContent,  // 🆕 使用新格式
         width: 200,
         height: 200,
         colorDark: "#000000",
@@ -9057,22 +9069,12 @@ function generateScratchCardQRCode(quantity, totalCost) {
         correctLevel: QRCode.CorrectLevel.H
     });
     
-    // 存储刮刮樂數據
-    const virtualScratchData = {
-        id: scratchId,
-        quantity: quantity,
-        totalCost: totalCost,
-        timestamp: new Date().toISOString(),
-        used: false,
-        cards: scratchCards
-    };
-    
-    // 保存到localStorage
+    // 保存基本資訊到localStorage
     let existingScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
     existingScratches[scratchId] = virtualScratchData;
     localStorage.setItem('virtualScratchCards', JSON.stringify(existingScratches));
     
-    console.log('生成的刮刮樂數據:', virtualScratchData);
+    console.log('生成的QR碼數據:', qrData);
 }
 
 function generateScratchCards(quantity) {
@@ -11808,6 +11810,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
