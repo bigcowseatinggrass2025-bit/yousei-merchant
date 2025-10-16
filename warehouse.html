@@ -868,7 +868,6 @@ function closeCameraInterface(stream) {
     });
 }
 
-     // 處理刮刮樂URL - 修復版本
 // 處理刮刮樂URL - 修復版本
 function processScratchCardURL(url) {
     console.log('🔗 處理URL:', url);
@@ -892,6 +891,11 @@ function processScratchCardURL(url) {
                     cards: generateScratchCards(decodedData.q)
                 };
                 
+                // 🆕 修复：打开刮刮乐页面时传递base64数据
+                const scratchPageURL = `scratch-card.html?data=${base64Data}`;
+                window.open(scratchPageURL, '_blank');
+                return; // 🆕 重要：直接返回，不执行后面的代码
+                
             } catch (e) {
                 console.error('❌ scratch格式解析失敗:', e);
                 alert('QR碼格式錯誤: ' + e.message);
@@ -912,30 +916,15 @@ function processScratchCardURL(url) {
                     alert("找不到對應的刮刮樂數據");
                     return;
                 }
-            }
-        }
-        // 🆕 處理完整URL
-        else if (url.includes('http')) {
-            const urlObj = new URL(url);
-            const scratchId = urlObj.searchParams.get('id');
-            
-            if (scratchId) {
-                const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-                scratchData = allScratches[scratchId];
                 
-                if (!scratchData) {
-                    alert("找不到對應的刮刮樂數據");
-                    return;
-                }
+                // 🆕 旧格式：使用id参数
+                openScratchCardPage(scratchId);
+                return;
             }
         }
         
-        if (scratchData) {
-            // 🆕 直接打開刮刮樂頁面，通過URL參數傳遞數據
-            openScratchCardPage(scratchData);
-        } else {
-            alert("無效的刮刮樂URL");
-        }
+        alert("無效的刮刮樂URL");
+        
     } catch (error) {
         console.error('URL解析錯誤:', error);
         alert("URL格式錯誤: " + error.message);
@@ -1006,11 +995,18 @@ function generateScratchCards(quantity) {
     
     return cards;
 }
-        // 打開刮刮樂頁面
-        function openScratchCardPage(scratchId) {
-            const scratchPageURL = `scratch-card.html?id=${scratchId}`;
-            window.open(scratchPageURL, '_blank');
-        }
+       // 打開刮刮樂頁面 - 修復版本
+function openScratchCardPage(scratchId) {
+    // 🆕 检查是否是base64数据（新格式）
+    if (scratchId.startsWith('eyJ')) { // base64数据通常以eyJ开头
+        const scratchPageURL = `scratch-card.html?data=${scratchId}`;
+        window.open(scratchPageURL, '_blank');
+    } else {
+        // 旧格式：使用id参数
+        const scratchPageURL = `scratch-card.html?id=${scratchId}`;
+        window.open(scratchPageURL, '_blank');
+    }
+}
 
         // 樂透按鈕點擊事件
         document.getElementById('lotto-btn').addEventListener('click', function() {
@@ -1292,6 +1288,7 @@ function generateScratchCards(quantity) {
     </script>
 </body>
 </html>
+
 
 
 
