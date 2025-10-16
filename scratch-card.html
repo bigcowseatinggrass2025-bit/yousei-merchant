@@ -251,21 +251,26 @@
     let currentCard = null;
     let totalWinnings = 0;
 
-  function getScratchIdFromURL() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const dataParam = urlParams.get('data');
-    if (dataParam) {
-        return dataParam; // 应该返回 base64 数据
+    // 🆕 修复的URL参数获取函数
+    function getScratchIdFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        console.log('🔗 URL参数:', Object.fromEntries(urlParams));
+        
+        // 🆕 优先检查 data 参数
+        const dataParam = urlParams.get('data');
+        if (dataParam) {
+            console.log('✅ 找到data参数:', dataParam);
+            return dataParam;
+        }
+        
+        // 兼容旧的 id 参数
+        const idParam = urlParams.get('id');
+        console.log('🔄 使用id参数:', idParam);
+        return idParam;
     }
-    const idParam = urlParams.get('id');
-    return idParam;
-}
-    
-    // 🆕 兼容旧的 id 参数
-    const idParam = urlParams.get('id');
-    return idParam;
-}
+
     function loadScratchData() {
+        console.log('🚀 开始加载刮刮乐数据');
         const scratchParam = getScratchIdFromURL();
         
         if (!scratchParam) {
@@ -273,13 +278,15 @@
             return;
         }
         
-        // 🆕 檢查是否是QR碼數據格式
-        if (scratchParam.startsWith('scratch:')) {
+        console.log('📝 处理参数:', scratchParam);
+        
+        // 🆕 检查是否是QR碼數據格式
+        if (scratchParam.startsWith('scratch:') || scratchParam.startsWith('eyJ')) {
             processQRCodeData(scratchParam);
             return;
         }
         
-        // 原有localStorage邏輯
+        // 原有localStorage邏輯（兼容旧格式）
         const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
         currentScratchData = allScratches[scratchParam];
         
@@ -288,64 +295,61 @@
             return;
         }
         
-        // 🆕 檢查是否已使用
-        if (currentScratchData.used) {
-            showError('此刮刮樂已被使用');
-            // 🆕 隱藏所有界面元素
-            document.getElementById('cards-container').innerHTML = '';
-            document.getElementById('total-winnings').style.display = 'none';
-            return;
-        }
-        
-        // 🆕 如果沒有cards，就隨機生成
-        if (!currentScratchData.cards) {
-            currentScratchData.cards = generateScratchCards(currentScratchData.quantity);
-        }
-        
         updatePurchaseInfo();
         renderCards();
     }
 
-  // 🆕 處理QR碼數據 - 修复版本
-function processQRCodeData(qrData) {
-    try {
-        console.log('🎯 解析QR碼數據:', qrData);
+    // 🆕 修复的QR碼數據處理
+    function processQRCodeData(qrData) {
+        console.log('🎯 开始解析QR码数据:', qrData);
         
-        // 🆕 确保能处理带或不带 scratch: 前缀的数据
-        let base64Data = qrData;
-        if (qrData.startsWith('scratch:')) {
-            base64Data = qrData.replace('scratch:', '');
+        try {
+            // 🆕 处理带或不带 scratch: 前缀的数据
+            let base64Data = qrData;
+            if (qrData.startsWith('scratch:')) {
+                base64Data = qrData.replace('scratch:', '');
+                console.log('🔧 移除scratch:前缀');
+            }
+            
+            console.log('🔍 Base64数据:', base64Data);
+            
+            // 🆕 解码Base64
+            const decodedString = atob(base64Data);
+            console.log('🔍 解码后的字符串:', decodedString);
+            
+            const qrInfo = JSON.parse(decodedString);
+            console.log('✅ QR數據解析成功:', qrInfo);
+            
+            // 生成刮刮樂卡片
+            const cards = generateScratchCards(qrInfo.q);
+            console.log('🎴 生成的卡片:', cards);
+            
+            // 創建刮刮樂數據
+            currentScratchData = {
+                id: qrInfo.id,
+                quantity: qrInfo.q,
+                totalCost: qrInfo.c,
+                timestamp: new Date(qrInfo.t).toISOString(),
+                used: false,
+                cards: cards
+            };
+            
+            console.log('💾 最终刮刮乐数据:', currentScratchData);
+            
+            updatePurchaseInfo();
+            renderCards();
+            
+        } catch (error) {
+            console.error('❌ QR碼數據解析錯誤:', error);
+            showError('無效的QR碼格式: ' + error.message);
         }
-        
-        const qrInfo = JSON.parse(atob(base64Data));
-        console.log('✅ QR數據解析成功:', qrInfo);
-        
-        // 生成刮刮樂卡片
-        const cards = generateScratchCards(qrInfo.q);
-        
-        // 創建刮刮樂數據
-        currentScratchData = {
-            id: qrInfo.id,
-            quantity: qrInfo.q,
-            totalCost: qrInfo.c,
-            timestamp: new Date(qrInfo.t).toISOString(),
-            used: false,
-            cards: cards
-        };
-        
-        updatePurchaseInfo();
-        renderCards();
-        
-    } catch (error) {
-        console.error('❌ QR碼數據解析錯誤:', error);
-        showError('無效的QR碼格式: ' + error.message);
     }
-}
 
     // 🆕 根據數量生成隨機卡片
     function generateScratchCards(quantity) {
+        console.log('🎲 生成刮刮卡，数量:', quantity);
         const cards = [];
-        const prizes = ["多謝優惠", "2兩", "5兩", "10兩", "50兩", "100兩"];
+        const prizes = ["多謝惠顧", "2兩", "5兩", "10兩", "50兩", "100兩"];
         const weights = [75, 8, 7, 5, 3, 2];
         
         for (let i = 0; i < quantity; i++) {
@@ -369,11 +373,19 @@ function processQRCodeData(qrData) {
             });
         }
         
+        console.log('✅ 生成的卡片:', cards);
         return cards;
     }
 
     // 🆕 更新購買信息顯示
     function updatePurchaseInfo() {
+        if (!currentScratchData) {
+            console.log('❌ 没有刮刮乐数据可用于更新购买信息');
+            return;
+        }
+        
+        console.log('📊 更新购买信息:', currentScratchData);
+        
         document.getElementById('purchase-info').innerHTML = `
             <div><strong>購買數量：</strong>${currentScratchData.quantity}張</div>
             <div><strong>總金額：</strong>${currentScratchData.totalCost}兩</div>
@@ -382,6 +394,8 @@ function processQRCodeData(qrData) {
         
         document.getElementById('total-winnings').style.display = 'block';
         document.getElementById('total-count').textContent = currentScratchData.quantity;
+        
+        console.log('✅ 购买信息更新完成');
     }
 
     // 渲染卡片
@@ -725,6 +739,7 @@ function claimPrize() {
 </script>
 </body>
 </html>
+
 
 
 
