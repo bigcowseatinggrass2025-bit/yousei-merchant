@@ -693,7 +693,7 @@
         }
     }
 
- // 🆕 修复的兌獎函數 - 完全重置页面状态
+ // 🆕 恢复原来的兌獎函數
 function claimPrize() {
     console.log('🎯 开始兑奖流程');
     
@@ -706,6 +706,11 @@ function claimPrize() {
     currentScratchData.used = true;
     console.log('✅ 刮刮乐标记为已使用');
     
+    // 🆕 保存到localStorage
+    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+    allScratches[currentScratchData.id] = currentScratchData;
+    localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+    
     // 🆕 通知父頁面
     if (window.opener && !window.opener.closed) {
         window.opener.postMessage({ 
@@ -717,51 +722,14 @@ function claimPrize() {
     // 關閉界面
     closeClaimConfirmation();
     
-    // 🆕 完全重置页面状态
+    // 🆕 恢复原来的行为：显示成功消息，然后重置页面
     setTimeout(() => {
-        // 显示完成页面，阻止继续操作
-        showCompletionPage();
+        alert(`🎉 成功兌換 ${totalWinnings}兩 獎金！`);
+        
+        // 🆕 重新加载页面（回到"載入中"状态）
+        location.reload();
+        
     }, 300);
-}
-
-// 🆕 显示完成页面
-function showCompletionPage() {
-    const container = document.querySelector('.container');
-    
-    container.innerHTML = `
-        <div class="header">
-            <h1>🎉 刮刮樂已完成</h1>
-            <p>感謝您的參與！</p>
-        </div>
-        
-        <div class="purchase-info">
-            <div><strong>總獎金：</strong>${totalWinnings}兩</div>
-            <div><strong>完成時間：</strong>${new Date().toLocaleString()}</div>
-        </div>
-        
-        <div style="text-align: center; margin: 30px 0;">
-            <div style="font-size: 3rem; margin: 20px 0;">🎊</div>
-            <h3>恭喜獲得 ${totalWinnings}兩 獎金！</h3>
-            <p>請向幽街商人兌換實體獎金</p>
-        </div>
-        
-        <div class="action-buttons">
-            <button class="btn btn-success" onclick="closeScratchCardPage()">關閉頁面</button>
-        </div>
-    `;
-    
-    console.log('✅ 显示完成页面');
-}
-
-// 🆕 關閉刮刮樂頁面
-function closeScratchCardPage() {
-    if (window.opener && !window.opener.closed) {
-        // 如果有父页面，只关闭当前页面
-        window.close();
-    } else {
-        // 如果没有父页面，跳转到空白页或关闭
-        window.location.href = 'about:blank';
-    }
 }
 
     // 初始化
@@ -769,6 +737,7 @@ function closeScratchCardPage() {
 </script>
 </body>
 </html>
+
 
 
 
