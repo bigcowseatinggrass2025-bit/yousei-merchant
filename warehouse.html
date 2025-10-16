@@ -898,30 +898,42 @@ function processScratchCardURL(url) {
     }
 }
 
-        // 保存刮刮樂數據並打開頁面
         function saveScratchCardAndOpen(scratchId, url) {
-            console.log('💾 保存刮刮樂數據:', scratchId);
-            
-            const scratchData = {
-                id: scratchId,
-                quantity: 3,
-                totalCost: 15,
-                timestamp: new Date().toISOString(),
-                used: false,
-                cards: [
-                    {id: 1, prize: "100兩", isScratched: false, claimed: false},
-                    {id: 2, prize: "多謝惠顧", isScratched: false, claimed: false},
-                    {id: 3, prize: "50兩", isScratched: false, claimed: false}
-                ]
-            };
-            
-            const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-            allScratches[scratchId] = scratchData;
-            localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
-            
-            updateLottoButton();
-            openScratchCardPage(scratchId);
-        }
+    console.log('💾 查找刮刮樂數據:', scratchId);
+    
+    // 🆕 從localStorage讀取主網頁保存的真實資料
+    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+    const originalData = allScratches[scratchId];
+    
+    if (originalData) {
+        console.log('✅ 找到真實刮刮樂數據:', originalData);
+        
+        // 🆕 直接使用主網頁的真實資料，不創建測試資料
+        // 資料已經包含正確的 quantity 和 totalCost
+        
+        // 確保資料狀態正確
+        originalData.used = false;
+        originalData.timestamp = new Date().toISOString();
+        
+        // 🆕 重新保存（確保格式一致）
+        allScratches[scratchId] = originalData;
+        localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+        
+        console.log('🎯 使用真實資料 - 張數:', originalData.quantity, '金額:', originalData.totalCost);
+        
+        updateLottoButton();
+        openScratchCardPage(scratchId);
+        
+    } else {
+        console.error('❌ 找不到對應的刮刮樂數據，ID:', scratchId);
+        
+        // 🆕 調試：顯示所有可用的刮刮樂
+        const availableIds = Object.keys(allScratches);
+        console.log('🔍 當前可用的刮刮樂ID:', availableIds);
+        
+        alert('錯誤：找不到刮刮樂數據\n請確認：\n1. 主網頁已保存數據\n2. QR碼ID正確\n3. 在同一瀏覽器中操作');
+    }
+}
 
         // 打開刮刮樂頁面
         function openScratchCardPage(scratchId) {
@@ -1209,6 +1221,7 @@ function processScratchCardURL(url) {
     </script>
 </body>
 </html>
+
 
 
 
