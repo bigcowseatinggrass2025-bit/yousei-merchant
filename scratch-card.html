@@ -693,7 +693,7 @@
         }
     }
 
-   // 🆕 修复的兌獎函數
+ // 🆕 修复的兌獎函數 - 完全重置页面状态
 function claimPrize() {
     console.log('🎯 开始兑奖流程');
     
@@ -704,51 +704,64 @@ function claimPrize() {
     
     // 標記整個刮刮樂為已使用
     currentScratchData.used = true;
-    console.log('✅ 刮刮乐标记为已使用:', currentScratchData.id);
+    console.log('✅ 刮刮乐标记为已使用');
     
-    // 🆕 通知父頁面（倉庫頁面）
+    // 🆕 通知父頁面
     if (window.opener && !window.opener.closed) {
-        console.log('📢 发送完成消息给仓库页面');
         window.opener.postMessage({ 
             type: 'SCRATCH_CARD_COMPLETED', 
-            scratchId: currentScratchData.id,
-            timestamp: Date.now()
+            scratchId: currentScratchData.id
         }, '*');
-    } else {
-        console.log('⚠️ 无法找到父页面');
-    }
-    
-    // 🆕 保存状态到localStorage（兼容旧格式）
-    try {
-        const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-        allScratches[currentScratchData.id] = currentScratchData;
-        localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
-        console.log('💾 状态已保存到localStorage');
-    } catch (e) {
-        console.error('保存到localStorage失败:', e);
     }
     
     // 關閉界面
     closeClaimConfirmation();
     
-    // 顯示兌獎成功訊息
+    // 🆕 完全重置页面状态
     setTimeout(() => {
-        alert(`🎉 成功兌換 ${totalWinnings}兩 獎金！`);
-        console.log('💰 兑奖完成，总奖金:', totalWinnings);
-        
-        // 🆕 更新界面状态
-        renderCards();
-        hideClaimButton();
-        
-        // 🆕 可选：自动关闭页面
-        setTimeout(() => {
-            if (!window.opener || window.opener.closed) {
-                console.log('🔄 自动关闭刮刮乐页面');
-                window.close();
-            }
-        }, 2000);
-        
+        // 显示完成页面，阻止继续操作
+        showCompletionPage();
     }, 300);
+}
+
+// 🆕 显示完成页面
+function showCompletionPage() {
+    const container = document.querySelector('.container');
+    
+    container.innerHTML = `
+        <div class="header">
+            <h1>🎉 刮刮樂已完成</h1>
+            <p>感謝您的參與！</p>
+        </div>
+        
+        <div class="purchase-info">
+            <div><strong>總獎金：</strong>${totalWinnings}兩</div>
+            <div><strong>完成時間：</strong>${new Date().toLocaleString()}</div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <div style="font-size: 3rem; margin: 20px 0;">🎊</div>
+            <h3>恭喜獲得 ${totalWinnings}兩 獎金！</h3>
+            <p>請向幽街商人兌換實體獎金</p>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn btn-success" onclick="closeScratchCardPage()">關閉頁面</button>
+        </div>
+    `;
+    
+    console.log('✅ 显示完成页面');
+}
+
+// 🆕 關閉刮刮樂頁面
+function closeScratchCardPage() {
+    if (window.opener && !window.opener.closed) {
+        // 如果有父页面，只关闭当前页面
+        window.close();
+    } else {
+        // 如果没有父页面，跳转到空白页或关闭
+        window.location.href = 'about:blank';
+    }
 }
 
     // 初始化
@@ -756,6 +769,7 @@ function claimPrize() {
 </script>
 </body>
 </html>
+
 
 
 
