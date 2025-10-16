@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的幽街貨卡倉庫</title>
+    <!-- 🎯 添加Supabase库引用 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <style>
+        /* 手机端专用样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+       body {
+    font-family: 'Microsoft YaHei', sans-serif;
+    background: 
+        linear-gradient(rgba(26, 42, 58, 0.7), rgba(44, 62, 80, 0.7)),
+        url('images/hbgvdfh53.png') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+    min-height: 100vh;
+    padding: 20px;
+}
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .header h1 {
+            color: #ffd700;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .player-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .player-name {
+            font-size: 1.3rem;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+        
+        .last-updated {
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+        
+        /* 筛选标签样式 */
+        .filter-tabs {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+        
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .filter-tab {
+            flex: 0 0 auto;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .filter-tab.active {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #ffd700;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        /* 详情面板 */
+        .detail-panel {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            display: none;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .detail-title {
+            color: #ffd700;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .close-detail {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .detail-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .detail-goods {
+            grid-column: 1 / -1;
+        }
+        
+        .goods-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .goods-tag {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .price-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        /* 货卡网格布局 - 每行3张卡片 */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .warehouse-card {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .warehouse-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* 稀有度边框颜色 */
+        .warehouse-card.ghost { 
+            border-color: #3498db;
+            animation: ghost-glow 2s infinite alternate;
+        }
+        .warehouse-card.fairy { 
+            border-color: #9b59b6;
+            animation: fairy-glow 2s infinite alternate;
+        }
+        .warehouse-card.immortal { 
+            border-color: #00ffcc;
+            animation: immortal-glow 1.8s infinite alternate;
+        }
+        .warehouse-card.king { 
+            border-color: #8b0000;
+            animation: king-dark-glow 1.5s infinite alternate;
+        }
+        .warehouse-card.celestial { 
+            border-color: #ffcc00;
+            animation: celestial-glow 1.2s infinite alternate;
+        }
+        
+        .card-name {
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            line-height: 1.2;
+        }
+        
+        .card-goods {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .goods-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.65rem;
+        }
+        
+        .card-prices {
+            font-size: 0.7rem;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+        
+        .card-rarity {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            display: inline-block;
+        }
+        
+        /* 货物颜色 */
+        .goods-fanhuo { background: #27ae60; }
+        .goods-wenwan { background: #9b59b6; }
+        .goods-yishou { background: #2980b9; }
+        .goods-yantie { background: #3498db; }
+        .goods-huoqi { background: #e74c3c; }
+        .goods-qiwu { background: #f39c12; }
+        
+        /* 发光动画 */
+        @keyframes ghost-glow {
+            from { box-shadow: 0 0 5px #3498db; }
+            to { box-shadow: 0 0 15px #3498db, 0 0 25px #3498db; }
+        }
+        
+        @keyframes fairy-glow {
+            from { box-shadow: 0 0 5px #9b59b6; }
+            to { box-shadow: 0 0 15px #9b59b6, 0 0 25px #9b59b6; }
+        }
+        
+        @keyframes immortal-glow {
+            from { box-shadow: 0 0 5px #00ffcc; }
+            to { box-shadow: 0 0 15px #00ffcc, 0 0 25px #00ff99, 0 0 35px #00ffcc; }
+        }
+        
+        @keyframes king-dark-glow {
+            from { box-shadow: 0 0 5px #8b0000; }
+            to { box-shadow: 0 0 15px #8b0000, 0 0 30px #ff0000, 0 0 45px #8b0000; }
+        }
+        
+        @keyframes celestial-glow {
+            from { box-shadow: 0 0 5px #ffffff; }
+            to { box-shadow: 0 0 20px #ffffff, 0 0 40px #ffff00, 0 0 60px #ffffff; }
+        }
+        
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #bbb;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #bbb;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            width: 100%;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+
+        /* 隐私保护遮罩样式 */
+        .privacy-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a2a3a, #0d1b2a);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ffd700;
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        .privacy-mask::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            opacity: 0.3;
+        }
+
+        .privacy-mask.show {
+            opacity: 1;
+        }
+
+        .privacy-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 4rem;
+            font-weight: bold;
+            letter-spacing: 15px;
+            animation: pulse 2s infinite;
+            z-index: 1;
+        }
+
+        .privacy-hint {
+            position: absolute;
+            bottom: 100px;
+            color: #bbb;
+            font-size: 1rem;
+            text-align: center;
+            z-index: 1;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        /* 幽街浮动按钮 */
+        .youjie-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border: none;
+            border-radius: 50%;
+            color: #1a2a3a;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .youjie-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        /* 樂透按鈕樣式 */
+        .lotto-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e) !important;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4) !important;
+        }
+
+        .lotto-btn:hover {
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6) !important;
+        }
+
+        .lotto-btn.has-data {
+            background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4) !important;
+        }
+
+        .lotto-btn.has-data:hover {
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.6) !important;
+        }
+
+        /* 🆕 修復相機界面樣式 */
+        .camera-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: rgba(0, 0, 0, 0.95) !important;
+            z-index: 10000 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .camera-container {
+            background: white !important;
+            padding: 20px !important;
+            border-radius: 15px !important;
+            text-align: center !important;
+            max-width: 90% !important;
+            z-index: 10001 !important;
+            position: relative !important;
+        }
+
+        .camera-header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-bottom: 15px !important;
+            padding-bottom: 10px !important;
+            border-bottom: 1px solid #ddd !important;
+        }
+
+        .camera-title {
+            color: black !important;
+            font-size: 1.2rem !important;
+            font-weight: bold !important;
+        }
+
+        .close-camera {
+            background: #e74c3c !important;
+            color: white !important;
+            border: none !important;
+            width: 30px !important;
+            height: 30px !important;
+            border-radius: 50% !important;
+            cursor: pointer !important;
+            font-size: 1.2rem !important;
+        }
+
+       #camera-video {
+    width: 300px !important;
+    height: 300px !important;
+    background: #000 !important;
+    border: 3px solid #00ff00 !important;
+    display: block !important;
+    object-fit: cover !important;
+    margin: 0 auto !important;
+    border-radius: 10px !important;
+}
+
+        .camera-hint {
+            color: black !important;
+            margin: 15px 0 !important;
+            font-size: 0.9rem !important;
+        }
+
+        .camera-buttons {
+            display: flex !important;
+            gap: 10px !important;
+            margin-top: 15px !important;
+        }
+
+        .manual-input-btn, .test-scratch-btn {
+            flex: 1 !important;
+            padding: 12px !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-size: 0.9rem !important;
+            cursor: pointer !important;
+            font-weight: bold !important;
+        }
+
+        .manual-input-btn {
+            background: #3498db !important;
+            color: white !important;
+        }
+
+        .test-scratch-btn {
+            background: #9b59b6 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 幽街貨卡倉庫</h1>
+            <div class="player-info">
+                <div class="player-name" id="player-name">載入中...</div>
+                <div class="last-updated" id="last-updated"></div>
+            </div>
+        </div>
+        
+        <!-- 筛选标签 -->
+        <div class="filter-tabs">
+            <div class="filter-tab active" data-filter="all">全部</div>
+            <div class="filter-tab" data-filter="ghost">幽魂</div>
+            <div class="filter-tab" data-filter="fairy">妖精</div>
+            <div class="filter-tab" data-filter="immortal">仙使</div>
+            <div class="filter-tab" data-filter="king">大王</div>
+            <div class="filter-tab" data-filter="celestial">天尊</div>
+        </div>
+        
+        <!-- 货卡网格 -->
+        <div id="cards-container">
+            <div class="loading" id="loading">
+                <p>🔄 載入貨卡資料中...</p>
+            </div>
+        </div>
+        
+        <!-- 详情面板 -->
+        <div class="detail-panel" id="detail-panel">
+            <div class="detail-header">
+                <div class="detail-title" id="detail-title">貨卡詳情</div>
+                <button class="close-detail" id="close-detail">×</button>
+            </div>
+            <div class="detail-content">
+                <div class="detail-goods">
+                    <div>貨物:</div>
+                    <div class="goods-tags" id="detail-goods"></div>
+                </div>
+                <div class="price-info">
+                    <div>獲得靈石</div>
+                    <div id="detail-buy-price">0顆</div>
+                </div>
+                <div class="price-info">
+                    <div>賣出價格</div>
+                    <div id="detail-sell-price">0兩</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="refresh-btn" id="refresh-btn">🔄 刷新資料</button>
+        
+        <div class="footer">
+            <p>幽街商人 - 手機倉庫查看</p>
+            <p>數據自動更新 | v1.2</p>
+        </div>
+    </div>
+    
+    <!-- 新增的隐私保护元素 -->
+    <div class="privacy-mask" id="privacy-mask">
+        <div class="privacy-text">幽街商人</div>
+        <div class="privacy-hint">點擊螢幕返回</div>
+    </div>
+
+    <!-- 樂透按鈕 -->
+    <button class="youjie-btn lotto-btn" id="lotto-btn" style="bottom: 90px; background: linear-gradient(135deg, #ff6b6b, #ff8e8e);">
+        樂透
+    </button>
+    <button class="youjie-btn" id="youjie-btn">幽街</button>
+
+    <script>
+        // 🎯 在脚本最顶部创建Supabase客户端
+        const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
+        
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 从URL获取玩家信息
+        const urlParams = new URLSearchParams(window.location.search);
+        const playerId = urlParams.get('p');
+        const playerName = urlParams.get('name') || '幽街商人';
+
+        // 显示玩家信息
+        document.getElementById('player-name').textContent = playerName;
+        document.getElementById('last-updated').textContent = '最後更新: ' + new Date().toLocaleString();
+
+        let currentCards = [];
+        
+        // 货物名称映射
+        const goodsNameMapping = {
+            "番": "番貨",
+            "文": "文玩", 
+            "異": "異獸",
+            "鹽": "鹽錠",
+            "炮": "火器",
+            "奇": "奇物"
+        };
+
+        // 🎯 隐私保护功能
+        document.getElementById('youjie-btn').addEventListener('click', function() {
+            const mask = document.getElementById('privacy-mask');
+            mask.style.display = 'flex';
+            setTimeout(() => mask.classList.add('show'), 10);
+        });
+
+        document.getElementById('privacy-mask').addEventListener('click', function() {
+            this.classList.remove('show');
+            setTimeout(() => this.style.display = 'none', 2000);
+        });
+
+        // 🧹 清理函数
+        async function cleanupExpiredWarehouses() {
+            try {
+                const 四小时前 = new Date(Date.now() - 4 * 60 * 60 * 1000);
+                
+                const { error } = await supabaseClient
+                    .from('player_warehouses')
+                    .delete()
+                    .lt('created_at', 四小时前.toISOString());
+                
+                if (!error) {
+                    console.log('🧹 已清理4小时前的过期仓库数据');
+                }
+            } catch (error) {
+                console.log('清理数据时出错:', error);
+            }
+        }
+
+        // ==================== 刮刮樂功能 ====================
+
+        // 檢查是否有可用的刮刮樂數據
+        function checkScratchCardData() {
+            const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+            
+            for (const [scratchId, scratchData] of Object.entries(allScratches)) {
+                if (!scratchData.used) {
+                    const createTime = new Date(scratchData.timestamp).getTime();
+                    const currentTime = Date.now();
+                    const twentyFourHours = 24 * 60 * 60 * 1000;
+                    
+                    if (currentTime - createTime < twentyFourHours) {
+                        return { scratchId, scratchData };
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        // 更新樂透按鈕狀態
+        function updateLottoButton() {
+            const lottoBtn = document.getElementById('lotto-btn');
+            if (!lottoBtn) return;
+            
+            const scratchData = checkScratchCardData();
+            
+            if (scratchData) {
+                lottoBtn.innerHTML = '刮刮樂';
+                lottoBtn.classList.add('has-data');
+                lottoBtn.dataset.scratchId = scratchData.scratchId;
+                console.log('✅ 樂透按鈕更新: 有刮刮樂數據');
+            } else {
+                lottoBtn.innerHTML = '樂透';
+                lottoBtn.classList.remove('has-data');
+                delete lottoBtn.dataset.scratchId;
+                console.log('🔄 樂透按鈕更新: 無數據，相機模式');
+            }
+        }
+
+        // 🆕 修復的相機功能
+        function openQRScanner() {
+            console.log('📷 開啟相機...');
+            
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('您的瀏覽器不支持相機功能');
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            }).then(stream => {
+                createCameraInterface(stream);
+            }).catch(error => {
+                console.error('❌ 相機錯誤:', error);
+                let errorMsg = "無法訪問相機：";
+                if (error.name === 'NotAllowedError') {
+                    errorMsg += "請允許相機權限";
+                } else if (error.name === 'NotFoundError') {
+                    errorMsg += "找不到相機設備";
+                } else {
+                    errorMsg += error.message;
+                }
+                alert(errorMsg);
+            });
+        }
+
+        // 創建相機界面
+function createCameraInterface(stream) {
+    console.log('🎬 創建相機界面');
+    
+    const cameraHTML = `
+        <div class="camera-overlay" id="camera-overlay">
+            <div class="camera-container">
+                <div class="camera-header">
+                    <div class="camera-title">掃描QR碼</div>
+                    <button class="close-camera" id="close-camera">×</button>
+                </div>
+                <div style="position: relative; display: inline-block;">
+                    <video id="camera-video" autoplay playsinline muted></video>
+                    <div class="scan-frame"></div>
+                </div>
+                <div class="camera-hint" id="camera-hint">相機啟動中...</div>
+                <div class="camera-buttons">
+                    <button class="manual-input-btn" id="manual-input-btn">手動輸入URL</button>
+                    <button class="test-scratch-btn" id="test-scratch-btn">測試刮刮樂</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', cameraHTML);
+    
+    const video = document.getElementById('camera-video');
+    const hint = document.getElementById('camera-hint');
+    
+    video.srcObject = stream;
+    
+    // 確保視頻播放
+    video.play().then(() => {
+        console.log('✅ 視頻播放成功');
+        hint.textContent = '✅ 相機就緒！對準QR碼掃描';
+        hint.style.color = '#27ae60';
+        video.style.border = '3px solid #27ae60';
+    }).catch(error => {
+        console.error('❌ 播放失敗:', error);
+        hint.textContent = '❌ 播放失敗: ' + error.message;
+        hint.style.color = '#e74c3c';
+        video.style.border = '3px solid #e74c3c';
+    });
+    
+    // 🆕 QR碼掃描功能
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    let scanInterval;
+
+    function scanQRCode() {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            
+            if (code) {
+                console.log('🎯 掃描到QR碼:', code.data);
+                hint.textContent = '✅ 掃描成功！';
+                hint.style.color = '#27ae60';
+                
+                // 停止掃描
+                clearInterval(scanInterval);
+                
+                // 關閉相機
+                stream.getTracks().forEach(track => track.stop());
+                document.getElementById('camera-overlay').remove();
+                
+                // 處理QR碼內容
+                processScratchCardURL(code.data);
+            }
+        }
+    }
+
+    // 開始掃描
+    scanInterval = setInterval(scanQRCode, 500);
+    
+    // 關閉相機
+    document.getElementById('close-camera').addEventListener('click', function() {
+        clearInterval(scanInterval);
+        stream.getTracks().forEach(track => track.stop());
+        document.getElementById('camera-overlay').remove();
+    });
+    
+    // 手動輸入URL
+    document.getElementById('manual-input-btn').addEventListener('click', function() {
+        clearInterval(scanInterval);
+        const url = prompt("請輸入刮刮樂URL:", "scratch-card.html?id=test123");
+        if (url) {
+            stream.getTracks().forEach(track => track.stop());
+            document.getElementById('camera-overlay').remove();
+            processScratchCardURL(url);
+        }
+    });
+    
+    // 測試刮刮樂
+    document.getElementById('test-scratch-btn').addEventListener('click', function() {
+        clearInterval(scanInterval);
+        const testScratchId = 'test_' + Date.now();
+        const testUrl = `scratch-card.html?id=${testScratchId}`;
+        
+        stream.getTracks().forEach(track => track.stop());
+        document.getElementById('camera-overlay').remove();
+        processScratchCardURL(testUrl);
+    });
+}
+
+        // 處理刮刮樂URL
+        function processScratchCardURL(url) {
+            console.log('🔗 處理URL:', url);
+            
+            try {
+                let scratchId;
+                
+                if (url.includes('http')) {
+                    const urlObj = new URL(url);
+                    scratchId = urlObj.searchParams.get('id');
+                } else if (url.includes('scratch-card.html')) {
+                    const match = url.match(/id=([^&]+)/);
+                    scratchId = match ? match[1] : null;
+                } else {
+                    scratchId = url;
+                }
+                
+                console.log('🎯 提取的刮刮樂ID:', scratchId);
+                
+                if (scratchId) {
+                    saveScratchCardAndOpen(scratchId, url);
+                } else {
+                    alert("無效的刮刮樂URL");
+                }
+            } catch (error) {
+                console.error('URL解析錯誤:', error);
+                const scratchId = url.trim();
+                if (scratchId) {
+                    saveScratchCardAndOpen(scratchId, url);
+                } else {
+                    alert("URL格式錯誤");
+                }
+            }
+        }
+
+        // 保存刮刮樂數據並打開頁面
+        function saveScratchCardAndOpen(scratchId, url) {
+            console.log('💾 保存刮刮樂數據:', scratchId);
+            
+            const scratchData = {
+                id: scratchId,
+                quantity: 3,
+                totalCost: 15,
+                timestamp: new Date().toISOString(),
+                used: false,
+                cards: [
+                    {id: 1, prize: "100兩", isScratched: false, claimed: false},
+                    {id: 2, prize: "多謝惠顧", isScratched: false, claimed: false},
+                    {id: 3, prize: "50兩", isScratched: false, claimed: false}
+                ]
+            };
+            
+            const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+            allScratches[scratchId] = scratchData;
+            localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+            
+            updateLottoButton();
+            openScratchCardPage(scratchId);
+        }
+
+        // 打開刮刮樂頁面
+        function openScratchCardPage(scratchId) {
+            const scratchPageURL = `scratch-card.html?id=${scratchId}`;
+            window.open(scratchPageURL, '_blank');
+        }
+
+        // 樂透按鈕點擊事件
+        document.getElementById('lotto-btn').addEventListener('click', function() {
+            const scratchId = this.dataset.scratchId;
+            
+            if (scratchId) {
+                openScratchCardPage(scratchId);
+            } else {
+                openQRScanner();
+            }
+        });
+
+        // 監聽刮刮樂完成消息
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'SCRATCH_CARD_COMPLETED') {
+                console.log('🎉 收到刮刮樂完成通知');
+                updateLottoButton();
+                showTemporaryMessage('刮刮樂已完成兌獎', 'success');
+            }
+        });
+
+        // 顯示臨時提示
+        function showTemporaryMessage(message, type = 'info') {
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${type === 'success' ? '#27ae60' : '#3498db'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 25px;
+                z-index: 10001;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                font-weight: bold;
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        // ==================== 倉庫功能 ====================
+
+        // 從Supabase加載數據
+        async function loadPlayerDataFromSupabase() {
+            try {
+                await cleanupExpiredWarehouses();
+                console.log('📱 從Supabase加載玩家數據...');
+                
+                if (!playerId) {
+                    console.log('❌ 未找到玩家ID參數');
+                    displayTestData();
+                    return;
+                }
+                
+                const { data, error } = await supabaseClient
+                    .from('player_warehouses')
+                    .select('*')
+                    .eq('player_id', playerId);
+                    
+                if (error) {
+                    console.error('❌ Supabase查詢錯誤:', error);
+                    displayTestData();
+                    return;
+                }
+                
+                if (data && data.length > 0) {
+                    const playerData = data[0];
+                    document.getElementById('player-name').textContent = playerData.player_name || playerName;
+                    document.getElementById('last-updated').textContent = '最後更新: ' + new Date().toLocaleString();
+                    
+                    if (playerData.warehouse_data && playerData.warehouse_data.goodsCards) {
+                        renderCards(playerData.warehouse_data.goodsCards);
+                    } else {
+                        renderCards([]);
+                    }
+                } else {
+                    displayTestData();
+                }
+                
+            } catch (error) {
+                console.error('❌ 數據加載異常:', error);
+                displayTestData();
+            }
+        }
+
+        // 顯示測試數據
+        function displayTestData() {
+            const testCards = [
+                {
+                    name: "幽魂貨卡",
+                    rarity: "ghost",
+                    goodsCount: 2,
+                    buyPrice: 16,
+                    sellPrice: 50,
+                    goods: [
+                        { name: "番", color: "goods-fanhuo" },
+                        { name: "文", color: "goods-wenwan" }
+                    ]
+                },
+                {
+                    name: "妖精貨卡", 
+                    rarity: "fairy",
+                    goodsCount: 3,
+                    buyPrice: 25,
+                    sellPrice: 75,
+                    goods: [
+                        { name: "異", color: "goods-yishou" },
+                        { name: "鹽", color: "goods-yantie" },
+                        { name: "火", color: "goods-huoqi" }
+                    ]
+                }
+            ];
+
+            currentCards = testCards;
+            renderCards(testCards);
+            
+            document.getElementById('player-name').textContent = playerName + ' (測試模式)';
+            document.getElementById('last-updated').textContent = '最後更新: ' + new Date().toLocaleString();
+        }
+
+        // 標籤篩選功能
+        function setupFilterTabs() {
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const filter = this.dataset.filter;
+                    filterCards(filter);
+                });
+            });
+        }
+
+        // 篩選卡片
+        function filterCards(rarity) {
+            const cards = document.querySelectorAll('.warehouse-card');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                if (rarity === 'all' || card.classList.contains(rarity)) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 顯示卡片詳情
+        function showCardDetail(cardIndex) {
+            const card = currentCards[cardIndex];
+            if (!card) return;
+
+            document.getElementById('detail-title').textContent = card.name;
+            document.getElementById('detail-buy-price').textContent = card.buyPrice + '顆';
+            document.getElementById('detail-sell-price').textContent = card.sellPrice + '兩';
+            
+            const goodsTags = document.getElementById('detail-goods');
+            goodsTags.innerHTML = card.goods.map(good => {
+                const shortName = good.name;
+                const fullName = goodsNameMapping[shortName] || shortName;
+                return `<div class="goods-tag ${good.color}">[${shortName}]${fullName}</div>`;
+            }).join('');
+            
+            document.getElementById('detail-panel').style.display = 'block';
+        }
+
+        // 渲染貨卡
+        function renderCards(cards) {
+            const container = document.getElementById('cards-container');
+            
+            if (!cards || cards.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>📭 倉庫中沒有貨物交易卡</p>
+                        <p>回到遊戲中獲取更多貨卡吧！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            currentCards = cards;
+            
+            const cardsHtml = cards.map((card, index) => {
+                return `
+                    <div class="warehouse-card ${card.rarity}" onclick="showCardDetail(${index})">
+                        <div class="card-name">${card.name}</div>
+                        <div class="card-goods">
+                            ${card.goods.map(good => {
+                                const shortName = good.name;
+                                const fullName = goodsNameMapping[shortName] || shortName;
+                                return `<div class="goods-circle ${good.color}" title="${fullName}">${shortName}</div>`;
+                            }).join('')}
+                        </div>
+                        <div class="card-prices">
+                            <div>靈石: ${card.buyPrice}顆</div>
+                            <div>價格: ${card.sellPrice}兩</div>
+                        </div>
+                        <div class="card-rarity">${getRarityName(card.rarity)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div class="cards-grid">${cardsHtml}</div>`;
+            
+            setTimeout(() => {
+                setupFilterTabs();
+            }, 100);
+        }
+
+        // 獲取稀有度中文名稱
+        function getRarityName(rarity) {
+            const rarityNames = {
+                'ghost': '幽魂',
+                'fairy': '妖精', 
+                'immortal': '仙使',
+                'king': '大王',
+                'celestial': '天尊'
+            };
+            return rarityNames[rarity] || rarity;
+        }
+
+        // 關閉詳情面板
+        document.getElementById('close-detail').addEventListener('click', function() {
+            document.getElementById('detail-panel').style.display = 'none';
+        });
+
+        // 自動刷新數據
+        let autoRefreshInterval;
+
+        function startAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            
+            autoRefreshInterval = setInterval(() => {
+                loadPlayerDataFromSupabase();
+            }, 10000);
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
+        // 刷新按鈕事件
+        document.getElementById('refresh-btn').addEventListener('click', function() {
+            loadPlayerDataFromSupabase();
+        });
+
+        // 頁面可見性控制
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopAutoRefresh();
+            } else {
+                startAutoRefresh();
+            }
+        });
+
+        // 初始化
+        updateLottoButton();
+
+        window.addEventListener('load', function() {
+            loadPlayerDataFromSupabase();
+            setTimeout(() => {
+                startAutoRefresh();
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
+
+
