@@ -269,35 +269,47 @@
         return idParam;
     }
 
-    function loadScratchData() {
-        console.log('🚀 开始加载刮刮乐数据');
-        const scratchParam = getScratchIdFromURL();
-        
-        if (!scratchParam) {
-            showError('無效的刮刮樂連結');
-            return;
-        }
-        
-        console.log('📝 处理参数:', scratchParam);
-        
-        // 🆕 检查是否是QR碼數據格式
-        if (scratchParam.startsWith('scratch:') || scratchParam.startsWith('eyJ')) {
-            processQRCodeData(scratchParam);
-            return;
-        }
-        
-        // 原有localStorage邏輯（兼容旧格式）
-        const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-        currentScratchData = allScratches[scratchParam];
-        
-        if (!currentScratchData) {
-            showError('刮刮樂數據不存在或已過期');
-            return;
-        }
-        
-        updatePurchaseInfo();
-        renderCards();
+ function loadScratchData() {
+    const scratchParam = getScratchIdFromURL();
+    
+    if (!scratchParam) {
+        showError('無效的刮刮樂連結');
+        return;
     }
+    
+    // 🆕 檢查是否是QR碼數據格式
+    if (scratchParam.startsWith('scratch:') || scratchParam.startsWith('eyJ')) {
+        processQRCodeData(scratchParam);
+        return;
+    }
+    
+    // 原有localStorage邏輯
+    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+    currentScratchData = allScratches[scratchParam];
+    
+    if (!currentScratchData) {
+        showError('刮刮樂數據不存在或已過期');
+        return;
+    }
+    
+    // 🆕 檢查是否已使用 - 如果已使用，显示相应信息
+    if (currentScratchData.used) {
+        showError('此刮刮樂已被使用');
+        // 🆕 隱藏所有界面元素
+        document.getElementById('cards-container').innerHTML = '';
+        document.getElementById('total-winnings').style.display = 'none';
+        document.getElementById('purchase-info').innerHTML = '<div>此刮刮樂已完成兌獎</div>';
+        return;
+    }
+    
+    // 🆕 如果沒有cards，就隨機生成
+    if (!currentScratchData.cards) {
+        currentScratchData.cards = generateScratchCards(currentScratchData.quantity);
+    }
+    
+    updatePurchaseInfo();
+    renderCards();
+}
 
     // 🆕 修复的QR碼數據處理
     function processQRCodeData(qrData) {
@@ -737,6 +749,7 @@ function claimPrize() {
 </script>
 </body>
 </html>
+
 
 
 
