@@ -9057,7 +9057,7 @@ function generateScratchCardQRCode(quantity, totalCost) {
         c: totalCost,     // 金額
         t: Date.now()     // 時間戳
     };
-    const qrContent = `scratch:${btoa(JSON.stringify(qrData))}`;
+    const qrContent = `scratch-card.html?id=${scratchId}`;
     
     // 生成QR码
     new QRCode(qrContainer, {
@@ -11810,6 +11810,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
