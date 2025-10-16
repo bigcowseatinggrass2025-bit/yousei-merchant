@@ -261,27 +261,104 @@
             return urlParams.get('id');
         }
 
-        // 載入刮刮樂數據
-        function loadScratchData() {
-            const scratchId = getScratchIdFromURL();
-            
-            if (!scratchId) {
-                showError('無效的刮刮樂連結');
-                return;
+     // 載入刮刮樂數據
+function loadScratchData() {
+    const scratchId = getScratchIdFromURL();
+    
+    if (!scratchId) {
+        showError('無效的刮刮樂連結');
+        return;
+    }
+    
+    // 🆕 檢查是否是QR碼數據格式
+    if (scratchId.startsWith('scratch:')) {
+        processQRCodeData(scratchId);
+        return;
+    }
+    
+    // 原有localStorage邏輯（備用）
+    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+    currentScratchData = allScratches[scratchId];
+    
+    if (!currentScratchData) {
+        showError('刮刮樂數據不存在或已過期');
+        return;
+    }
+    
+    if (currentScratchData.used) {
+        showError('此刮刮樂已被使用');
+        return;
+    }
+    
+    // 🆕 如果沒有cards，就隨機生成
+    if (!currentScratchData.cards) {
+        currentScratchData.cards = generateScratchCards(currentScratchData.quantity);
+    }
+    
+    updatePurchaseInfo();
+    renderCards();
+}
+
+// 🆕 處理QR碼數據
+function processQRCodeData(qrData) {
+    try {
+        // 解碼QR碼數據：scratch:base64Data
+        const base64Data = qrData.replace('scratch:', '');
+        const qrInfo = JSON.parse(atob(base64Data));
+        
+        console.log('🎯 解析QR碼數據:', qrInfo);
+        
+        // 生成刮刮樂卡片
+        const cards = generateScratchCards(qrInfo.q);
+        
+        // 創建刮刮樂數據
+        currentScratchData = {
+            id: qrInfo.id,
+            quantity: qrInfo.q,
+            totalCost: qrInfo.c,
+            timestamp: new Date(qrInfo.t).toISOString(),
+            used: false,
+            cards: cards
+        };
+        
+        updatePurchaseInfo();
+        renderCards();
+        
+    } catch (error) {
+        console.error('QR碼數據解析錯誤:', error);
+        showError('無效的QR碼格式');
+    }
+}
+
+// 🆕 根據數量生成隨機卡片（使用主網頁的概率）
+function generateScratchCards(quantity) {
+    const cards = [];
+    const prizes = ["多謝優惠", "2兩", "5兩", "10兩", "50兩", "100兩"];
+    const weights = [75, 8, 7, 5, 3, 2];
+    
+    for (let i = 0; i < quantity; i++) {
+        let random = Math.random() * 100;
+        let prizeIndex = 0;
+        let accumulated = 0;
+        
+        for (let j = 0; j < weights.length; j++) {
+            accumulated += weights[j];
+            if (random <= accumulated) {
+                prizeIndex = j;
+                break;
             }
-            
-            const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-            currentScratchData = allScratches[scratchId];
-            
-            if (!currentScratchData) {
-                showError('刮刮樂數據不存在或已過期');
-                return;
-            }
-            
-            if (currentScratchData.used) {
-                showError('此刮刮樂已被使用');
-                return;
-            }
+        }
+        
+        cards.push({
+            id: `card_${i + 1}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            prize: prizes[prizeIndex],
+            isScratched: false,
+            claimed: false
+        });
+    }
+    
+    return cards;
+}
             
             // 更新購買信息
             document.getElementById('purchase-info').innerHTML = `
@@ -729,3 +806,4 @@ function renderCards() {
 </body>
 
 </html>
+
