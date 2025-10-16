@@ -9042,13 +9042,13 @@ function generateScratchCardQRCode(quantity, totalCost) {
     
     // 🆕 只保存基本資訊到localStorage（備用）
     const virtualScratchData = {
-        id: scratchId,
-        quantity: quantity,
-        totalCost: totalCost,
-        timestamp: new Date().toISOString(),
-        used: false
-        // 🆕 移除cards，不保存具體獎金
-    };
+    id: scratchId,
+    quantity: quantity,
+    totalCost: totalCost,
+    timestamp: new Date().toISOString(),
+    used: false,
+    cards: generateScratchCards(quantity) // 🆕 添加这行！
+};
     
     // 🆕 QR碼包含數量、金額、ID（Base64編碼）
     const qrData = {
@@ -11810,6 +11810,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
