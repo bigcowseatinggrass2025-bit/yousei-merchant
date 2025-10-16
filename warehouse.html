@@ -805,54 +805,92 @@ function createCameraInterface(stream) {
     });
 
 
-// 🆕 优化版扫描函数（100ms间隔）
-function startQRScanning(video, hint, stream) {
+// 🆕 超级稳定版扫描函数 - 替换原来的startQRScanning
+function startStableQRScanning(video, hint, stream) {
+    console.log('🔧 启动稳定版QR扫描');
+    
+    // 🆕 确保jsQR已加载
+    if (typeof jsQR === 'undefined') {
+        console.error('❌ jsQR未加载');
+        hint.textContent = '❌ 掃描功能加載失敗，請刷新頁面';
+        return;
+    }
+    
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     let scanCount = 0;
+    let isScanning = true;
     
     function scanQRCode() {
+        if (!isScanning) return;
+        
         scanCount++;
         
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        // 🆕 更严格的视频状态检查
+        if (video.readyState >= 3) { // HAVE_FUTURE_DATA 或 HAVE_ENOUGH_DATA
             try {
-                // 🆕 优化：固定尺寸，只扫描中心区域
-                canvas.width = 300;
-                canvas.height = 300;
+                // 🆕 固定尺寸，确保一致性
+                const scanSize = 350;
+                canvas.width = scanSize;
+                canvas.height = scanSize;
                 
-                const centerX = (video.videoWidth - 300) / 2;
-                const centerY = (video.videoHeight - 300) / 2;
-                ctx.drawImage(video, centerX, centerY, 300, 300, 0, 0, 300, 300);
+                // 🆕 确保坐标有效
+                const centerX = Math.max(0, (video.videoWidth - scanSize) / 2);
+                const centerY = Math.max(0, (video.videoHeight - scanSize) / 2);
                 
-                const imageData = ctx.getImageData(0, 0, 300, 300);
-                const code = jsQR(imageData.data, 300, 300, {
-                    inversionAttempts: "attemptBoth",
-                });
+                ctx.drawImage(video, centerX, centerY, scanSize, scanSize, 0, 0, scanSize, scanSize);
                 
-                if (code) {
-                    console.log('🎯 扫描成功! 次数:', scanCount);
-                    hint.textContent = '✅ 掃描成功！';
-                    hint.style.color = '#27ae60';
-                    closeCameraInterface(stream);
-                    processScratchCardURL(code.data);
-                    return; // 🆕 成功就退出
-                } else {
-                    // 🆕 每10次显示一次状态
-                    if (scanCount % 10 === 0) {
+                const imageData = ctx.getImageData(0, 0, scanSize, scanSize);
+                
+                // 🆕 添加超时保护
+                setTimeout(() => {
+                    const code = jsQR(imageData.data, scanSize, scanSize, {
+                        inversionAttempts: "dontInvert",
+                    });
+                    
+                    if (code) {
+                        console.log('🎯 稳定扫描成功! 次数:', scanCount);
+                        hint.textContent = '✅ 掃描成功！';
+                        isScanning = false;
+                        closeCameraInterface(stream);
+                        processScratchCardURL(code.data);
+                        return;
+                    }
+                    
+                    // 🆕 简单的状态更新
+                    if (scanCount % 8 === 0) {
                         hint.textContent = `🔍 掃描中... ${scanCount}次`;
                     }
-                }
+                    
+                    // 🆕 继续扫描
+                    if (isScanning) {
+                        setTimeout(scanQRCode, 80);
+                    }
+                    
+                }, 10); // 小延迟避免阻塞
+                
             } catch (error) {
-                console.error('扫描错误:', error);
+                console.error('❌ 扫描异常:', error);
+                // 🆕 出错后继续扫描
+                if (isScanning) {
+                    setTimeout(scanQRCode, 100);
+                }
+            }
+        } else {
+            // 🆕 视频未就绪，稍后重试
+            console.log('⏳ 视频未就绪，状态:', video.readyState);
+            if (isScanning) {
+                setTimeout(scanQRCode, 200);
             }
         }
-        
-        // 🆕 100ms后继续扫描（原来是500ms）
-        setTimeout(scanQRCode, 100);
     }
     
-    // 🆕 开始扫描（100ms间隔）
-    scanQRCode();
+    // 🆕 延迟启动，确保一切就绪
+    setTimeout(() => {
+        if (isScanning) {
+            scanQRCode();
+        }
+    }, 500);
 }
 // 🆕 關閉相機界面
 function closeCameraInterface(stream) {
@@ -1314,6 +1352,7 @@ window.addEventListener('message', function(event) {
     </script>
 </body>
 </html>
+
 
 
 
