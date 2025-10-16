@@ -724,9 +724,21 @@
             });
         }
 
-        // 創建相機界面
-function createCameraInterface(stream) {
+        function createCameraInterface(stream) {
     console.log('🎬 創建相機界面');
+    
+    // 🆕 檢查jsQR庫是否加載
+    if (typeof jsQR === 'undefined') {
+        console.error('❌ jsQR庫未加載！');
+        alert('QR掃描功能加載失敗，請使用手動輸入');
+        //  fallback到手動輸入
+        const url = prompt("請輸入刮刮樂URL:", "scratch-card.html?id=test123");
+        if (url) {
+            stream.getTracks().forEach(track => track.stop());
+            processScratchCardURL(url);
+        }
+        return;
+    }
     
     const cameraHTML = `
         <div class="camera-overlay" id="camera-overlay">
@@ -1179,5 +1191,6 @@ function createCameraInterface(stream) {
     </script>
 </body>
 </html>
+
 
 
