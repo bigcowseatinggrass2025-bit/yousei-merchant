@@ -6,6 +6,7 @@
     <title>我的幽街貨卡倉庫</title>
     <!-- 🎯 添加Supabase库引用 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <style>
         /* 手机端专用样式 */
         * {
@@ -723,73 +724,114 @@
             });
         }
 
-        // 🆕 修復的相機界面
-        function createCameraInterface(stream) {
-            console.log('🎬 創建相機界面');
-            
-            const cameraHTML = `
-                <div class="camera-overlay" id="camera-overlay">
-                    <div class="camera-container">
-                        <div class="camera-header">
-                            <div class="camera-title">掃描QR碼</div>
-                            <button class="close-camera" id="close-camera">×</button>
-                        </div>
-                        <video id="camera-video" autoplay playsinline muted></video>
-                        <div class="camera-hint" id="camera-hint">相機啟動中...</div>
-                        <div class="camera-buttons">
-                            <button class="manual-input-btn" id="manual-input-btn">手動輸入URL</button>
-                            <button class="test-scratch-btn" id="test-scratch-btn">測試刮刮樂</button>
-                        </div>
-                    </div>
+        // 創建相機界面
+function createCameraInterface(stream) {
+    console.log('🎬 創建相機界面');
+    
+    const cameraHTML = `
+        <div class="camera-overlay" id="camera-overlay">
+            <div class="camera-container">
+                <div class="camera-header">
+                    <div class="camera-title">掃描QR碼</div>
+                    <button class="close-camera" id="close-camera">×</button>
                 </div>
-            `;
+                <div style="position: relative; display: inline-block;">
+                    <video id="camera-video" autoplay playsinline muted></video>
+                    <div class="scan-frame"></div>
+                </div>
+                <div class="camera-hint" id="camera-hint">相機啟動中...</div>
+                <div class="camera-buttons">
+                    <button class="manual-input-btn" id="manual-input-btn">手動輸入URL</button>
+                    <button class="test-scratch-btn" id="test-scratch-btn">測試刮刮樂</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', cameraHTML);
+    
+    const video = document.getElementById('camera-video');
+    const hint = document.getElementById('camera-hint');
+    
+    video.srcObject = stream;
+    
+    // 確保視頻播放
+    video.play().then(() => {
+        console.log('✅ 視頻播放成功');
+        hint.textContent = '✅ 相機就緒！對準QR碼掃描';
+        hint.style.color = '#27ae60';
+        video.style.border = '3px solid #27ae60';
+    }).catch(error => {
+        console.error('❌ 播放失敗:', error);
+        hint.textContent = '❌ 播放失敗: ' + error.message;
+        hint.style.color = '#e74c3c';
+        video.style.border = '3px solid #e74c3c';
+    });
+    
+    // 🆕 QR碼掃描功能
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    let scanInterval;
+
+    function scanQRCode() {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            document.body.insertAdjacentHTML('beforeend', cameraHTML);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
             
-            const video = document.getElementById('camera-video');
-            const hint = document.getElementById('camera-hint');
-            
-            video.srcObject = stream;
-            
-            // 確保視頻播放
-            video.play().then(() => {
-                console.log('✅ 視頻播放成功');
-                hint.textContent = '✅ 相機就緒！對準QR碼掃描';
+            if (code) {
+                console.log('🎯 掃描到QR碼:', code.data);
+                hint.textContent = '✅ 掃描成功！';
                 hint.style.color = '#27ae60';
-                video.style.border = '3px solid #27ae60';
-            }).catch(error => {
-                console.error('❌ 播放失敗:', error);
-                hint.textContent = '❌ 播放失敗: ' + error.message;
-                hint.style.color = '#e74c3c';
-                video.style.border = '3px solid #e74c3c';
-            });
-            
-            // 關閉相機
-            document.getElementById('close-camera').addEventListener('click', function() {
-                stream.getTracks().forEach(track => track.stop());
-                document.getElementById('camera-overlay').remove();
-            });
-            
-            // 手動輸入URL
-            document.getElementById('manual-input-btn').addEventListener('click', function() {
-                const url = prompt("請輸入刮刮樂URL:", "scratch-card.html?id=test123");
-                if (url) {
-                    stream.getTracks().forEach(track => track.stop());
-                    document.getElementById('camera-overlay').remove();
-                    processScratchCardURL(url);
-                }
-            });
-            
-            // 測試刮刮樂
-            document.getElementById('test-scratch-btn').addEventListener('click', function() {
-                const testScratchId = 'test_' + Date.now();
-                const testUrl = `scratch-card.html?id=${testScratchId}`;
                 
+                // 停止掃描
+                clearInterval(scanInterval);
+                
+                // 關閉相機
                 stream.getTracks().forEach(track => track.stop());
                 document.getElementById('camera-overlay').remove();
-                processScratchCardURL(testUrl);
-            });
+                
+                // 處理QR碼內容
+                processScratchCardURL(code.data);
+            }
         }
+    }
+
+    // 開始掃描
+    scanInterval = setInterval(scanQRCode, 500);
+    
+    // 關閉相機
+    document.getElementById('close-camera').addEventListener('click', function() {
+        clearInterval(scanInterval);
+        stream.getTracks().forEach(track => track.stop());
+        document.getElementById('camera-overlay').remove();
+    });
+    
+    // 手動輸入URL
+    document.getElementById('manual-input-btn').addEventListener('click', function() {
+        clearInterval(scanInterval);
+        const url = prompt("請輸入刮刮樂URL:", "scratch-card.html?id=test123");
+        if (url) {
+            stream.getTracks().forEach(track => track.stop());
+            document.getElementById('camera-overlay').remove();
+            processScratchCardURL(url);
+        }
+    });
+    
+    // 測試刮刮樂
+    document.getElementById('test-scratch-btn').addEventListener('click', function() {
+        clearInterval(scanInterval);
+        const testScratchId = 'test_' + Date.now();
+        const testUrl = `scratch-card.html?id=${testScratchId}`;
+        
+        stream.getTracks().forEach(track => track.stop());
+        document.getElementById('camera-overlay').remove();
+        processScratchCardURL(testUrl);
+    });
+}
 
         // 處理刮刮樂URL
         function processScratchCardURL(url) {
@@ -1137,4 +1179,5 @@
     </script>
 </body>
 </html>
+
 
