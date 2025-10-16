@@ -189,10 +189,6 @@
             background: linear-gradient(135deg, #27ae60, #2ecc71);
         }
         
-        .btn-warning {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-        }
-        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -255,123 +251,124 @@
         let currentCard = null;
         let totalWinnings = 0;
 
-        // 從URL參數獲取刮刮樂ID
+        // 從URL參數獲取刮刮樂ID或數據
         function getScratchIdFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('id');
+            return urlParams.get('id') || urlParams.get('data');
         }
 
-     // 載入刮刮樂數據
-function loadScratchData() {
-    const scratchId = getScratchIdFromURL();
-    
-    if (!scratchId) {
-        showError('無效的刮刮樂連結');
-        return;
-    }
-    
-    // 🆕 檢查是否是QR碼數據格式
-    if (scratchId.startsWith('scratch:')) {
-        processQRCodeData(scratchId);
-        return;
-    }
-    
-    // 原有localStorage邏輯（備用）
-    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-    currentScratchData = allScratches[scratchId];
-    
-    if (!currentScratchData) {
-        showError('刮刮樂數據不存在或已過期');
-        return;
-    }
-    
-    if (currentScratchData.used) {
-        showError('此刮刮樂已被使用');
-        return;
-    }
-    
-    // 🆕 如果沒有cards，就隨機生成
-    if (!currentScratchData.cards) {
-        currentScratchData.cards = generateScratchCards(currentScratchData.quantity);
-    }
-    
-    updatePurchaseInfo();
-    renderCards();
-}
+        // 🆕 載入刮刮樂數據 - 支援QR碼數據和localStorage
+        function loadScratchData() {
+            const scratchParam = getScratchIdFromURL();
+            console.log('🔍 URL參數:', scratchParam);
+            
+            if (!scratchParam) {
+                showError('無效的刮刮樂連結');
+                return;
+            }
+            
+            // 🆕 檢查是否是QR碼數據格式
+            if (scratchParam.startsWith('scratch:')) {
+                console.log('🎯 檢測到QR碼數據格式');
+                processQRCodeData(scratchParam);
+                return;
+            }
+            
+            // 原有localStorage邏輯
+            const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+            currentScratchData = allScratches[scratchParam];
+            
+            if (!currentScratchData) {
+                showError('刮刮樂數據不存在或已過期');
+                return;
+            }
+            
+            if (currentScratchData.used) {
+                showError('此刮刮樂已被使用');
+                return;
+            }
+            
+            // 🆕 如果沒有cards，就隨機生成
+            if (!currentScratchData.cards) {
+                currentScratchData.cards = generateScratchCards(currentScratchData.quantity);
+            }
+            
+            updatePurchaseInfo();
+            renderCards();
+        }
 
-// 🆕 處理QR碼數據
-function processQRCodeData(qrData) {
-    try {
-        // 解碼QR碼數據：scratch:base64Data
-        const base64Data = qrData.replace('scratch:', '');
-        const qrInfo = JSON.parse(atob(base64Data));
-        
-        console.log('🎯 解析QR碼數據:', qrInfo);
-        
-        // 生成刮刮樂卡片
-        const cards = generateScratchCards(qrInfo.q);
-        
-        // 創建刮刮樂數據
-        currentScratchData = {
-            id: qrInfo.id,
-            quantity: qrInfo.q,
-            totalCost: qrInfo.c,
-            timestamp: new Date(qrInfo.t).toISOString(),
-            used: false,
-            cards: cards
-        };
-        
-        updatePurchaseInfo();
-        renderCards();
-        
-    } catch (error) {
-        console.error('QR碼數據解析錯誤:', error);
-        showError('無效的QR碼格式');
-    }
-}
-
-// 🆕 根據數量生成隨機卡片（使用主網頁的概率）
-function generateScratchCards(quantity) {
-    const cards = [];
-    const prizes = ["多謝優惠", "2兩", "5兩", "10兩", "50兩", "100兩"];
-    const weights = [75, 8, 7, 5, 3, 2];
-    
-    for (let i = 0; i < quantity; i++) {
-        let random = Math.random() * 100;
-        let prizeIndex = 0;
-        let accumulated = 0;
-        
-        for (let j = 0; j < weights.length; j++) {
-            accumulated += weights[j];
-            if (random <= accumulated) {
-                prizeIndex = j;
-                break;
+        // 🆕 處理QR碼數據
+        function processQRCodeData(qrData) {
+            try {
+                console.log('🎯 解析QR碼數據:', qrData);
+                
+                const base64Data = qrData.replace('scratch:', '');
+                const qrInfo = JSON.parse(atob(base64Data));
+                
+                console.log('✅ QR數據解析成功:', qrInfo);
+                
+                // 生成刮刮樂卡片
+                const cards = generateScratchCards(qrInfo.q);
+                
+                // 創建刮刮樂數據
+                currentScratchData = {
+                    id: qrInfo.id,
+                    quantity: qrInfo.q,
+                    totalCost: qrInfo.c,
+                    timestamp: new Date(qrInfo.t).toISOString(),
+                    used: false,
+                    cards: cards
+                };
+                
+                updatePurchaseInfo();
+                renderCards();
+                
+            } catch (error) {
+                console.error('❌ QR碼數據解析錯誤:', error);
+                showError('無效的QR碼格式: ' + error.message);
             }
         }
-        
-        cards.push({
-            id: `card_${i + 1}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-            prize: prizes[prizeIndex],
-            isScratched: false,
-            claimed: false
-        });
-    }
-    
-    return cards;
-}
+
+        // 🆕 根據數量生成隨機卡片
+        function generateScratchCards(quantity) {
+            const cards = [];
+            const prizes = ["多謝優惠", "2兩", "5兩", "10兩", "50兩", "100兩"];
+            const weights = [75, 8, 7, 5, 3, 2];
             
-            // 更新購買信息
+            for (let i = 0; i < quantity; i++) {
+                let random = Math.random() * 100;
+                let prizeIndex = 0;
+                let accumulated = 0;
+                
+                for (let j = 0; j < weights.length; j++) {
+                    accumulated += weights[j];
+                    if (random <= accumulated) {
+                        prizeIndex = j;
+                        break;
+                    }
+                }
+                
+                cards.push({
+                    id: `card_${i + 1}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                    prize: prizes[prizeIndex],
+                    isScratched: false,
+                    claimed: false
+                });
+            }
+            
+            return cards;
+        }
+
+        // 🆕 更新購買信息顯示
+        function updatePurchaseInfo() {
             document.getElementById('purchase-info').innerHTML = `
                 <div><strong>購買數量：</strong>${currentScratchData.quantity}張</div>
                 <div><strong>總金額：</strong>${currentScratchData.totalCost}兩</div>
                 <div><strong>購買時間：</strong>${new Date(currentScratchData.timestamp).toLocaleString()}</div>
             `;
             
-            // 顯示總獎金區域
             document.getElementById('total-winnings').style.display = 'block';
             document.getElementById('total-count').textContent = currentScratchData.quantity;
-            
-            renderCards();
         }
 
         // 渲染卡片
@@ -422,6 +419,13 @@ function generateScratchCards(quantity) {
             // 更新刮開數量
             document.getElementById('scratched-count').textContent = scratchedCount;
             updateTotalWinnings();
+            
+            // 檢查是否所有卡片都已刮開且未兌獎
+            if (checkAllScratched() && !currentScratchData.used) {
+                showClaimButton();
+            } else {
+                hideClaimButton();
+            }
         }
 
         // 顯示刮卡界面
@@ -598,212 +602,101 @@ function generateScratchCards(quantity) {
         function saveScratchData() {
             if (!currentScratchData) return;
             
-            const scratchId = getScratchIdFromURL();
             const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-            allScratches[scratchId] = currentScratchData;
+            allScratches[currentScratchData.id] = currentScratchData;
             localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
         }
-		// 檢查是否所有卡片都已刮開
-function checkAllScratched() {
-    if (!currentScratchData || !currentScratchData.cards) return false;
-    
-    const allScratched = currentScratchData.cards.every(card => card.isScratched);
-    return allScratched;
-}
 
-// 顯示兌獎按鈕
-function showClaimButton() {
-    const totalWinningsDiv = document.getElementById('total-winnings');
-    
-    // 檢查是否已經有兌獎按鈕，避免重複添加
-    if (!document.getElementById('claim-button')) {
-        const claimButton = document.createElement('button');
-        claimButton.id = 'claim-button';
-        claimButton.className = 'btn btn-success';
-        claimButton.style.cssText = 'font-size: 1.5rem; padding: 15px 30px; margin: 20px auto; display: block;';
-        claimButton.innerHTML = '🎊 兌換總獎金 🎊';
-        claimButton.onclick = showClaimConfirmation;
-        
-        totalWinningsDiv.appendChild(claimButton);
-    }
-}
+        // 檢查是否所有卡片都已刮開
+        function checkAllScratched() {
+            if (!currentScratchData || !currentScratchData.cards) return false;
+            
+            const allScratched = currentScratchData.cards.every(card => card.isScratched);
+            return allScratched;
+        }
 
-// 隱藏兌獎按鈕
-function hideClaimButton() {
-    const claimButton = document.getElementById('claim-button');
-    if (claimButton) {
-        claimButton.remove();
-    }
-}
+        // 顯示兌獎按鈕
+        function showClaimButton() {
+            const totalWinningsDiv = document.getElementById('total-winnings');
+            
+            if (!document.getElementById('claim-button')) {
+                const claimButton = document.createElement('button');
+                claimButton.id = 'claim-button';
+                claimButton.className = 'btn btn-success';
+                claimButton.style.cssText = 'font-size: 1.5rem; padding: 15px 30px; margin: 20px auto; display: block;';
+                claimButton.innerHTML = '🎊 兌換總獎金 🎊';
+                claimButton.onclick = showClaimConfirmation;
+                
+                totalWinningsDiv.appendChild(claimButton);
+            }
+        }
 
-// 顯示兌獎確認界面
-function showClaimConfirmation() {
-    const claimHTML = `
-        <div class="scratch-result" id="claim-confirmation" style="display: block;">
-            <h3>🎉 兌獎確認</h3>
-            <div class="scratch-prize">${totalWinnings}兩</div>
-            <p style="margin: 15px 0;">請向幽街商人兌換獎金</p>
-            <div class="action-buttons">
-                <button class="btn btn-warning" onclick="closeClaimConfirmation()">取消</button>
-                <button class="btn btn-success" onclick="claimPrize()">確認兌換</button>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('overlay').style.display = 'block';
-    document.body.insertAdjacentHTML('beforeend', claimHTML);
-}
+        // 隱藏兌獎按鈕
+        function hideClaimButton() {
+            const claimButton = document.getElementById('claim-button');
+            if (claimButton) {
+                claimButton.remove();
+            }
+        }
 
-// 關閉兌獎確認
-function closeClaimConfirmation() {
-    document.getElementById('overlay').style.display = 'none';
-    const claimConfirmation = document.getElementById('claim-confirmation');
-    if (claimConfirmation) {
-        claimConfirmation.remove();
-    }
-}
+        // 顯示兌獎確認界面
+        function showClaimConfirmation() {
+            const claimHTML = `
+                <div class="scratch-result" id="claim-confirmation" style="display: block;">
+                    <h3>🎉 兌獎確認</h3>
+                    <div class="scratch-prize">${totalWinnings}兩</div>
+                    <p style="margin: 15px 0;">請向幽街商人兌換獎金</p>
+                    <div class="action-buttons">
+                        <button class="btn btn-warning" onclick="closeClaimConfirmation()">取消</button>
+                        <button class="btn btn-success" onclick="claimPrize()">確認兌換</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('overlay').style.display = 'block';
+            document.body.insertAdjacentHTML('beforeend', claimHTML);
+        }
 
-// 確認兌獎
-function claimPrize() {
-    // 標記所有卡片為已兌獎
-    currentScratchData.cards.forEach(card => {
-        card.claimed = true;
-    });
-    
-    // 標記整個刮刮樂為已使用
-    currentScratchData.used = true;
-    
-    // 保存數據
-    saveScratchData();
-    
-    // 關閉界面
-    closeClaimConfirmation();
-    
-    // 🆕 新增：通知父頁面刮刮樂已完成
-    notifyParentPage();
-    
-    // 顯示兌獎成功訊息
-    setTimeout(() => {
-        alert(`🎉 成功兌換 ${totalWinnings}兩 獎金！`);
-        resetPage();
-    }, 300);
-}
+        // 關閉兌獎確認
+        function closeClaimConfirmation() {
+            document.getElementById('overlay').style.display = 'none';
+            const claimConfirmation = document.getElementById('claim-confirmation');
+            if (claimConfirmation) {
+                claimConfirmation.remove();
+            }
+        }
 
-// 🆕 新增：通知父頁面的函數
-function notifyParentPage() {
-    const scratchId = getScratchIdFromURL();
-    
-    // 方法1: 使用 postMessage 通知父窗口
-    if (window.opener && !window.opener.closed) {
-        window.opener.postMessage({ 
-            type: 'SCRATCH_CARD_COMPLETED', 
-            scratchId: scratchId 
-        }, '*');
-        console.log('✅ 已通知父頁面刮刮樂完成');
-    }
-    
-    // 方法2: 觸發 storage 事件
-    try {
-        const event = new Event('storage');
-        window.dispatchEvent(event);
-        
-        // 強制觸發 localStorage 變化
-        const updateKey = 'scratchCardUpdate_' + scratchId;
-        localStorage.setItem(updateKey, Date.now().toString());
-        localStorage.removeItem(updateKey);
-    } catch (e) {
-        console.log('觸發storage事件時出錯:', e);
-    }
-    
-    // 方法3: 使用 BroadcastChannel (現代瀏覽器)
-    if (typeof BroadcastChannel !== 'undefined') {
-        try {
-            const channel = new BroadcastChannel('scratch_card_updates');
-            channel.postMessage({
-                type: 'COMPLETED',
-                scratchId: scratchId,
-                timestamp: Date.now()
+        // 確認兌獎
+        function claimPrize() {
+            // 標記所有卡片為已兌獎
+            currentScratchData.cards.forEach(card => {
+                card.claimed = true;
             });
-            channel.close();
-        } catch (e) {
-            console.log('BroadcastChannel 不支持');
+            
+            // 標記整個刮刮樂為已使用
+            currentScratchData.used = true;
+            
+            // 保存數據
+            saveScratchData();
+            
+            // 關閉界面
+            closeClaimConfirmation();
+            
+            // 顯示兌獎成功訊息
+            setTimeout(() => {
+                alert(`🎉 成功兌換 ${totalWinnings}兩 獎金！`);
+                resetPage();
+            }, 300);
         }
-    }
-}
 
-// 重置頁面到初始狀態
-function resetPage() {
-    // 隱藏總獎金區域
-    document.getElementById('total-winnings').style.display = 'none';
-    // 隱藏兌獎按鈕
-    hideClaimButton();
-    // 重新載入數據
-    loadScratchData();
-}
-
-// 在 renderCards 函數中添加檢查
-function renderCards() {
-    const container = document.getElementById('cards-container');
-    
-    if (!currentScratchData || !currentScratchData.cards) {
-        container.innerHTML = '<div class="error-message">數據錯誤</div>';
-        return;
-    }
-    
-    container.innerHTML = '';
-    
-    let scratchedCount = 0;
-    
-    currentScratchData.cards.forEach(card => {
-        const cardElement = document.createElement('div');
-        cardElement.className = 'scratch-card';
-        
-        if (card.claimed) {
-            cardElement.classList.add('claimed');
-        } else if (card.isScratched) {
-            cardElement.classList.add('scratched');
-            scratchedCount++;
+        // 重置頁面到初始狀態
+        function resetPage() {
+            // 重新載入頁面
+            location.reload();
         }
-        
-        let statusText = '';
-        if (card.claimed) {
-            statusText = '已兌獎';
-        } else if (card.isScratched) {
-            statusText = `已刮開: ${card.prize}`;
-        } else {
-            statusText = '未刮開';
-        }
-        
-        cardElement.innerHTML = `
-            <div style="font-size: 1.2rem; font-weight: bold;">刮刮樂</div>
-            <div class="card-status">${statusText}</div>
-        `;
-        
-        if (!card.claimed) {
-            cardElement.onclick = () => showScratchCard(card.id);
-        }
-        
-        container.appendChild(cardElement);
-    });
-    
-    // 更新刮開數量
-    document.getElementById('scratched-count').textContent = scratchedCount;
-    updateTotalWinnings();
-    
-    // 檢查是否所有卡片都已刮開且未兌獎
-    if (checkAllScratched() && !currentScratchData.used) {
-        showClaimButton();
-    } else {
-        hideClaimButton();
-    }
-}
-		
-		
 
         // 初始化
         window.addEventListener('load', loadScratchData);
     </script>
 </body>
-
 </html>
-
