@@ -853,51 +853,41 @@
     });
 }
 
-        // 處理刮刮樂URL - 支援所有格式
+       // 處理刮刮樂URL
 function processScratchCardURL(url) {
     console.log('🔗 原始掃描內容:', url);
     
-    let scratchId = null;
+    let finalUrl = url;
     
-    // 🆕 支援所有可能格式：
-    
-    // 1. 完整URL: https://site.com/scratch-card.html?id=123
-    if (url.includes('http') && url.includes('scratch-card.html')) {
-        try {
-            const urlObj = new URL(url);
-            scratchId = urlObj.searchParams.get('id');
-            console.log('✅ 完整URL格式，提取ID:', scratchId);
-        } catch (e) {
-            console.error('URL解析錯誤:', e);
+    // 🆕 如果是scratch:格式，直接傳遞給刮刮樂頁面
+    if (url.includes('scratch:')) {
+        finalUrl = `scratch-card.html?data=${encodeURIComponent(url)}`;
+    } else {
+        // 原有邏輯處理其他格式
+        let scratchId = null;
+        
+        if (url.includes('http') && url.includes('scratch-card.html')) {
+            try {
+                const urlObj = new URL(url);
+                scratchId = urlObj.searchParams.get('id') || urlObj.searchParams.get('data');
+            } catch (e) {
+                console.error('URL解析錯誤:', e);
+            }
+        } else if (url.includes('scratch-card.html')) {
+            const match = url.match(/(?:id|data)=([^&]+)/);
+            scratchId = match ? match[1] : null;
+        } else {
+            scratchId = url.trim();
+        }
+        
+        if (scratchId) {
+            finalUrl = `scratch-card.html?data=${encodeURIComponent(scratchId)}`;
         }
     }
-    // 2. 完整URL但路徑不同
-    else if (url.includes('http') && url.includes('id=')) {
-        const match = url.match(/id=([^&]+)/);
-        scratchId = match ? match[1] : null;
-        console.log('✅ 其他完整URL格式，提取ID:', scratchId);
-    }
-    // 3. 相對路徑: scratch-card.html?id=123
-    else if (url.includes('scratch-card.html')) {
-        const match = url.match(/id=([^&]+)/);
-        scratchId = match ? match[1] : null;
-        console.log('✅ 相對路徑格式，提取ID:', scratchId);
-    }
-    // 4. 直接ID
-    else {
-        scratchId = url.trim();
-        console.log('✅ 直接ID格式:', scratchId);
-    }
     
-    console.log('🎯 最終提取的刮刮樂ID:', scratchId);
-    
-    if (scratchId) {
-        saveScratchCardAndOpen(scratchId, url);
-    } else {
-        alert('無法識別QR碼格式，請確認是有效的刮刮樂URL\n掃描到的內容: ' + url);
-    }
+    console.log('🎯 最終打開的URL:', finalUrl);
+    window.open(finalUrl, '_blank');
 }
-
         function saveScratchCardAndOpen(scratchId, url) {
     console.log('💾 查找刮刮樂數據:', scratchId);
     
@@ -1221,6 +1211,7 @@ function processScratchCardURL(url) {
     </script>
 </body>
 </html>
+
 
 
 
