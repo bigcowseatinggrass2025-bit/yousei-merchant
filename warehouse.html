@@ -966,12 +966,6 @@ function processScratchCardURL(url) {
                 return;
             }
         }
-        // ... 其他格式處理保持不變 ...
-    } catch (error) {
-        console.error('URL解析錯誤:', error);
-        alert("URL格式錯誤");
-    }
-}
         // 🆕 處理舊格式：scratch-card.html?id=xxx
         else if (url.includes('scratch-card.html')) {
             const match = url.match(/id=([^&]+)/);
@@ -992,6 +986,24 @@ function processScratchCardURL(url) {
                 return;
             }
         }
+        // 🆕 處理完整URL
+        else if (url.includes('http')) {
+            const urlObj = new URL(url);
+            const scratchId = urlObj.searchParams.get('id');
+            
+            if (scratchId) {
+                const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+                scratchData = allScratches[scratchId];
+                
+                if (!scratchData) {
+                    alert("找不到對應的刮刮樂數據");
+                    return;
+                }
+                
+                openScratchCardPage(scratchId);
+                return;
+            }
+        }
         
         alert("無效的刮刮樂URL");
         
@@ -1001,8 +1013,8 @@ function processScratchCardURL(url) {
     }
 }
 
-        // 保存刮刮樂數據並打開頁面
-        function saveScratchCardAndOpen(scratchId, url) {
+// 保存刮刮樂數據並打開頁面
+function saveScratchCardAndOpen(scratchId, url) {
     console.log('💾 保存刮刮樂數據:', scratchId);
     
     // 🆕 從URL中提取數量、金額信息（如果有的話）
@@ -1364,6 +1376,7 @@ window.addEventListener('message', function(event) {
     </script>
 </body>
 </html>
+
 
 
 
