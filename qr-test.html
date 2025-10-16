@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QR´a’ßÃèœyÔ‡</title>
+    <title>QRç¢¼åˆ°ç¶²é é€£çµå®Œæ•´æ¸¬è©¦</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <style>
@@ -9,7 +9,8 @@
             font-family: Arial;
             text-align: center;
             padding: 20px;
-            background: #f0f0f0;
+            background: #1a2a3a;
+            color: white;
         }
         button {
             padding: 15px 30px;
@@ -25,7 +26,7 @@
             width: 300px;
             height: 300px;
             background: #000;
-            border: 3px solid red;
+            border: 3px solid #00ff00;
             margin: 20px auto;
             display: block;
             border-radius: 10px;
@@ -47,84 +48,89 @@
             border-radius: 10px;
             background: #2c3e50;
             color: white;
-            min-height: 60px;
+            min-height: 80px;
+            border: 2px solid #34495e;
         }
-        .test-qr {
-            margin: 20px;
+        .test-info {
+            background: rgba(255,255,255,0.1);
             padding: 15px;
-            background: white;
             border-radius: 10px;
+            margin: 20px;
+            text-align: left;
         }
+        .success { background: #27ae60; border-color: #2ecc71; }
+        .error { background: #e74c3c; border-color: #c0392b; }
+        .scanning { background: #3498db; border-color: #2980b9; }
     </style>
 </head>
 <body>
-    <h1>?? QR´a’ßÃèœyÔ‡</h1>
+    <h1>ğŸ¯ QRç¢¼åˆ°ç¶²é é€£çµå®Œæ•´æ¸¬è©¦</h1>
     
-    <button onclick="startQRTest()">é_Ê¼QR’ßÃèœyÔ‡</button>
-    <button onclick="stopQRTest()">Í£Ö¹’ßÃè</button>
+    <button onclick="startFullTest()">é–‹å§‹å®Œæ•´æ¸¬è©¦</button>
+    <button onclick="stopTest()">åœæ­¢æ¸¬è©¦</button>
     
-    <div class="status" id="status">üc“ô"é_Ê¼QR’ßÃèœyÔ‡"</div>
+    <div class="status" id="status">æº–å‚™é–‹å§‹æ¸¬è©¦...</div>
     
     <div id="camera-container"></div>
     
-    <div class="test-qr">
-        <h3>œyÔ‡ÓÃQR´a£º</h3>
-        <p>Õˆ’ßÃèß@‚€œyÔ‡URL£º</p>
-        <p style="background: #eee; padding: 10px; border-radius: 5px;">
-            <strong>scratch-card.html?id=qr_test_123</strong>
+    <div class="test-info">
+        <h3>ğŸ“‹ æ¸¬è©¦èªªæ˜ï¼š</h3>
+        <p>1. ç”ŸæˆåŒ…å«ä»¥ä¸‹URLçš„QRç¢¼ï¼š</p>
+        <p style="background: #2c3e50; padding: 10px; border-radius: 5px; font-family: monospace;">
+            <strong>scratch-card.html?id=test123</strong>
         </p>
-        <p>»òÕßÓÃÊÖ™CÉú³Éß@‚€URLµÄQR´aíœyÔ‡</p>
+        <p>2. æƒæå¾Œæ‡‰è©²è‡ªå‹•å˜—è©¦æ‰“é–‹é€™å€‹ç¶²é </p>
+        <p>3. å¦‚æœç¶²é ä¸å­˜åœ¨æœƒé¡¯ç¤ºéŒ¯èª¤ï¼Œä½†é€™è­‰æ˜é€£çµåŠŸèƒ½æ­£å¸¸</p>
     </div>
 
     <script>
         let currentStream = null;
         let scanInterval = null;
         
-        function updateStatus(message, isError = false) {
+        function updateStatus(message, type = 'normal') {
             const status = document.getElementById('status');
             status.innerHTML = message;
-            status.style.background = isError ? '#e74c3c' : '#2c3e50';
-            console.log('?? ' + message);
+            status.className = 'status';
+            if (type === 'success') status.classList.add('success');
+            else if (type === 'error') status.classList.add('error');
+            else if (type === 'scanning') status.classList.add('scanning');
+            console.log('ğŸ“¢ ' + message.replace(/<[^>]*>/g, ''));
         }
         
-        function startQRTest() {
-            updateStatus('?? é_Ê¼QR’ßÃèœyÔ‡...');
+        function startFullTest() {
+            updateStatus('ğŸš€ é–‹å§‹å®Œæ•´QRç¢¼åˆ°ç¶²é æ¸¬è©¦...');
             
-            // ™z²éjsQRì
+            // æª¢æŸ¥ç’°å¢ƒ
             if (typeof jsQR === 'undefined') {
-                updateStatus('? jsQRìÎ´¼Óİd£¡Õˆ™z²é¾W½j', true);
-                return;
-            }
-            updateStatus('? jsQRìÒÑ¼Óİd');
-            
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                updateStatus('? gÓ[Æ÷²»Ö§³ÖÏà™C', true);
+                updateStatus('âŒ jsQRåº«æœªåŠ è¼‰ï¼', 'error');
                 return;
             }
             
-            // ÕˆÇóÏà™C™àÏŞ
+            if (!navigator.mediaDevices?.getUserMedia) {
+                updateStatus('âŒ ç€è¦½å™¨ä¸æ”¯æŒç›¸æ©Ÿ', 'error');
+                return;
+            }
+            
+            updateStatus('âœ… ç’°å¢ƒæª¢æŸ¥é€šéï¼Œè«‹æ±‚ç›¸æ©Ÿæ¬Šé™...');
+            
             navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'environment',
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                }
+                video: { facingMode: 'environment' }
             }).then(stream => {
                 currentStream = stream;
-                setupQRScanner(stream);
+                setupFullTest(stream);
             }).catch(error => {
-                updateStatus('? Ïà™CåeÕ`: ' + error.message, true);
+                updateStatus('âŒ ç›¸æ©ŸéŒ¯èª¤: ' + error.message, 'error');
             });
         }
         
-        function setupQRScanner(stream) {
+        function setupFullTest(stream) {
             const container = document.getElementById('camera-container');
             container.innerHTML = `
                 <div style="position: relative; display: inline-block;">
                     <video id="test-video" autoplay playsinline muted></video>
                     <div class="scan-frame"></div>
-                    <div id="scan-result" style="position: absolute; bottom: -50px; left: 0; right: 0; text-align: center; color: white; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px;">
-                        µÈ´ı’ßÃè...
+                    <div id="scan-result" style="position: absolute; bottom: -60px; left: 0; right: 0; text-align: center; color: white; background: rgba(0,0,0,0.9); padding: 10px; border-radius: 5px; border: 2px solid #3498db;">
+                        ç­‰å¾…æƒæQRç¢¼...
                     </div>
                 </div>
             `;
@@ -134,13 +140,12 @@
             
             video.srcObject = stream;
             
-            // ÔOÖÃQR’ßÃè
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             let scanCount = 0;
             
             video.play().then(() => {
-                updateStatus('? Ïà™C†¢„Ó³É¹¦£¡é_Ê¼’ßÃèQR´a...');
+                updateStatus('ğŸ“¹ ç›¸æ©Ÿå•Ÿå‹•æˆåŠŸï¼<br>è«‹æƒæåŒ…å«åˆ®åˆ®æ¨‚URLçš„QRç¢¼', 'scanning');
                 
                 scanInterval = setInterval(() => {
                     scanCount++;
@@ -153,52 +158,96 @@
                         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                         
                         try {
-                            const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                                inversionAttempts: "dontInvert",
-                            });
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
                             
                             if (code) {
-                                updateStatus(`?? <strong>QR’ßÃè³É¹¦£¡</strong><br>™zœyµ½: ${code.data}`);
-                                scanResult.textContent = `? ³É¹¦: ${code.data}`;
+                                const scannedUrl = code.data;
+                                updateStatus(`ğŸ‰ QRæƒææˆåŠŸï¼<br>æª¢æ¸¬åˆ°: <strong>${scannedUrl}</strong>`, 'success');
+                                scanResult.innerHTML = `âœ… æƒææˆåŠŸï¼<br>è™•ç†ä¸­...`;
                                 scanResult.style.background = '#27ae60';
+                                scanResult.style.borderColor = '#27ae60';
                                 
-                                // ³É¹¦ááÀ^Àm’ßÃè£¨²»Í£Ö¹£©
-                                setTimeout(() => {
-                                    scanResult.textContent = 'À^Àm’ßÃèÖĞ...';
-                                    scanResult.style.background = '#3498db';
-                                }, 2000);
+                                // ğŸ†• å®Œæ•´çš„URLè™•ç†æ¸¬è©¦
+                                processScannedURL(scannedUrl);
                                 
                             } else {
-                                scanResult.textContent = `?? ’ßÃèÖĞ... (${scanCount}´Î)`;
+                                scanResult.innerHTML = `ğŸ” æƒæä¸­...<br>æ¬¡æ•¸: ${scanCount}`;
                                 scanResult.style.background = '#3498db';
+                                scanResult.style.borderColor = '#3498db';
                             }
                         } catch (error) {
-                            scanResult.textContent = '? ’ßÃèåeÕ`';
+                            scanResult.innerHTML = 'âŒ æƒæéŒ¯èª¤';
                             scanResult.style.background = '#e74c3c';
+                            scanResult.style.borderColor = '#c0392b';
                         }
                     }
-                }, 500); // Ã¿500ms’ßÃèÒ»´Î
+                }, 500);
                 
             }).catch(error => {
-                updateStatus('? Ò•îl²¥·ÅÊ§”¡: ' + error.message, true);
+                updateStatus('âŒ è¦–é »æ’­æ”¾å¤±æ•—: ' + error.message, 'error');
             });
         }
         
-        function stopQRTest() {
-            if (scanInterval) {
-                clearInterval(scanInterval);
-                scanInterval = null;
+        // ğŸ†• å®Œæ•´çš„URLè™•ç†å‡½æ•¸
+        function processScannedURL(url) {
+            console.log('ğŸ”— é–‹å§‹è™•ç†URL:', url);
+            updateStatus(`ğŸ”— è™•ç†æƒæçµæœ:<br>${url}`, 'scanning');
+            
+            // åœæ­¢æƒæ
+            clearInterval(scanInterval);
+            
+            // åˆ†æURL
+            let scratchId = null;
+            
+            if (url.includes('scratch-card.html')) {
+                // è™•ç†å®Œæ•´URLæˆ–ç›¸å°è·¯å¾‘
+                const match = url.match(/id=([^&]+)/);
+                scratchId = match ? match[1] : null;
+            } else if (url.startsWith('http')) {
+                // è™•ç†å®Œæ•´HTTP URL
+                try {
+                    const urlObj = new URL(url);
+                    scratchId = urlObj.searchParams.get('id');
+                } catch (e) {
+                    console.error('URLè§£æéŒ¯èª¤:', e);
+                }
+            } else {
+                // ç›´æ¥ID
+                scratchId = url;
             }
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-                currentStream = null;
+            
+            if (scratchId) {
+                updateStatus(`âœ… URLè§£ææˆåŠŸï¼<br>åˆ®åˆ®æ¨‚ID: <strong>${scratchId}</strong>`, 'success');
+                
+                // ğŸ†• æ¨¡æ“¬æ‰“é–‹åˆ®åˆ®æ¨‚é é¢
+                setTimeout(() => {
+                    const fullUrl = `scratch-card.html?id=${scratchId}`;
+                    updateStatus(`ğŸŠ æ¸¬è©¦å®Œæˆï¼<br>å°‡æœƒæ‰“é–‹: <strong>${fullUrl}</strong><br><br>åœ¨çœŸå¯¦ç’°å¢ƒä¸­æœƒè‡ªå‹•è·³è½‰`, 'success');
+                    
+                    // åœ¨çœŸå¯¦ç’°å¢ƒä¸­å–æ¶ˆè¨»é‡‹é€™è¡Œï¼š
+                    // window.open(fullUrl, '_blank');
+                    
+                    // é¡¯ç¤ºæ¸¬è©¦æˆåŠŸè¨Šæ¯
+                    alert(`ğŸ‰ æ¸¬è©¦æˆåŠŸï¼\næƒæåˆ°çš„URL: ${url}\næå–çš„ID: ${scratchId}\nå°‡æœƒæ‰“é–‹: ${fullUrl}`);
+                    
+                }, 2000);
+                
+            } else {
+                updateStatus(`âŒ URLè§£æå¤±æ•—<br>ç„¡æ³•å¾ä¸­æå–åˆ®åˆ®æ¨‚ID:<br>${url}`, 'error');
             }
-            document.getElementById('camera-container').innerHTML = '';
-            updateStatus('?? ’ßÃèÒÑÍ£Ö¹');
         }
         
-        // í“ÃæĞ¶İd•rÇåÀí
-        window.addEventListener('beforeunload', stopQRTest);
+        function stopTest() {
+            if (scanInterval) clearInterval(scanInterval);
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('camera-container').innerHTML = '';
+            updateStatus('ğŸ›‘ æ¸¬è©¦å·²åœæ­¢');
+        }
+        
+        // æ¸…ç†
+        window.addEventListener('beforeunload', stopTest);
     </script>
 </body>
 </html>
