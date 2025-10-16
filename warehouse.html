@@ -724,14 +724,12 @@
             });
         }
 
-        function createCameraInterface(stream) {
+       function createCameraInterface(stream) {
     console.log('🎬 創建相機界面');
     
-    // 🆕 檢查jsQR庫是否加載
+    // 檢查jsQR庫
     if (typeof jsQR === 'undefined') {
-        console.error('❌ jsQR庫未加載！');
         alert('QR掃描功能加載失敗，請使用手動輸入');
-        //  fallback到手動輸入
         const url = prompt("請輸入刮刮樂URL:", "scratch-card.html?id=test123");
         if (url) {
             stream.getTracks().forEach(track => track.stop());
@@ -739,7 +737,7 @@
         }
         return;
     }
-    
+
     const cameraHTML = `
         <div class="camera-overlay" id="camera-overlay">
             <div class="camera-container">
@@ -750,11 +748,14 @@
                 <div style="position: relative; display: inline-block;">
                     <video id="camera-video" autoplay playsinline muted></video>
                     <div class="scan-frame"></div>
+                    <div id="scan-indicator" style="position: absolute; bottom: -50px; left: 0; right: 0; text-align: center; color: white; background: rgba(0,0,0,0.9); padding: 8px; border-radius: 5px; border: 2px solid #3498db;">
+                        等待掃描QR碼...
+                    </div>
                 </div>
                 <div class="camera-hint" id="camera-hint">相機啟動中...</div>
                 <div class="camera-buttons">
-                    <button class="manual-input-btn" id="manual-input-btn">手動輸入URL</button>
-                    <button class="test-scratch-btn" id="test-scratch-btn">測試刮刮樂</button>
+                    <button class="manual-input-btn" id="manual-input-btn">手動輸入</button>
+                    <button class="test-scratch-btn" id="test-scratch-btn">測試功能</button>
                 </div>
             </div>
         </div>
@@ -764,27 +765,15 @@
     
     const video = document.getElementById('camera-video');
     const hint = document.getElementById('camera-hint');
+    const indicator = document.getElementById('scan-indicator');
     
     video.srcObject = stream;
     
-    // 確保視頻播放
-    video.play().then(() => {
-        console.log('✅ 視頻播放成功');
-        hint.textContent = '✅ 相機就緒！對準QR碼掃描';
-        hint.style.color = '#27ae60';
-        video.style.border = '3px solid #27ae60';
-    }).catch(error => {
-        console.error('❌ 播放失敗:', error);
-        hint.textContent = '❌ 播放失敗: ' + error.message;
-        hint.style.color = '#e74c3c';
-        video.style.border = '3px solid #e74c3c';
-    });
-    
-    // 🆕 QR碼掃描功能
+    // QR掃描設置
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     let scanInterval;
-
+    
     function scanQRCode() {
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
             canvas.width = video.videoWidth;
@@ -792,39 +781,58 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
             
-            if (code) {
-                console.log('🎯 掃描到QR碼:', code.data);
-                hint.textContent = '✅ 掃描成功！';
-                hint.style.color = '#27ae60';
+            try {
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
                 
-                // 停止掃描
-                clearInterval(scanInterval);
-                
-                // 關閉相機
-                stream.getTracks().forEach(track => track.stop());
-                document.getElementById('camera-overlay').remove();
-                
-                // 處理QR碼內容
-                processScratchCardURL(code.data);
+                if (code) {
+                    console.log('🎯 掃描到QR碼:', code.data);
+                    indicator.textContent = '✅ 掃描成功！';
+                    indicator.style.background = '#27ae60';
+                    hint.textContent = '處理中...';
+                    
+                    clearInterval(scanInterval);
+                    
+                    setTimeout(() => {
+                        stream.getTracks().forEach(track => track.stop());
+                        document.getElementById('camera-overlay').remove();
+                        processScratchCardURL(code.data);
+                    }, 500);
+                    
+                } else {
+                    indicator.textContent = '🔍 掃描中...';
+                    indicator.style.background = '#3498db';
+                }
+            } catch (error) {
+                indicator.textContent = '❌ 掃描錯誤';
+                indicator.style.background = '#e74c3c';
             }
         }
     }
 
-    // 開始掃描
-    scanInterval = setInterval(scanQRCode, 500);
+    // 視頻播放成功後開始掃描
+    video.play().then(() => {
+        console.log('✅ 視頻播放成功，開始QR掃描');
+        hint.textContent = '✅ 相機就緒！對準QR碼';
+        video.style.border = '3px solid #27ae60';
+        
+        scanInterval = setInterval(scanQRCode, 500);
+        
+    }).catch(error => {
+        console.error('❌ 播放失敗:', error);
+        hint.textContent = '❌ 相機啟動失敗';
+    });
     
     // 關閉相機
     document.getElementById('close-camera').addEventListener('click', function() {
-        clearInterval(scanInterval);
+        if (scanInterval) clearInterval(scanInterval);
         stream.getTracks().forEach(track => track.stop());
         document.getElementById('camera-overlay').remove();
     });
     
-    // 手動輸入URL
+    // 手動輸入
     document.getElementById('manual-input-btn').addEventListener('click', function() {
-        clearInterval(scanInterval);
+        if (scanInterval) clearInterval(scanInterval);
         const url = prompt("請輸入刮刮樂URL:", "scratch-card.html?id=test123");
         if (url) {
             stream.getTracks().forEach(track => track.stop());
@@ -833,9 +841,9 @@
         }
     });
     
-    // 測試刮刮樂
+    // 測試功能
     document.getElementById('test-scratch-btn').addEventListener('click', function() {
-        clearInterval(scanInterval);
+        if (scanInterval) clearInterval(scanInterval);
         const testScratchId = 'test_' + Date.now();
         const testUrl = `scratch-card.html?id=${testScratchId}`;
         
@@ -1191,6 +1199,7 @@
     </script>
 </body>
 </html>
+
 
 
 
