@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>刮刮樂已完成 - 幽街商人</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a2a3a, #2c3e50);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        .container {
+            max-width: 500px;
+        }
+        .prize-amount {
+            font-size: 3rem;
+            color: #ffd700;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        .completion-message {
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="font-size: 5rem; margin-bottom: 20px;">🎊</div>
+        <h1 style="color: #ffd700; margin-bottom: 30px;">兌獎完成</h1>
+        
+        <div class="completion-message">
+            <h2 class="prize-amount" id="prize-amount">0兩</h2>
+            <p style="font-size: 1.2rem; margin: 10px 0;">獎金已成功兌換</p>
+        </div>
+        
+        <div style="color: #bbb; margin: 30px 0;">
+            <p>請向幽街商人出示此頁面領取實體獎金</p>
+            <p>感謝您的參與！</p>
+        </div>
+        
+        <div style="color: #7f8c8d; font-size: 0.9rem; margin-top: 40px;">
+            <p>此刮刮樂已完成使命</p>
+            <p>請關閉此頁面</p>
+        </div>
+    </div>
+
+    <script>
+        // 从URL参数获取奖金金额
+        const urlParams = new URLSearchParams(window.location.search);
+        const prizeAmount = urlParams.get('prize') || '0';
+        document.getElementById('prize-amount').textContent = prizeAmount + '兩';
+        
+        // 🆕 禁用后退按钮
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            history.go(1);
+        };
+    </script>
+</body>
+</html>
