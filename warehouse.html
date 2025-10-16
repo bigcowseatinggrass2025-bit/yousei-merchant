@@ -676,21 +676,39 @@ function updateLottoButton() {
     }
 }
 
-// 打開相機掃描QR碼
 function openQRScanner() {
     // 這裡使用瀏覽器的媒體API打開相機
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(function(stream) {
-                // 創建相機界面
-                createCameraInterface(stream);
-            })
-            .catch(function(error) {
-                console.error("無法訪問相機:", error);
-                alert("無法訪問相機，請確保已授予相機權限");
-            });
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: "environment",
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        })
+        .then(function(stream) {
+            // 創建相機界面
+            createCameraInterface(stream);
+        })
+        .catch(function(error) {
+            console.error("無法訪問相機:", error);
+            // 🆕 提供替代方案
+            showManualInputOption();
+        });
     } else {
-        alert("您的設備不支持相機功能");
+        // 🆕 設備不支持相機
+        showManualInputOption();
+    }
+}
+
+// 🆕 新增：顯示手動輸入選項
+function showManualInputOption() {
+    const manualInput = prompt(
+        "相機無法使用\n請輸入刮刮樂網址：\n（格式：.../scratch-card.html?id=xxx）", 
+        "scratch-card.html?id="
+    );
+    if (manualInput) {
+        processScratchCardURL(manualInput);
     }
 }
 
@@ -705,8 +723,9 @@ function createCameraInterface(stream) {
                 </div>
                 <video id="camera-video" autoplay playsinline></video>
                 <div class="scan-frame"></div>
-                <div class="camera-hint">對準QR碼進行掃描</div>
-                <button class="manual-input-btn" id="manual-input-btn">手動輸入URL</button>
+               <div class="camera-hint">對準QR碼進行掃描</div>
+<button class="manual-input-btn" id="manual-input-btn">手動輸入URL</button>
+<button class="flash-toggle" id="flash-toggle">📸 閃光燈</button>
             </div>
         </div>
     `;
@@ -715,6 +734,18 @@ function createCameraInterface(stream) {
     
     const video = document.getElementById('camera-video');
     video.srcObject = stream;
+	// 🆕 確保視頻正確播放
+video.onloadedmetadata = function() {
+    video.play().catch(e => {
+        console.log('視頻播放失敗:', e);
+        document.getElementById('camera-hint').textContent = '視頻播放失敗，請嘗試手動輸入';
+    });
+};
+
+// 🆕 添加錯誤處理
+video.onerror = function() {
+    document.getElementById('camera-hint').textContent = '相機啟動失敗，請嘗試手動輸入';
+};
     
     // 關閉相機
     document.getElementById('close-camera').addEventListener('click', function() {
@@ -730,6 +761,10 @@ function createCameraInterface(stream) {
         }
     });
 }
+		// 🆕 閃光燈切換（模擬）
+document.getElementById('flash-toggle').addEventListener('click', function() {
+    video.style.filter = video.style.filter === 'brightness(150%)' ? 'brightness(100%)' : 'brightness(150%)';
+});
 
 // 處理刮刮樂URL
 function processScratchCardURL(url) {
@@ -1162,7 +1197,27 @@ function showTemporaryMessage(message, type = 'info') {
 updateLottoButton();
 
 // ==================== 刮刮樂功能整合結束 ====================
+// 🆕 測試用：生成示範QR碼
+function generateTestQRCode() {
+    const testScratchId = 'test_' + Date.now();
+    const testUrl = `scratch-card.html?id=${testScratchId}`;
+    
+    const testHTML = `
+        <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; z-index:10001; border-radius:10px; color: black;">
+            <h3>測試用刮刮樂</h3>
+            <div>網址: ${testUrl}</div>
+            <button onclick="processScratchCardURL('${testUrl}')">直接載入此刮刮樂</button>
+            <button onclick="this.parentElement.remove()">關閉</button>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', testHTML);
+}
 
+// 🆕 在樂透按鈕長按時顯示測試選項
+document.getElementById('lotto-btn').addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    generateTestQRCode();
+});
 // 🎯 页面加载时获取真实数据
 window.addEventListener('load', function() {
     loadPlayerDataFromSupabase();
@@ -1174,6 +1229,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
