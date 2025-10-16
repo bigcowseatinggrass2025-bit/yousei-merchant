@@ -6,7 +6,7 @@
     <title>我的幽街貨卡倉庫</title>
     <!-- 🎯 添加Supabase库引用 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
     <style>
         /* 手机端专用样式 */
         * {
@@ -802,56 +802,53 @@ function createCameraInterface(stream) {
     });
 
 
+// 🆕 使用 qr-scanner 的快速扫描函数
 function startQRScanning(video, hint, stream) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    let scanInterval;
-    let scanCount = 0;
+    console.log('🚀 启动 qr-scanner 检测');
     
-    function scanQRCode() {
-        scanCount++;
-        
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            try {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    try {
+        // 🆕 创建 QR Scanner 实例
+        const qrScanner = new QrScanner(
+            video,
+            result => {
+                console.log('🎯 qr-scanner 检测成功:', result);
+                hint.textContent = '✅ 掃描成功！';
+                hint.style.color = '#27ae60';
                 
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                
-                // 🆕 优化扫描参数
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "attemptBoth",  // 🆕 尝试两种反转
-                    // 🆕 添加调试信息
-                });
-                
-                if (code) {
-                    console.log('🎯 扫描成功! 次数:', scanCount);
-                    console.log('📍 QR码位置:', code.location);
-                    
-                    hint.textContent = '✅ 掃描成功！';
-                    hint.style.color = '#27ae60';
-                    
-                    clearInterval(scanInterval);
+                // 🆕 停止扫描并处理结果
+                qrScanner.stop().then(() => {
+                    qrScanner.destroy();
                     closeCameraInterface(stream);
-                    processScratchCardURL(code.data);
-                } else {
-                    // 🆕 每10次显示一次状态
-                    if (scanCount % 10 === 0) {
-                        hint.textContent = `🔍 掃描中... ${scanCount}次`;
-                    }
-                }
-            } catch (error) {
-                console.error('扫描错误:', error);
+                    processScratchCardURL(result.data);
+                });
+            },
+            {
+                // 🆕 优化配置
+                highlightScanRegion: true,
+                highlightCodeOutline: true,
+                maxScansPerSecond: 10,
+                returnDetailedScanResult: true,
             }
-        }
+        );
+        
+        // 🆕 启动扫描
+        qrScanner.start().then(() => {
+            console.log('✅ qr-scanner 启动成功');
+            hint.textContent = '🚀 高速掃描中...';
+        }).catch(error => {
+            console.error('❌ qr-scanner 启动失败:', error);
+            hint.textContent = '❌ 掃描啟動失敗';
+        });
+        
+        // 🆕 保存扫描器实例以便关闭
+        window.currentQrScanner = qrScanner;
+        
+    } catch (error) {
+        console.error('❌ 创建QR扫描器失败:', error);
+        hint.textContent = '❌ 掃描器初始化失敗';
     }
     
-    // 🆕 缩短扫描间隔到200ms
-    scanInterval = setInterval(scanQRCode, 200);
-    console.log('🔄 QR扫描启动，间隔200ms');
-    
-    return scanInterval;
+    // 🆕 注意：这里没有 return 语句了！
 }
 // 🆕 關閉相機界面
 function closeCameraInterface(stream) {
@@ -1313,6 +1310,7 @@ window.addEventListener('message', function(event) {
     </script>
 </body>
 </html>
+
 
 
 
