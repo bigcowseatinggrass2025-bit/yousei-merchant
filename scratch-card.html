@@ -705,50 +705,55 @@
         }
     }
 
- // 🆕 恢复原来的兌獎函數
 function claimPrize() {
     console.log('🎯 开始兑奖流程');
     
-    // 標記所有卡片為已兌獎
+    // 1. ✅ 标记所有卡片为已兌獎
     currentScratchData.cards.forEach(card => {
         card.claimed = true;
     });
     
-    // 標記整個刮刮樂為已使用
+    // 2. ✅ 关键：标记整個刮刮樂為已使用
     currentScratchData.used = true;
-    console.log('✅ 刮刮乐标记为已使用');
+    console.log('✅ 刮刮乐标记为已使用:', currentScratchData.id);
     
-    // 🆕 保存到localStorage
+    // 3. ✅ 关键：保存到localStorage
     const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
     allScratches[currentScratchData.id] = currentScratchData;
     localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+    console.log('💾 已保存到localStorage');
     
-    // 🆕 通知父頁面
+    // 4. ✅ 关键：通知仓库页面
     if (window.opener && !window.opener.closed) {
         window.opener.postMessage({ 
             type: 'SCRATCH_CARD_COMPLETED', 
-            scratchId: currentScratchData.id
+            scratchId: currentScratchData.id 
         }, '*');
+        console.log('📢 已通知仓库页面');
     }
     
     // 關閉界面
     closeClaimConfirmation();
     
-    // 🆕 恢复原来的行为：显示成功消息，然后重置页面
+    // 顯示兌獎成功訊息
     setTimeout(() => {
         alert(`🎉 成功兌換 ${totalWinnings}兩 獎金！`);
+        console.log('💰 兑奖完成，总奖金:', totalWinnings);
         
-        // 🆕 重新加载页面（回到"載入中"状态）
-        location.reload();
+        // 更新界面
+        renderCards();
+        hideClaimButton();
         
     }, 300);
 }
+
 
     // 初始化
     window.addEventListener('load', loadScratchData);
 </script>
 </body>
 </html>
+
 
 
 
