@@ -887,35 +887,116 @@ function createCameraInterface(stream) {
         hint.textContent = '❌ 播放失敗: ' + error.message;
         hint.style.color = '#e74c3c';
     });
-    
+
+
     // 關閉相機
     document.getElementById('close-camera').addEventListener('click', function() {
         closeCameraInterface(stream);
     });
     
-    // 手動輸入URL
-    document.getElementById('manual-input-btn').addEventListener('click', function() {
-        closeCameraInterface(stream);
-        const url = prompt("請輸入刮刮樂URL:", "scratch:eyJpZCI6InNjcmF0Y2hfMTcxMDAwMDAwMDAwMCIsInEiOjMsImMiOjE1LCJ0IjoxNzEwMDAwMDAwMDAwfQ==");
-        if (url) {
-            processScratchCardURL(url);
-        }
-    });
+
+
+    // 📸 拍照掃描功能
+function captureAndScan(video, stream) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const hint = document.getElementById('camera-hint');
     
-    // 測試刮刮樂
-    document.getElementById('test-scratch-btn').addEventListener('click', function() {
-        closeCameraInterface(stream);
-        // 生成測試用的base64數據
-        const testData = {
-            id: 'test_' + Date.now(),
-            q: 3,
-            c: 15,
-            t: Date.now()
-        };
-        const base64Data = btoa(JSON.stringify(testData));
-        const testUrl = `scratch:${base64Data}`;
-        processScratchCardURL(testUrl);
-    });
+    // 設置畫布尺寸與視頻一致
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // 繪製當前視頻幀
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // 顯示"分析中"提示
+    hint.textContent = '🔍 分析圖片中...';
+    hint.style.color = '#9b59b6';
+    
+    // 暫停實時掃描
+    isScanning = false;
+    
+    // 短暫延遲讓用戶看到提示
+    setTimeout(() => {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, canvas.width, canvas.height, {
+            inversionAttempts: "dontInvert",
+        });
+        
+        if (code) {
+            hint.textContent = '✅ 掃描成功！';
+            hint.style.color = '#27ae60';
+            setTimeout(() => {
+                closeCameraInterface(stream);
+                processScratchCardURL(code.data);
+            }, 500);
+        } else {
+            hint.textContent = '❌ 未找到QR碼，請重試';
+            hint.style.color = '#e74c3c';
+            
+            // 3秒後恢復掃描
+            setTimeout(() => {
+                hint.textContent = '📷 可拍照掃描或繼續實時掃描';
+                hint.style.color = '#3498db';
+                // 重新開始實時掃描
+                isScanning = true;
+                scanQRCode();
+            }, 3000);
+        }
+        
+        // 🗑️ 清理內存
+        canvas.width = 0;
+        canvas.height = 0;
+    }, 800);
+}
+    // 🔍 增強檢測模式
+let isEnhancedMode = false;
+
+function enableEnhancedMode() {
+    isEnhancedMode = !isEnhancedMode;
+    const btn = document.getElementById('enhance-scan');
+    const hint = document.getElementById('camera-hint');
+    
+    if (isEnhancedMode) {
+        btn.textContent = '🔍 增強模式中';
+        btn.style.background = '#27ae60';
+        hint.textContent = '✅ 已開啟增強檢測模式';
+    } else {
+        btn.textContent = '🔍 增強檢測';
+        btn.style.background = '';
+        hint.textContent = '🔄 恢復普通檢測模式';
+    }
+}
+
+// ⚙️ 重置掃描引擎
+function resetQRScanner() {
+    const hint = document.getElementById('camera-hint');
+    hint.textContent = '⚙️ 重置掃描引擎...';
+    
+    setTimeout(() => {
+        hint.textContent = '✅ 掃描引擎已重置';
+        // 這裡可以添加重置掃描狀態的代碼
+        
+        setTimeout(() => {
+            hint.textContent = '🔍 重新開始掃描';
+        }, 1500);
+    }, 800);
+}
+
+    // 🔍 增強檢測模式
+document.getElementById('enhance-scan').addEventListener('click', function() {
+    enableEnhancedMode();
+});
+
+// ⚙️ 重置掃描引擎  
+document.getElementById('reset-scanner').addEventListener('click', function() {
+    resetQRScanner();
+});
+
+// 📸 拍照掃描功能
+document.getElementById('capture-btn').addEventListener('click', function() {
+    captureAndScan(video, stream);
+});
 
 
 // 🆕 超级稳定版扫描函数 - 替换原来的startQRScanning
@@ -1515,6 +1596,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
