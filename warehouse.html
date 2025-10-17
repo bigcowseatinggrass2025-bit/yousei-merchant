@@ -1342,6 +1342,109 @@ window.addEventListener('message', function(event) {
                 loadPlayerDataFromSupabase();
             }, 10000);
         }
+        // ==================== 刮刮乐状态同步 ====================
+
+// 🆕 监听刮刮乐状态变化
+function setupScratchCardSync() {
+    console.log('🔄 设置刮刮乐状态同步');
+    
+    // 🆕 监听storage事件（跨页面通信）
+    window.addEventListener('storage', function(e) {
+        console.log('📦 Storage事件:', e.key);
+        
+        if (e.key === 'virtualScratchCards' || e.key === 'scratchCardLastUpdate') {
+            console.log('🔄 检测到刮刮乐数据变化，更新按钮状态');
+            updateLottoButton();
+        }
+    });
+    
+    // 🆕 监听页面可见性变化（返回页面时检查）
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            console.log('📱 页面变为可见，检查刮刮乐状态');
+            setTimeout(() => {
+                updateLottoButton();
+            }, 500);
+        }
+    });
+    
+    // 🆕 定期检查刮刮乐状态（备用方案）
+    setInterval(() => {
+        updateLottoButton();
+    }, 3000); // 每3秒检查一次
+}
+
+// 🆕 增强的刮刮乐数据检查函数
+function checkScratchCardData() {
+    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+    console.log('🔍 检查刮刮乐数据，总数:', Object.keys(allScratches).length);
+    
+    let availableScratch = null;
+    
+    for (const [scratchId, scratchData] of Object.entries(allScratches)) {
+        console.log('📄 检查刮刮乐:', scratchId, '状态:', scratchData.used ? '已使用' : '未使用');
+        
+        if (!scratchData.used) {
+            const createTime = new Date(scratchData.timestamp).getTime();
+            const currentTime = Date.now();
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+            
+            if (currentTime - createTime < twentyFourHours) {
+                console.log('✅ 找到可用刮刮乐:', scratchId);
+                availableScratch = { scratchId, scratchData };
+                break;
+            } else {
+                console.log('⏰ 刮刮乐已过期:', scratchId);
+                // 🆕 自动清理过期数据
+                delete allScratches[scratchId];
+                localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+            }
+        }
+    }
+    
+    return availableScratch;
+}
+
+// 🆕 增强的乐透按钮更新函数
+function updateLottoButton() {
+    const lottoBtn = document.getElementById('lotto-btn');
+    if (!lottoBtn) {
+        console.log('❌ 乐透按钮未找到');
+        return;
+    }
+    
+    const scratchData = checkScratchCardData();
+    console.log('🔄 更新乐透按钮，找到数据:', scratchData ? '是' : '否');
+    
+    if (scratchData) {
+        lottoBtn.innerHTML = '🎫 刮刮樂';
+        lottoBtn.classList.add('has-data');
+        lottoBtn.dataset.scratchId = scratchData.scratchId;
+        console.log('✅ 乐透按钮更新: 有刮刮乐数据');
+    } else {
+        lottoBtn.innerHTML = '📷 掃QR碼';
+        lottoBtn.classList.remove('has-data');
+        delete lottoBtn.dataset.scratchId;
+        console.log('🔄 乐透按钮更新: 无数据，相机模式');
+    }
+}
+
+// 🆕 添加页面焦点事件监听
+window.addEventListener('focus', function() {
+    console.log('🎯 页面获得焦点，更新刮刮乐状态');
+    setTimeout(() => {
+        updateLottoButton();
+    }, 300);
+});
+
+// 🆕 添加beforeunload事件，确保离开时状态正确
+window.addEventListener('beforeunload', function() {
+    console.log('🚪 页面即将卸载，保存状态');
+    // 触发storage事件通知其他页面
+    localStorage.setItem('warehouseLastActivity', Date.now().toString());
+});
+
+        
 
         function stopAutoRefresh() {
             if (autoRefreshInterval) {
@@ -1364,18 +1467,27 @@ window.addEventListener('message', function(event) {
             }
         });
 
-        // 初始化
+       // 初始化
+window.addEventListener('load', function() {
+    console.log('🚀 仓库页面初始化');
+    
+    loadPlayerDataFromSupabase();
+    updateLottoButton(); // 🆕 确保初始状态正确
+    setupScratchCardSync(); // 🆕 启动状态同步
+    
+    setTimeout(() => {
+        startAutoRefresh();
+    }, 3000);
+    
+    // 🆕 页面显示时立即检查状态
+    setTimeout(() => {
         updateLottoButton();
-
-        window.addEventListener('load', function() {
-            loadPlayerDataFromSupabase();
-            setTimeout(() => {
-                startAutoRefresh();
-            }, 3000);
-        });
+    }, 1000);
+});
     </script>
 </body>
 </html>
+
 
 
 
