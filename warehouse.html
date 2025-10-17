@@ -747,7 +747,7 @@ function createCameraInterface(stream) {
                 <div class="camera-hint" id="camera-hint">相機啟動中...</div>
                 <div class="camera-buttons">
                     <button class="manual-input-btn" id="manual-input-btn">手動輸入URL</button>
-                    <button class="test-scratch-btn" id="test-scratch-btn">測試刮刮樂</button>
+                    <button class="capture-btn" id="capture-btn">📸 拍照掃描</button>
                 </div>
             </div>
         </div>
@@ -789,21 +789,10 @@ function createCameraInterface(stream) {
         }
     });
     
-    // 測試刮刮樂
-    document.getElementById('test-scratch-btn').addEventListener('click', function() {
-        closeCameraInterface(stream);
-        // 生成測試用的base64數據
-        const testData = {
-            id: 'test_' + Date.now(),
-            q: 3,
-            c: 15,
-            t: Date.now()
-        };
-        const base64Data = btoa(JSON.stringify(testData));
-        const testUrl = `scratch:${base64Data}`;
-        processScratchCardURL(testUrl);
-    });
-
+    // 📸 拍照掃描功能
+document.getElementById('capture-btn').addEventListener('click', function() {
+    captureAndScan(video, stream);
+});
 
 // 🆕 超级稳定版扫描函数 - 替换原来的startQRScanning
 function startStableQRScanning(video, hint, stream) {
@@ -842,56 +831,115 @@ function startStableQRScanning(video, hint, stream) {
                 
                 const imageData = ctx.getImageData(0, 0, scanSize, scanSize);
                 
-                // 🆕 添加超时保护
-                setTimeout(() => {
-                    const code = jsQR(imageData.data, scanSize, scanSize, {
-                        inversionAttempts: "dontInvert",
-                    });
-                    
-                    if (code) {
-                        console.log('🎯 稳定扫描成功! 次数:', scanCount);
-                        hint.textContent = '✅ 掃描成功！';
-                        isScanning = false;
-                        closeCameraInterface(stream);
-                        processScratchCardURL(code.data);
-                        return;
-                    }
-                    
-                    // 🆕 简单的状态更新
-                    if (scanCount % 8 === 0) {
-                        hint.textContent = `🔍 掃描中... ${scanCount}次`;
-                    }
-                    
-                    // 🆕 继续扫描
-                    if (isScanning) {
-                        setTimeout(scanQRCode, 80);
-                    }
-                    
-                }, 10); // 小延迟避免阻塞
-                
-            } catch (error) {
-                console.error('❌ 扫描异常:', error);
-                // 🆕 出错后继续扫描
-                if (isScanning) {
-                    setTimeout(scanQRCode, 100);
-                }
-            }
-        } else {
-            // 🆕 视频未就绪，稍后重试
-            console.log('⏳ 视频未就绪，状态:', video.readyState);
-            if (isScanning) {
-                setTimeout(scanQRCode, 200);
-            }
+              // 🆕 添加超时保护
+setTimeout(() => {
+    const code = jsQR(imageData.data, scanSize, scanSize, {
+        inversionAttempts: "dontInvert",
+    });
+    
+    if (code) {
+        console.log('🎯 稳定扫描成功! 次数:', scanCount);
+        hint.textContent = '✅ 掃描成功！';
+        hint.style.color = '#27ae60';
+        isScanning = false;
+        closeCameraInterface(stream);
+        processScratchCardURL(code.data);
+        return;
+    }
+    
+    // 🆕 智能状态提示（替换简单的计数显示）
+    const imageQuality = assessImageQuality(imageData);
+    if (imageQuality === 'dark') {
+        hint.textContent = '💡 光線不足，請調亮環境';
+        hint.style.color = '#f39c12';
+    } else if (imageQuality === 'blurry') {
+        hint.textContent = '📱 設備移動中，請保持穩定';
+        hint.style.color = '#e67e22';
+    } else if (imageQuality === 'bright') {
+        hint.textContent = '🔆 光線太強，請調整角度';
+        hint.style.color = '#f39c12';
+    } else {
+        // 正常狀態下的隨機提示
+        const hints = [
+            '🔍 對準QR碼...',
+            '📱 慢慢移動相機...', 
+            '🎯 尋找QR碼中...',
+            '📷 保持相機穩定...',
+            '✨ 調整對焦中...',
+            '⚡ 掃描進行中...'
+        ];
+        if (scanCount % 8 === 0) { // 每8次換一次提示
+            const randomHint = hints[Math.floor(Math.random() * hints.length)];
+            hint.textContent = randomHint;
         }
     }
     
-    // 🆕 延迟启动，确保一切就绪
+    // 確保正常狀態為藍色
+    if (!hint.style.color || hint.style.color === 'rgb(52, 152, 219)') {
+        hint.style.color = '#3498db';
+    }
+    
+    // 🆕 继续扫描
+    if (isScanning) {
+        setTimeout(scanQRCode, 80);
+    }
+    
+}, 10); // 小延迟避免阻塞
+
+// 📸 拍照掃描功能
+function captureAndScan(video, stream) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const hint = document.getElementById('camera-hint');
+    
+    // 設置畫布尺寸與視頻一致
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // 繪製當前視頻幀
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // 顯示"分析中"提示
+    hint.textContent = '🔍 分析圖片中...';
+    hint.style.color = '#9b59b6';
+    
+    // 暫停實時掃描
+    isScanning = false;
+    
+    // 短暫延遲讓用戶看到提示
     setTimeout(() => {
-        if (isScanning) {
-            scanQRCode();
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, canvas.width, canvas.height, {
+            inversionAttempts: "dontInvert",
+        });
+        
+        if (code) {
+            hint.textContent = '✅ 掃描成功！';
+            hint.style.color = '#27ae60';
+            setTimeout(() => {
+                closeCameraInterface(stream);
+                processScratchCardURL(code.data);
+            }, 500);
+        } else {
+            hint.textContent = '❌ 未找到QR碼，請重試';
+            hint.style.color = '#e74c3c';
+            
+            // 3秒後恢復掃描
+            setTimeout(() => {
+                hint.textContent = '📷 可拍照掃描或繼續實時掃描';
+                hint.style.color = '#3498db';
+                // 重新開始實時掃描
+                isScanning = true;
+                scanQRCode();
+            }, 3000);
         }
-    }, 500);
+        
+        // 🗑️ 清理內存
+        canvas.width = 0;
+        canvas.height = 0;
+    }, 800);
 }
+                
 // 🆕 關閉相機界面
 function closeCameraInterface(stream) {
     const cameraOverlay = document.getElementById('camera-overlay');
@@ -925,6 +973,40 @@ function closeCameraInterface(stream) {
         processScratchCardURL(testUrl);
     });
 }
+       // 🆕 評估圖像質量函數
+function assessImageQuality(imageData) {
+    const pixels = imageData.data;
+    let totalLuminance = 0;
+    let contrast = 0;
+    
+    // 計算平均亮度
+    for (let i = 0; i < pixels.length; i += 4) {
+        const r = pixels[i];
+        const g = pixels[i + 1]; 
+        const b = pixels[i + 2];
+        const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+        totalLuminance += luminance;
+    }
+    
+    const avgLuminance = totalLuminance / (pixels.length / 4);
+    
+    // 簡單的圖像質量判斷
+    if (avgLuminance < 60) return 'dark';
+    if (avgLuminance > 200) return 'bright';
+    
+    // 檢查對比度（簡單版本）
+    let darkCount = 0, brightCount = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+        const luminance = 0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2];
+        if (luminance < 80) darkCount++;
+        if (luminance > 180) brightCount++;
+    }
+    
+    const contrastRatio = (brightCount + darkCount) / (pixels.length / 4);
+    if (contrastRatio < 0.3) return 'blurry';
+    
+    return 'good';
+}     
 
 // 處理刮刮樂URL - 修復版本
 function processScratchCardURL(url) {
@@ -1487,6 +1569,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
