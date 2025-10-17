@@ -189,6 +189,10 @@
             background: linear-gradient(135deg, #27ae60, #2ecc71);
         }
         
+        .btn-warning {
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+        }
+        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -311,6 +315,8 @@
                 return;
             }
             
+            // 🆕 修复：确保计算总奖金
+            calculateTotalWinnings();
             updatePurchaseInfo();
             renderCards();
             return;
@@ -344,6 +350,8 @@
             currentScratchData.cards = generateScratchCards(currentScratchData.quantity);
         }
         
+        // 🆕 修复：确保计算总奖金
+        calculateTotalWinnings();
         updatePurchaseInfo();
         renderCards();
     }
@@ -386,11 +394,11 @@
             console.log('💾 最终刮刮乐数据:', currentScratchData);
             
             // 🆕 关键修复：立即保存到 localStorage
-            const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-            allScratches[currentScratchData.id] = currentScratchData;
-            localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+            saveScratchData();
             console.log('💾 数据已保存到localStorage');
             
+            // 🆕 修复：确保计算总奖金
+            calculateTotalWinnings();
             updatePurchaseInfo();
             renderCards();
             
@@ -451,6 +459,26 @@
         document.getElementById('total-count').textContent = currentScratchData.quantity;
         
         console.log('✅ 购买信息更新完成');
+    }
+
+    // 🆕 修复：计算总奖金
+    function calculateTotalWinnings() {
+        if (!currentScratchData || !currentScratchData.cards) {
+            totalWinnings = 0;
+            return;
+        }
+        
+        totalWinnings = 0;
+        currentScratchData.cards.forEach(card => {
+            if (card.isScratched && card.prize !== '多謝惠顧') {
+                const prizeAmount = parseInt(card.prize);
+                if (!isNaN(prizeAmount)) {
+                    totalWinnings += prizeAmount;
+                }
+            }
+        });
+        
+        console.log('💰 计算总奖金:', totalWinnings);
     }
 
     // 渲染卡片
@@ -649,16 +677,15 @@
         document.getElementById('scratch-container').style.display = 'none';
         document.getElementById('scratch-result').style.display = 'block';
         
-        // 計算獎金
-        if (currentCard.prize !== '多謝優惠') {
-            const prizeAmount = parseInt(currentCard.prize);
-            if (!isNaN(prizeAmount)) {
-                totalWinnings += prizeAmount;
-            }
-        }
-        
+        // 🆕 修复：重新计算总奖金
+        calculateTotalWinnings();
         updateTotalWinnings();
         saveScratchData();
+        
+        // 🆕 修复：立即更新界面状态
+        setTimeout(() => {
+            renderCards();
+        }, 100);
     }
 
     // 關閉刮卡結果
@@ -680,13 +707,14 @@
         document.getElementById('cards-container').innerHTML = '';
     }
 
-    // 保存刮刮樂數據
+    // 🆕 修复：保存刮刮樂數據
     function saveScratchData() {
         if (!currentScratchData) return;
         
         const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
         allScratches[currentScratchData.id] = currentScratchData;
         localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+        console.log('💾 数据已保存:', currentScratchData.id);
     }
 
     // 檢查是否所有卡片都已刮開
@@ -752,6 +780,11 @@
     function claimPrize() {
         console.log('🎯 開始兌獎流程');
         
+        if (!currentScratchData) {
+            console.error('❌ 没有刮刮乐数据');
+            return;
+        }
+        
         // 標記所有卡片為已兌獎
         currentScratchData.cards.forEach(card => {
             card.claimed = true;
@@ -761,20 +794,34 @@
         currentScratchData.used = true;
         console.log('✅ 刮刮樂標記為已使用:', currentScratchData.id);
         
-        // 🆕 保存到localStorage
+        // 🆕 修复：立即保存到localStorage
         saveScratchData();
+        
+        // 🆕 修复：强制触发storage事件
+        const event = new Event('storage');
+        window.dispatchEvent(event);
         
         // 🆕 通知父頁面（倉庫頁面）
         if (window.opener) {
-            window.opener.postMessage({ 
-                type: 'SCRATCH_CARD_COMPLETED', 
-                scratchId: currentScratchData.id 
-            }, '*');
-            console.log('📢 已通知倉庫頁面');
+            try {
+                window.opener.postMessage({ 
+                    type: 'SCRATCH_CARD_COMPLETED', 
+                    scratchId: currentScratchData.id,
+                    prize: totalWinnings
+                }, '*');
+                console.log('📢 已通知倉庫頁面');
+            } catch (e) {
+                console.error('通知父頁面失敗:', e);
+            }
         }
         
-        // 🆕 觸發storage事件更新按鈕
-        localStorage.setItem('scratchCardUpdate', Date.now().toString());
+        // 🆕 修复：使用localStorage传递消息
+        localStorage.setItem('scratchCardLastUpdate', Date.now().toString());
+        localStorage.setItem('scratchCardCompleted', JSON.stringify({
+            id: currentScratchData.id,
+            prize: totalWinnings,
+            timestamp: Date.now()
+        }));
         
         // 關閉界面
         closeClaimConfirmation();
@@ -782,34 +829,22 @@
         // 顯示兌獎成功訊息
         setTimeout(() => {
             alert(`🎉 成功兌換 ${totalWinnings}兩 獎金！`);
-            resetPage();
+            // 不重置頁面，保持當前狀態
+            renderCards();
         }, 300);
-    }
-
-    // 重置頁面到初始狀態
-    function resetPage() {
-        // 重新載入頁面
-        location.reload();
     }
 
     // 初始化
     window.addEventListener('load', loadScratchData);
+    
+    // 🆕 修复：添加storage事件监听，确保数据同步
+    window.addEventListener('storage', function(e) {
+        console.log('📦 Storage事件触发:', e.key);
+        if (e.key === 'virtualScratchCards') {
+            // 重新加载数据
+            loadScratchData();
+        }
+    });
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
