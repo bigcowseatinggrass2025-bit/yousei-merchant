@@ -1008,7 +1008,6 @@ function assessImageQuality(imageData) {
     return 'good';
 }     
 
-// 處理刮刮樂URL - 修復版本
 function processScratchCardURL(url) {
     console.log('🔗 處理URL:', url);
     
@@ -1068,28 +1067,10 @@ function processScratchCardURL(url) {
                 return;
             }
         }
-        // 🆕 處理完整URL
-        else if (url.includes('http')) {
-            const urlObj = new URL(url);
-            const scratchId = urlObj.searchParams.get('id');
-            
-            if (scratchId) {
-                const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-                scratchData = allScratches[scratchId];
-                
-                if (!scratchData) {
-                    alert("找不到對應的刮刮樂數據");
-                    return;
-                }
-                
-                openScratchCardPage(scratchId);
-                return;
-            }
-        }
         
         alert("無效的刮刮樂URL");
         
-    } catch (error) {
+    } catch (error) {  // 🆕 添加這個 catch
         console.error('URL解析錯誤:', error);
         alert("URL格式錯誤: " + error.message);
     }
@@ -1569,6 +1550,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
