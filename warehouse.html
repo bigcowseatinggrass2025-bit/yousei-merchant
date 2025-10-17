@@ -480,6 +480,41 @@
             cursor: pointer !important;
             font-size: 1.2rem !important;
         }
+        /* 🆕 掃描框樣式 */
+.scan-frame {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 250px !important;
+    height: 250px !important;
+    border: 3px solid #00ff00 !important;
+    border-radius: 15px !important;
+    background: rgba(0, 255, 0, 0.1) !important;
+    box-shadow: 
+        0 0 0 1000px rgba(0, 0, 0, 0.7),
+        0 0 20px rgba(0, 255, 0, 0.5),
+        inset 0 0 20px rgba(0, 255, 0, 0.3) !important;
+    z-index: 10 !important;
+    pointer-events: none !important;
+}
+
+/* 🆕 掃描動畫效果 */
+.scan-frame::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, transparent, #00ff00, transparent) !important;
+    animation: scan-line 2s linear infinite !important;
+}
+
+@keyframes scan-line {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(250px); }
+}
 
        #camera-video {
     width: 300px !important;
@@ -1630,6 +1665,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
