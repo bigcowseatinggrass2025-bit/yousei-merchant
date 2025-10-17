@@ -817,75 +817,83 @@ function startStableQRScanning(video, hint, stream) {
         
         // 🆕 更严格的视频状态检查
         if (video.readyState >= 3) { // HAVE_FUTURE_DATA 或 HAVE_ENOUGH_DATA
-            try {
-                // 🆕 固定尺寸，确保一致性
-                const scanSize = 350;
-                canvas.width = scanSize;
-                canvas.height = scanSize;
-                
-                // 🆕 确保坐标有效
-                const centerX = Math.max(0, (video.videoWidth - scanSize) / 2);
-                const centerY = Math.max(0, (video.videoHeight - scanSize) / 2);
-                
-                ctx.drawImage(video, centerX, centerY, scanSize, scanSize, 0, 0, scanSize, scanSize);
-                
-                const imageData = ctx.getImageData(0, 0, scanSize, scanSize);
-                
-              // 🆕 添加超时保护
-setTimeout(() => {
-    const code = jsQR(imageData.data, scanSize, scanSize, {
-        inversionAttempts: "dontInvert",
-    });
+           try {
+    // 🆕 固定尺寸，确保一致性
+    const scanSize = 350;
+    canvas.width = scanSize;
+    canvas.height = scanSize;
     
-    if (code) {
-        console.log('🎯 稳定扫描成功! 次数:', scanCount);
-        hint.textContent = '✅ 掃描成功！';
-        hint.style.color = '#27ae60';
-        isScanning = false;
-        closeCameraInterface(stream);
-        processScratchCardURL(code.data);
-        return;
-    }
+    // 🆕 确保坐标有效
+    const centerX = Math.max(0, (video.videoWidth - scanSize) / 2);
+    const centerY = Math.max(0, (video.videoHeight - scanSize) / 2);
     
-    // 🆕 智能状态提示（替换简单的计数显示）
-    const imageQuality = assessImageQuality(imageData);
-    if (imageQuality === 'dark') {
-        hint.textContent = '💡 光線不足，請調亮環境';
-        hint.style.color = '#f39c12';
-    } else if (imageQuality === 'blurry') {
-        hint.textContent = '📱 設備移動中，請保持穩定';
-        hint.style.color = '#e67e22';
-    } else if (imageQuality === 'bright') {
-        hint.textContent = '🔆 光線太強，請調整角度';
-        hint.style.color = '#f39c12';
-    } else {
-        // 正常狀態下的隨機提示
-        const hints = [
-            '🔍 對準QR碼...',
-            '📱 慢慢移動相機...', 
-            '🎯 尋找QR碼中...',
-            '📷 保持相機穩定...',
-            '✨ 調整對焦中...',
-            '⚡ 掃描進行中...'
-        ];
-        if (scanCount % 8 === 0) { // 每8次換一次提示
-            const randomHint = hints[Math.floor(Math.random() * hints.length)];
-            hint.textContent = randomHint;
+    ctx.drawImage(video, centerX, centerY, scanSize, scanSize, 0, 0, scanSize, scanSize);
+    
+    const imageData = ctx.getImageData(0, 0, scanSize, scanSize);
+    
+    // 🆕 添加超时保护
+    setTimeout(() => {
+        const code = jsQR(imageData.data, scanSize, scanSize, {
+            inversionAttempts: "dontInvert",
+        });
+        
+        if (code) {
+            console.log('🎯 稳定扫描成功! 次数:', scanCount);
+            hint.textContent = '✅ 掃描成功！';
+            hint.style.color = '#27ae60';
+            isScanning = false;
+            closeCameraInterface(stream);
+            processScratchCardURL(code.data);
+            return;
         }
-    }
+        
+        // 🆕 智能状态提示
+        const imageQuality = assessImageQuality(imageData);
+        if (imageQuality === 'dark') {
+            hint.textContent = '💡 光線不足，請調亮環境';
+            hint.style.color = '#f39c12';
+        } else if (imageQuality === 'blurry') {
+            hint.textContent = '📱 設備移動中，請保持穩定';
+            hint.style.color = '#e67e22';
+        } else if (imageQuality === 'bright') {
+            hint.textContent = '🔆 光線太強，請調整角度';
+            hint.style.color = '#f39c12';
+        } else {
+            // 正常狀態下的隨機提示
+            const hints = [
+                '🔍 對準QR碼...',
+                '📱 慢慢移動相機...', 
+                '🎯 尋找QR碼中...',
+                '📷 保持相機穩定...',
+                '✨ 調整對焦中...',
+                '⚡ 掃描進行中...'
+            ];
+            if (scanCount % 8 === 0) {
+                const randomHint = hints[Math.floor(Math.random() * hints.length)];
+                hint.textContent = randomHint;
+            }
+        }
+        
+        // 確保正常狀態為藍色
+        if (!hint.style.color || hint.style.color === 'rgb(52, 152, 219)') {
+            hint.style.color = '#3498db';
+        }
+        
+        // 🆕 继续扫描
+        if (isScanning) {
+            setTimeout(scanQRCode, 80);
+        }
+        
+    }, 10); // 小延迟避免阻塞
     
-    // 確保正常狀態為藍色
-    if (!hint.style.color || hint.style.color === 'rgb(52, 152, 219)') {
-        hint.style.color = '#3498db';
-    }
-    
-    // 🆕 继续扫描
+} catch (error) {
+    console.error('扫描错误:', error);
     if (isScanning) {
-        setTimeout(scanQRCode, 80);
+        setTimeout(scanQRCode, 100);
     }
-    
-}, 10); // 小延迟避免阻塞
-                }
+}
+} 
+  
             
 
 // 📸 拍照掃描功能
@@ -1552,6 +1560,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
