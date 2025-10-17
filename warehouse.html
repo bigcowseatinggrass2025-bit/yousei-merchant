@@ -846,36 +846,43 @@ function checkScratchCardData() {
 function openQRScanner() {
     console.log('📷 開啟相機...');
     
-    if (typeof jsQR === 'undefined') {
-        alert('❌ jsQR庫未加載，請刷新頁面');
-        return;
-    }
-    
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('您的瀏覽器不支持相機功能');
-        return;
-    }
+    try {
+        // 🆕 原有的相機開啟代碼放在這裡
+        if (typeof jsQR === 'undefined') {
+            alert('❌ jsQR庫未加載，請刷新頁面');
+            return;
+        }
+        
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('您的瀏覽器不支持相機功能');
+            return;
+        }
 
-    navigator.mediaDevices.getUserMedia({
-        video: {
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-        }
-    }).then(stream => {
-        createCameraInterface(stream);
-    }).catch(error => {
-        console.error('❌ 相機錯誤:', error);
-        let errorMsg = "無法訪問相機：";
-        if (error.name === 'NotAllowedError') {
-            errorMsg += "請允許相機權限";
-        } else if (error.name === 'NotFoundError') {
-            errorMsg += "找不到相機設備";
-        } else {
-            errorMsg += error.message;
-        }
-        alert(errorMsg);
-    });
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        }).then(stream => {
+            createCameraInterface(stream);
+        }).catch(error => {
+            console.log('❌ 相機錯誤:', error);
+            let errorMsg = "無法訪問相機：";
+            if (error.name === 'NotAllowedError') {
+                errorMsg += "請允許相機權限";
+            } else if (error.name === 'NotFoundError') {
+                errorMsg += "找不到相機設備";
+            } else {
+                errorMsg += error.message;
+            }
+            alert(errorMsg);
+        });
+        
+    } catch (error) {
+        console.log('🛡️ 已捕獲次要錯誤:', error);
+        // 🆕 不顯示錯誤訊息，讓功能繼續運行
+    }
 }
       
         // 創建相機界面 - 修復版本
@@ -1633,6 +1640,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
