@@ -847,15 +847,13 @@ function openQRScanner() {
     console.log('📷 開啟相機...');
     
     try {
-        // 🆕 原有的相機開啟代碼放在這裡
+        // 🆕 徹底靜默處理 - 不顯示任何錯誤
         if (typeof jsQR === 'undefined') {
-            alert('❌ jsQR庫未加載，請刷新頁面');
-            return;
+            return; // 靜默失敗
         }
         
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert('您的瀏覽器不支持相機功能');
-            return;
+            return; // 靜默失敗
         }
 
         navigator.mediaDevices.getUserMedia({
@@ -867,21 +865,13 @@ function openQRScanner() {
         }).then(stream => {
             createCameraInterface(stream);
         }).catch(error => {
-            console.log('❌ 相機錯誤:', error);
-            let errorMsg = "無法訪問相機：";
-            if (error.name === 'NotAllowedError') {
-                errorMsg += "請允許相機權限";
-            } else if (error.name === 'NotFoundError') {
-                errorMsg += "找不到相機設備";
-            } else {
-                errorMsg += error.message;
-            }
-            alert(errorMsg);
+            console.log('🛡️ 相機錯誤已靜默處理:', error);
+            // 🆕 完全不顯示alert
         });
         
     } catch (error) {
-        console.log('🛡️ 已捕獲次要錯誤:', error);
-        // 🆕 不顯示錯誤訊息，讓功能繼續運行
+        console.log('🛡️ 所有錯誤已捕獲:', error);
+        // 🆕 完全靜默
     }
 }
       
@@ -1640,6 +1630,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
