@@ -832,7 +832,36 @@
             // 不重置頁面，保持當前狀態
             renderCards();
         }, 300);
+        // 🆕 在這裡添加 - 强制同步状态到仓库页面
+    forceSyncToWarehouse();
+}
+   
+
+    // 🆕 强制同步状态到仓库页面
+function forceSyncToWarehouse() {
+    console.log('🔄 强制同步状态到仓库页面');
+    
+    // 方法1: 触发storage事件
+    localStorage.setItem('scratchCardLastUpdate', Date.now().toString());
+    
+    // 方法2: 直接设置仓库页面的标记
+    localStorage.setItem('scratchCardForceRefresh', Date.now().toString());
+    
+    // 方法3: 使用BroadcastChannel（如果支持）
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            const channel = new BroadcastChannel('scratch_card_updates');
+            channel.postMessage({ type: 'STATUS_CHANGED', timestamp: Date.now() });
+        } catch (e) {
+            console.log('BroadcastChannel不支持:', e);
+        }
     }
+    
+    console.log('✅ 状态同步完成');
+}
+
+
+    
 
     // 初始化
     window.addEventListener('load', loadScratchData);
@@ -848,3 +877,4 @@
 </script>
 </body>
 </html>
+
