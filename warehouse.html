@@ -652,6 +652,56 @@
             }
         }
 
+        // 🆕 實時狀態提示系統
+const scanStates = {
+    INIT: '🔍 相機啟動中...',
+    READY: '✅ 相機就緒！對準QR碼',
+    DETECTING: '🎯 檢測到QR碼...',
+    STABILIZING: '📱 QR碼穩定中',
+    SUCCESS: '✅ 掃描成功！',
+    TOO_FAR: '📏 太遠了，靠近一點',
+    TOO_CLOSE: '📏 太近了，拉遠一點',
+    LOW_LIGHT: '💡 光線不足',
+    MOVING: '📱 設備移動中，請保持穩定'
+};
+
+function updateScanHint(state, data = null) {
+    const hint = document.getElementById('camera-hint');
+    
+    let message = state;
+    if (data) {
+        if (state === scanStates.DETECTING) {
+            message = `🎯 檢測到QR碼 (${data.confidence}%)`;
+        } else if (state === scanStates.STABILIZING) {
+            message = `📱 QR碼穩定中 (${data.stability}%)`;
+        }
+    }
+    
+    hint.textContent = message;
+    hint.style.color = state === scanStates.SUCCESS ? '#27ae60' : 
+                       state.includes('❌') ? '#e74c3c' : '#3498db';
+}
+
+// 🆕 評估圖像質量函數
+function assessImageQuality(imageData) {
+    const pixels = imageData.data;
+    let totalLuminance = 0;
+    
+    for (let i = 0; i < pixels.length; i += 4) {
+        const r = pixels[i];
+        const g = pixels[i + 1];
+        const b = pixels[i + 2];
+        const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+        totalLuminance += luminance;
+    }
+    
+    const avgLuminance = totalLuminance / (pixels.length / 4);
+    
+    if (avgLuminance < 60) return 'dark';
+    if (avgLuminance > 200) return 'bright';
+    return 'good';
+}
+
         // ==================== 刮刮樂功能 ====================
 
         // 檢查是否有可用的刮刮樂數據
@@ -807,10 +857,11 @@ function createCameraInterface(stream) {
                     <div class="scan-frame"></div>
                 </div>
                 <div class="camera-hint" id="camera-hint">相機啟動中...</div>
-                <div class="camera-buttons">
-                    <button class="manual-input-btn" id="manual-input-btn">手動輸入URL</button>
-                    <button class="test-scratch-btn" id="test-scratch-btn">測試刮刮樂</button>
-                </div>
+               <div class="camera-buttons">
+    <button class="manual-input-btn" id="enhance-scan">🔍 增強檢測</button>
+    <button class="capture-btn" id="capture-btn">📸 拍照掃描</button>
+    <button class="cache-btn" id="reset-scanner">⚙️ 重置掃描</button>
+</div>
             </div>
         </div>
     `;
@@ -919,10 +970,28 @@ function startStableQRScanning(video, hint, stream) {
                         return;
                     }
                     
-                    // 🆕 简单的状态更新
-                    if (scanCount % 8 === 0) {
-                        hint.textContent = `🔍 掃描中... ${scanCount}次`;
-                    }
+                    // 🆕 智能狀態提示
+const imageQuality = assessImageQuality(imageData);
+if (imageQuality === 'dark') {
+    updateScanHint(scanStates.LOW_LIGHT);
+} else if (imageQuality === 'bright') {
+    updateScanHint(scanStates.TOO_CLOSE);
+} else {
+    // 正常狀態下的隨機提示
+    const hints = [
+        '🔍 對準QR碼...',
+        '📱 慢慢移動相機...', 
+        '🎯 尋找QR碼中...',
+        '📷 保持相機穩定...',
+        '✨ 調整對焦中...',
+        '⚡ 掃描進行中...'
+    ];
+    if (scanCount % 8 === 0) {
+        const randomHint = hints[Math.floor(Math.random() * hints.length)];
+        hint.textContent = randomHint;
+        hint.style.color = '#3498db';
+    }
+}
                     
                     // 🆕 继续扫描
                     if (isScanning) {
@@ -1446,6 +1515,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
