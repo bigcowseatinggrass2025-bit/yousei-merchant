@@ -672,6 +672,68 @@
             
             return null;
         }
+        // ==================== 刮刮乐状态同步 ====================
+
+// 🆕 监听刮刮乐状态变化
+function setupScratchCardSync() {
+    console.log('🔄 设置刮刮乐状态同步');
+    
+    // 🆕 监听storage事件（跨页面通信）
+    window.addEventListener('storage', function(e) {
+        console.log('📦 Storage事件:', e.key);
+        
+        if (e.key === 'virtualScratchCards' || e.key === 'scratchCardLastUpdate') {
+            console.log('🔄 检测到刮刮乐数据变化，更新按钮状态');
+            updateLottoButton();
+        }
+    });
+    
+    // 🆕 监听页面可见性变化（返回页面时检查）
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            console.log('📱 页面变为可见，检查刮刮乐状态');
+            setTimeout(() => {
+                updateLottoButton();
+            }, 500);
+        }
+    });
+    
+    // 🆕 定期检查刮刮乐状态（备用方案）
+    setInterval(() => {
+        updateLottoButton();
+    }, 3000); // 每3秒检查一次
+}
+
+// 🆕 增强的刮刮乐数据检查函数
+function checkScratchCardData() {
+    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+    console.log('🔍 检查刮刮乐数据，总数:', Object.keys(allScratches).length);
+    
+    let availableScratch = null;
+    
+    for (const [scratchId, scratchData] of Object.entries(allScratches)) {
+        console.log('📄 检查刮刮乐:', scratchId, '状态:', scratchData.used ? '已使用' : '未使用');
+        
+        if (!scratchData.used) {
+            const createTime = new Date(scratchData.timestamp).getTime();
+            const currentTime = Date.now();
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+            
+            if (currentTime - createTime < twentyFourHours) {
+                console.log('✅ 找到可用刮刮乐:', scratchId);
+                availableScratch = { scratchId, scratchData };
+                break;
+            } else {
+                console.log('⏰ 刮刮乐已过期:', scratchId);
+                // 🆕 自动清理过期数据
+                delete allScratches[scratchId];
+                localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+            }
+        }
+    }
+    
+    return availableScratch;
+}
 
         // 更新樂透按鈕狀態
         function updateLottoButton() {
@@ -1384,6 +1446,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
