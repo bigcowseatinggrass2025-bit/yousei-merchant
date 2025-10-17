@@ -498,7 +498,6 @@
     border-radius: 15px !important;
     background: rgba(0, 255, 0, 0.1) !important;
     box-shadow: 
-        0 0 0 1000px rgba(0, 0, 0, 0.7),
         0 0 20px rgba(0, 255, 0, 0.5),
         inset 0 0 20px rgba(0, 255, 0, 0.3) !important;
     z-index: 10 !important;
@@ -519,7 +518,7 @@
 
 @keyframes scan-line {
     0% { transform: translateY(0); }
-    100% { transform: translateY(250px); }
+    100% { transform: translateY(280px); }
 }
         
        #camera-video {
@@ -533,11 +532,13 @@
     border-radius: 10px !important;
 }
 
-        .camera-hint {
-            color: black !important;
-            margin: 15px 0 !important;
-            font-size: 0.9rem !important;
-        }
+   .camera-hint {
+    color: white !important; /* 🆕 強制白色文字 */
+    margin: 15px 0 !important;
+    font-size: 0.9rem !important;
+    font-weight: bold !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8) !important; /* 🆕 文字陰影增強可讀性 */
+}
 
         .camera-buttons {
             display: flex !important;
@@ -1671,6 +1672,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
