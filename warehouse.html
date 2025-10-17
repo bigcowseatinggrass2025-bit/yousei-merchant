@@ -523,6 +523,43 @@
             background: #9b59b6 !important;
             color: white !important;
         }
+        /* 🆕 相機按鈕樣式 */
+.manual-input-btn, .capture-btn, .cache-btn {
+    flex: 1 !important;
+    padding: 12px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    font-weight: bold !important;
+    color: white !important;
+    margin: 5px !important;
+}
+
+.manual-input-btn {
+    background: #3498db !important;
+}
+
+.capture-btn {
+    background: #27ae60 !important;
+}
+
+.cache-btn {
+    background: #e67e22 !important;
+}
+
+.manual-input-btn:hover, .capture-btn:hover, .cache-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+}
+
+/* 🆕 確保相機按鈕容器正確顯示 */
+.camera-buttons {
+    display: flex !important;
+    gap: 10px !important;
+    margin-top: 15px !important;
+    width: 100% !important;
+}
     </style>
 </head>
 <body>
@@ -1596,6 +1633,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
