@@ -7776,7 +7776,7 @@ function addManagedTimeout(callback, delay) {
 }
 
 
-  function showBreakthroughAnimation(guardianName) {
+function showBreakthroughAnimation(guardianName) {
     const breakthroughVideos = {
         'bull': "videos/bull_breakthrough.mp4",
         'tiger': "videos/tiger_breakthrough.mp4", 
@@ -7788,7 +7788,7 @@ function addManagedTimeout(callback, delay) {
     const guardianClass = getGuardianClass(guardianName);
     const breakthroughVideoPath = breakthroughVideos[guardianClass];
     
-    // 🎬 階段1：圖片淡入 (0-5秒)
+    // 🎬 階段1：圖片淡入 (0-2秒)
     console.log("🎬 階段1開始：圖片淡入");
     const breakthroughEffect = document.createElement('div');
     breakthroughEffect.className = 'breakthrough-animation-special';
@@ -7820,16 +7820,16 @@ function addManagedTimeout(callback, delay) {
     
     document.body.appendChild(breakthroughEffect);
     
-    // 圖片淡入 (0-5秒)
+    // 圖片淡入
     setTimeout(() => {
         const background = breakthroughEffect.querySelector('.breakthrough-bg-special');
-        background.style.transition = 'opacity 5s ease-in-out'; // 改為5秒
+        background.style.transition = 'opacity 2s ease-in-out';
         background.style.opacity = '1';
         
-        breakthroughEffect.style.transition = 'opacity 5s ease-in-out'; // 改為5秒
+        breakthroughEffect.style.transition = 'opacity 2s ease-in-out';
         breakthroughEffect.style.opacity = '1';
         
-        console.log("🎬 圖片開始5秒淡入");
+        console.log("🎬 圖片開始淡入");
     }, 100);
             
     // 創建粒子
@@ -7840,10 +7840,10 @@ function addManagedTimeout(callback, delay) {
     
     playSound('evolutionBgMusic');
     
-    // 🎬 光環波動效果 (5.5秒開始)
+    // 🎬 光環波動效果
     const ripplesContainer = breakthroughEffect.querySelector('.breakthrough-ripples-special');
 
-    // 初始光環 (5.5-8.5秒)
+    // 初始光環 (0-3秒) - 減少數量，增加間隔
     setTimeout(() => {
         console.log("🎬 開始發光光環波動效果");
         
@@ -7868,9 +7868,9 @@ function addManagedTimeout(callback, delay) {
             });
         }, 3000);
         
-    }, 5500); // 改為5500ms (5秒淡入 + 0.5秒緩衝)
+    }, 500);
 
-    // 🎬 階段2：能量爆發 (8-13秒)
+    // 🎬 階段2：能量爆發 (3-8秒) - 減少光環數量
     setTimeout(() => {
         console.log("🎬 階段2開始：能量爆發");
         
@@ -7911,7 +7911,7 @@ function addManagedTimeout(callback, delay) {
             });
         }
         
-        // 🎯 在11秒時再添加一波粒子
+        // 🎯 在6秒時再添加一波粒子
         setTimeout(() => {
             console.log("🎬 持續粒子效果");
             for (let i = 0; i < 15; i++) {
@@ -7929,11 +7929,11 @@ function addManagedTimeout(callback, delay) {
                 });
             }, 1000);
             
-        }, 3000); // 11秒時（8+3）
+        }, 3000); // 6秒時（3+3）
         
-    }, 8000); // 改為8000ms (5秒淡入 + 3秒停頓)
+    }, 3000);
 
-    // 🎬 階段3：準備轉場 (13秒時)
+    // 🎬 階段3：準備轉場 (8秒時) - 簡化最終光環
     setTimeout(() => {
         console.log("🎬 階段3開始：準備轉場");
         
@@ -8021,6 +8021,7 @@ function addManagedTimeout(callback, delay) {
                 console.log("🎬 圖片保持顯示，與影片重疊");
             };
             
+            // 🎯 關鍵修改：使用更可靠的事件監聽
             video.addEventListener('playing', function() {
                 console.log("🎬 影片正在播放，開始轉場");
                 startTransition();
@@ -8028,30 +8029,32 @@ function addManagedTimeout(callback, delay) {
             
             video.addEventListener('canplay', function() {
                 console.log("🎬 影片可以播放");
+                // 不立即開始轉場，等待 playing 事件
             });
             
             
             
-            // 🎯 在15秒時開始播放影片
+            // 🎯 關鍵修改：在10秒時才開始播放影片
             setTimeout(() => {
-                console.log("🎬 15秒到，開始播放影片");
+                console.log("🎬 10秒到，開始播放影片");
                 console.log("🎬 當前圖片狀態: 完全可見");
                 
                 video.play().catch(e => {
                     console.log("影片播放失敗:", e);
+                    // 播放失敗時也開始轉場
                     setTimeout(() => {
                         if (!transitionStarted) {
                             startTransition();
                         }
                     }, 500);
                 });
-            }, 7000); // 總共15秒（13+2）
+            }, 2000); // 總共10秒（8+2）
             
-            // 影片結束處理
+            // 影片結束處理 - 修改：在影片結束前淡出圖片
             video.onended = function() {
                 console.log("🎬 影片播放完成，開始淡出圖片");
                 
-                // 影片結束後2秒，圖片開始淡出
+                // 影片結束前2秒，圖片開始淡出
                 setTimeout(() => {
                     const background = breakthroughEffect.querySelector('.breakthrough-bg-special');
                     background.style.transition = 'opacity 2s ease-in-out';
@@ -8061,7 +8064,7 @@ function addManagedTimeout(callback, delay) {
                     breakthroughEffect.style.opacity = '0';
                     
                     console.log("🎬 圖片開始淡出");
-                }, 2000);
+                }, 2000); // 影片結束後2秒開始淡出圖片
 
                 // 最終淡出
                 setTimeout(() => {
@@ -8072,7 +8075,7 @@ function addManagedTimeout(callback, delay) {
                         if (videoOverlay.parentNode) document.body.removeChild(videoOverlay);
                         if (breakthroughEffect.parentNode) document.body.removeChild(breakthroughEffect);
                     }, 4000);
-                }, 4000);
+                }, 4000); // 圖片淡出完成後開始影片淡出
             };
             
         } else {
@@ -8084,7 +8087,7 @@ function addManagedTimeout(callback, delay) {
                 }, 3000);
             }, 8000);
         }
-    }, 13000); // 改為13000ms (5秒淡入 + 3秒停頓 + 5秒能量波動)
+    }, 8000);
 }
 
 // 發光光環波動效果函數
@@ -13224,6 +13227,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
