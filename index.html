@@ -5956,13 +5956,19 @@
         </h2>
         
         <p style="font-size: 1.4rem; font-weight: bold; text-align: center; margin: 20px 0; color: white;">
-            交易次數已達競猜條件！觸發寶箱競猜!
+            交易次數已達競猜條件！觸發寶箱競猜！
         </p>
         
         <div style="padding: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 12px; border-left: 4px solid #ffc107; margin: 20px 0;">
             <p style="font-size: 1.3rem; font-weight: bold; color: white; margin: 0; line-height: 1.6;">
-                <strong style="color: #ffd700;">競猜提示：</strong> 现在！各位攤販當主請取出一定量的銀兩,
-                然後在桌上拳頭握緊,然後進行對賭！！(銀兩數量只能整數10,30,70...100) 猜對即可穫得對手所有銀兩....
+                <strong style="color: #ffd700;">競猜規則：</strong> 每局開始前，雙方攤主暗中準備一定數量的銀兩（必須為整數，且符合當局賭注範圍）。
+                準備好後，雙方拳握銀兩，置於桌上，不讓對方看見數量。兩人同時猜對方手中銀兩的數字。
+                若任一玩家猜中，則被猜中者須支付自己手中全部銀兩給猜中者。若兩人都猜中或都未猜中，則平局，銀兩各自收回。
+                <br><br>
+                <strong style="color: #ffd700;">賭注範圍：</strong><br>
+                • 第1-15局：10-50兩<br>
+                • 第16-30局：60-100兩<br>
+                • 第31局起：150-200兩
             </p>
         </div>
         
@@ -5979,7 +5985,7 @@
         <button id="close-guess-btn" style="font-size: 1.3rem; padding: 12px 30px; background: linear-gradient(135deg, #3498db, #2c3e50); 
             color: white; border: none; border-radius: 6px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2); cursor: pointer; 
             display: block; margin: 15px auto 0; transition: all 0.3s;">
-            -關閉-
+            -完成競猜環節-
         </button>
     </div>
 </div>
@@ -13227,6 +13233,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
