@@ -8031,13 +8031,13 @@ function addManagedTimeout(callback, delay) {
             });
             
             // 安全機制：如果16秒時影片還沒開始，強制轉場
-            setTimeout(() => {
-                if (!transitionStarted) {
-                    console.log("🎬 安全機制：強制開始轉場");
-                    startTransition();
-                    video.play().catch(e => console.log("安全播放失敗:", e));
-                }
-            }, 3000); // 總共16秒（13+3）
+setTimeout(() => {
+    if (!transitionStarted) {
+        console.log("🎬 安全機制：強制開始轉場");
+        startTransition();
+        // 🎯 移除這行：video.play().catch(e => console.log("安全播放失敗:", e));
+    }
+}, 3000); // 總共16秒（13+3）
             
             // 🎯 在15秒時開始播放影片
             setTimeout(() => {
@@ -13231,6 +13231,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
