@@ -12551,7 +12551,7 @@ case "玄武護法":
     // 确保DOM完全重置后再设置新内容
     addManagedTimeout(() => {
         // 设置护法图片
-        guardianArrival.style.backgroundImage = `url(${guardianImage})`;
+        guardianArrival.style.backgroundImage = `url('${guardianImage}?t=${new Date().getTime()}')`;
         
         // 显示护法降临效果
         guardianArrival.classList.add(guardianClass);
@@ -13228,6 +13228,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
