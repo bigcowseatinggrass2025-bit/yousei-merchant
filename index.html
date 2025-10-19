@@ -5943,7 +5943,7 @@
         </div>
     </div>
     
-<!-- 竞猜环节模态框 - 只做美化，保持原有结构 -->
+<!-- 競猜環節模態框 - 只做美化，保持原有結構 -->
 <div class="guess-modal" id="guess-modal">
     <div class="guess-content" style="background: rgba(0, 0, 0, 0.9); border: 3px solid; animation: rainbow-border 3s infinite linear; border-radius: 15px; padding: 30px; max-width: 700px; margin: 0 auto;">
         <span class="close-modal" id="close-guess" style="position: absolute; top: 15px; right: 15px; font-size: 2rem; color: #e74c3c; cursor: pointer;">&times;</span>
@@ -5961,15 +5961,24 @@
         
         <div style="padding: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 12px; border-left: 4px solid #ffc107; margin: 20px 0;">
             <p style="font-size: 1.3rem; font-weight: bold; color: white; margin: 0; line-height: 1.6;">
-                <strong style="color: #ffd700;">競猜規則：</strong> 每局開始前，雙方攤主暗中準備一定數量的銀兩（必須為整數，且符合當局賭注範圍）。
-                準備好後，雙方拳握銀兩，置於桌上，不讓對方看見數量。兩人同時猜對方手中銀兩的數字。
-                若任一玩家猜中，則被猜中者須支付自己手中全部銀兩給猜中者。若兩人都猜中或都未猜中，則平局，銀兩各自收回。
-                <br><br>
-                <strong style="color: #ffd700;">賭注範圍：</strong><br>
-                • 第1-15局：10-50兩<br>
-                • 第16-30局：60-100兩<br>
-                • 第31局起：150-200兩
+                <strong style="color: #ffd700;">競猜規則：</strong>
             </p>
+            <ul style="font-size: 1.3rem; font-weight: bold; color: white; margin: 10px 0; line-height: 1.6; padding-left: 20px;">
+                <li>雙方暗中準備銀兩（必須為整數）</li>
+                <li>拳握銀兩，置於桌上，互不相見</li>
+                <li>同時猜對方手中銀兩數量</li>
+                <li>猜中者贏得對方全部銀兩</li>
+                <li>雙方都猜中或都未猜中則平局</li>
+            </ul>
+            
+            <p style="font-size: 1.3rem; font-weight: bold; color: white; margin: 15px 0 0 0; line-height: 1.6;">
+                <strong style="color: #ffd700;">賭注範圍：</strong>
+            </p>
+            <ul style="font-size: 1.3rem; font-weight: bold; color: white; margin: 10px 0; line-height: 1.6; padding-left: 20px;">
+                <li>第1-15局：10-50兩</li>
+                <li>第16-30局：60-100兩</li>
+                <li>第31局起：150-200兩</li>
+            </ul>
         </div>
         
         <div style="text-align: center; margin: 25px 0; padding: 15px; background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.15));
@@ -5978,7 +5987,7 @@
             <span style="position: absolute; top: -12px; left: 15px; font-size: 1.8rem; transform: rotate(-20deg);">💰</span>
             <span style="position: absolute; bottom: -12px; right: 15px; font-size: 1.8rem; transform: rotate(20deg);">💰</span>
             
-            <img src="images/box32165.jpg" alt="宝箱" style="width: 120px; height: 120px; animation: bounce 2s infinite, glow 3s infinite alternate;
+            <img src="images/box32165.jpg" alt="寶箱" style="width: 120px; height: 120px; animation: bounce 2s infinite, glow 3s infinite alternate;
                 border-radius: 10px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); border: 2px solid #ffd700;">
         </div>
         
@@ -7794,7 +7803,7 @@ function showBreakthroughAnimation(guardianName) {
     const guardianClass = getGuardianClass(guardianName);
     const breakthroughVideoPath = breakthroughVideos[guardianClass];
     
-    // 🎬 階段1：圖片淡入 (0-2秒)
+    // 🎬 階段1：圖片淡入 (0-5秒)
     console.log("🎬 階段1開始：圖片淡入");
     const breakthroughEffect = document.createElement('div');
     breakthroughEffect.className = 'breakthrough-animation-special';
@@ -7826,16 +7835,16 @@ function showBreakthroughAnimation(guardianName) {
     
     document.body.appendChild(breakthroughEffect);
     
-    // 圖片淡入
+    // 圖片淡入 (0-5秒)
     setTimeout(() => {
         const background = breakthroughEffect.querySelector('.breakthrough-bg-special');
-        background.style.transition = 'opacity 2s ease-in-out';
+        background.style.transition = 'opacity 5s ease-in-out';
         background.style.opacity = '1';
         
-        breakthroughEffect.style.transition = 'opacity 2s ease-in-out';
+        breakthroughEffect.style.transition = 'opacity 5s ease-in-out';
         breakthroughEffect.style.opacity = '1';
         
-        console.log("🎬 圖片開始淡入");
+        console.log("🎬 圖片開始5秒淡入");
     }, 100);
             
     // 創建粒子
@@ -7846,10 +7855,10 @@ function showBreakthroughAnimation(guardianName) {
     
     playSound('evolutionBgMusic');
     
-    // 🎬 光環波動效果
+    // 🎬 光環波動效果 (5.5秒開始)
     const ripplesContainer = breakthroughEffect.querySelector('.breakthrough-ripples-special');
 
-    // 初始光環 (0-3秒) - 減少數量，增加間隔
+    // 初始光環 (5.5-8.5秒)
     setTimeout(() => {
         console.log("🎬 開始發光光環波動效果");
         
@@ -7874,9 +7883,9 @@ function showBreakthroughAnimation(guardianName) {
             });
         }, 3000);
         
-    }, 500);
+    }, 5500);
 
-    // 🎬 階段2：能量爆發 (3-8秒) - 減少光環數量
+    // 🎬 階段2：能量爆發 (8-13秒)
     setTimeout(() => {
         console.log("🎬 階段2開始：能量爆發");
         
@@ -7885,14 +7894,14 @@ function showBreakthroughAnimation(guardianName) {
             createParticle(particlesContainer, 0);
         }
         
-        // 守護者專屬發光光環
-        const guardianColors = {
-            'bull': '#ff8c00', // 發光橙色
-            'tiger': '#ffffff', // 發光白色  
-            'dragon': '#00ff88', // 發光綠色
-            'phoenix': '#ff4444', // 發光紅色
-            'turtle': '#00ffff' // 發光青色
-        };
+      // 守護者專屬發光光環
+const guardianColors = {
+    'bull': '#8B4513',    // 大地棕色 - 牛神代表大地
+    'tiger': '#FFD700',   // 金色 - 白虎代表威嚴  
+    'dragon': '#008080',  // 青藍色 - 青龍代表水與智慧
+    'phoenix': '#FF4500', // 火紅色 - 朱雀代表火焰
+    'turtle': '#006400'   // 深綠色 - 玄武代表長壽與防禦
+};
         
         const guardianColor = guardianColors[guardianClass] || '#ffffff';
         
@@ -7911,13 +7920,13 @@ function showBreakthroughAnimation(guardianName) {
                 size: 120 + i * 30,
                 color: guardianColor,
                 duration: 3,
-                delay: i * 0.8, // 增加間隔時間
+                delay: i * 0.8,
                 borderWidth: 2,
                 glowIntensity: 1.5
             });
         }
         
-        // 🎯 在6秒時再添加一波粒子
+        // 在11秒時再添加一波粒子
         setTimeout(() => {
             console.log("🎬 持續粒子效果");
             for (let i = 0; i < 15; i++) {
@@ -7935,15 +7944,15 @@ function showBreakthroughAnimation(guardianName) {
                 });
             }, 1000);
             
-        }, 3000); // 6秒時（3+3）
+        }, 3000);
         
-    }, 3000);
+    }, 8000);
 
-    // 🎬 階段3：準備轉場 (8秒時) - 簡化最終光環
+    // 🎬 階段3：準備轉場 (13秒時)
     setTimeout(() => {
         console.log("🎬 階段3開始：準備轉場");
         
-        // 最終發光光環波動 - 改為2個主要光環
+        // 最終發光光環波動
         console.log("🎬 最終發光光環波動");
         
         // 第一個最終光環
@@ -7968,13 +7977,13 @@ function showBreakthroughAnimation(guardianName) {
         
         // 減少彩色光環數量，只保留2個
         setTimeout(() => {
-            const colors = ['#ff0066', '#0066ff']; // 只保留紅藍兩色
+            const colors = ['#ff0066', '#0066ff'];
             colors.forEach((color, index) => {
                 createRippleWaveLarge(ripplesContainer, {
                     size: 200,
                     color: color,
                     duration: 2,
-                    delay: index * 0.5, // 增加間隔
+                    delay: index * 0.5,
                     borderWidth: 2,
                     glowIntensity: 2
                 });
@@ -8012,6 +8021,7 @@ function showBreakthroughAnimation(guardianName) {
             document.body.appendChild(videoOverlay);
             
             let transitionStarted = false;
+            let videoPlayed = false; // 🎯 新增：防止重複播放
             
             const startTransition = () => {
                 if (transitionStarted) return;
@@ -8019,7 +8029,6 @@ function showBreakthroughAnimation(guardianName) {
                 
                 console.log("🎬 開始轉場：影片顯示，圖片保持");
                 
-                // 只讓影片淡入，圖片保持顯示
                 videoOverlay.style.transition = 'opacity 1.5s ease-in-out';
                 videoOverlay.style.opacity = '1';
                 videoOverlay.style.zIndex = '2147483647';
@@ -8027,61 +8036,49 @@ function showBreakthroughAnimation(guardianName) {
                 console.log("🎬 圖片保持顯示，與影片重疊");
             };
             
-            // 🎯 關鍵修改：使用更可靠的事件監聽
             video.addEventListener('playing', function() {
                 console.log("🎬 影片正在播放，開始轉場");
                 startTransition();
             });
             
-            video.addEventListener('canplay', function() {
-                console.log("🎬 影片可以播放");
-                // 不立即開始轉場，等待 playing 事件
-            });
-            
-            
-            
-            // 🎯 關鍵修改：在10秒時才開始播放影片
+            // 🎯 在15秒時開始播放影片（只播放一次）
             setTimeout(() => {
-                console.log("🎬 10秒到，開始播放影片");
-                console.log("🎬 當前圖片狀態: 完全可見");
-                
-                video.play().catch(e => {
-                    console.log("影片播放失敗:", e);
-                    // 播放失敗時也開始轉場
-                    setTimeout(() => {
-                        if (!transitionStarted) {
-                            startTransition();
-                        }
-                    }, 500);
-                });
-            }, 2000); // 總共10秒（8+2）
+                if (!videoPlayed) {
+                    videoPlayed = true;
+                    console.log("🎬 15秒到，開始播放影片");
+                    video.play().catch(e => {
+                        console.log("影片播放失敗:", e);
+                    });
+                }
+            }, 2000); // 總共15秒（13+2）
             
-            // 影片結束處理 - 修改：在影片結束前淡出圖片
+            // 🎯 影片結束處理：停頓5秒後淡出
             video.onended = function() {
-                console.log("🎬 影片播放完成，開始淡出圖片");
+                console.log("🎬 影片播放完成，開始5秒停頓展示");
                 
-                // 影片結束前2秒，圖片開始淡出
+                // 🎯 影片結束後停頓5秒展示
                 setTimeout(() => {
+                    console.log("🎬 5秒停頓結束，開始淡出");
+                    
+                    // 圖片開始淡出
                     const background = breakthroughEffect.querySelector('.breakthrough-bg-special');
-                    background.style.transition = 'opacity 2s ease-in-out';
+                    background.style.transition = 'opacity 3s ease-in-out';
                     background.style.opacity = '0';
                     
-                    breakthroughEffect.style.transition = 'opacity 2s ease-in-out';
+                    breakthroughEffect.style.transition = 'opacity 3s ease-in-out';
                     breakthroughEffect.style.opacity = '0';
                     
-                    console.log("🎬 圖片開始淡出");
-                }, 2000); // 影片結束後2秒開始淡出圖片
-
-                // 最終淡出
-                setTimeout(() => {
+                    // 影片開始淡出
+                    videoOverlay.style.transition = 'opacity 3s ease-in-out';
                     videoOverlay.style.opacity = '0';
-                    videoOverlay.style.transition = 'opacity 4s ease-in-out';
                     
+                    // 完全移除元素
                     setTimeout(() => {
                         if (videoOverlay.parentNode) document.body.removeChild(videoOverlay);
                         if (breakthroughEffect.parentNode) document.body.removeChild(breakthroughEffect);
                     }, 4000);
-                }, 4000); // 圖片淡出完成後開始影片淡出
+                    
+                }, 3000); // 🎯 影片結束後停頓3秒
             };
             
         } else {
@@ -8093,9 +8090,8 @@ function showBreakthroughAnimation(guardianName) {
                 }, 3000);
             }, 8000);
         }
-    }, 8000);
+    }, 13000);
 }
-
 // 發光光環波動效果函數
 function createRippleWave(container, options = {}) {
     const {
@@ -13233,6 +13229,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
