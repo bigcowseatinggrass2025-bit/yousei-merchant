@@ -7267,46 +7267,67 @@ const top = Math.floor((screen.height - height) / 2);
 });
 
 
-// 幽街主按鈕點擊事件
-document.getElementById('yojie-main-btn').addEventListener('click', function() {
-    const mainBtn = this;
-    const buttonsContainer = document.getElementById('floating-buttons');
-    
-    // 淡出圓圈，淡入功能按鈕
-    mainBtn.classList.add('hidden');
-    
-    setTimeout(() => {
-        buttonsContainer.classList.add('show');
-    }, 150);
-});
+document.addEventListener('DOMContentLoaded', function() {
+    // 幽街主按鈕點擊事件
+    document.getElementById('yojie-main-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        const mainBtn = this;
+        const buttonsContainer = document.getElementById('floating-buttons');
+        
+        console.log('幽街按钮点击 → 显示功能按钮');
+        
+        // 隐藏幽街按钮
+        mainBtn.classList.add('hidden');
+        
+        // 显示功能按钮
+        setTimeout(() => {
+            buttonsContainer.classList.add('show');
+        }, 50);
+    });
 
-// 功能按鈕點擊後恢復圓圈
-document.querySelectorAll('.floating-buttons-container > div').forEach(button => {
-    button.addEventListener('click', function() {
+    // 功能按鈕點擊後恢復幽街
+    document.querySelectorAll('.floating-buttons-container > div').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault(); // 添加这行阻止默认行为
+            
+            const mainBtn = document.getElementById('yojie-main-btn');
+            const buttonsContainer = document.getElementById('floating-buttons');
+            
+            console.log('功能按钮点击 → 恢复幽街按钮:', this.id);
+            
+            // 隐藏功能按钮
+            buttonsContainer.classList.remove('show');
+            
+            // 显示幽街按钮
+            setTimeout(() => {
+                mainBtn.classList.remove('hidden');
+            }, 150);
+        });
+    });
+
+    // 點擊頁面其他區域也恢復幽街
+    document.addEventListener('click', function(e) {
         const mainBtn = document.getElementById('yojie-main-btn');
         const buttonsContainer = document.getElementById('floating-buttons');
         
-        // 淡出功能按鈕，淡入圓圈
-        buttonsContainer.classList.remove('show');
+        // 如果点击的不是幽街按钮，也不是功能按钮区域
+        const clickedMainBtn = e.target === mainBtn || mainBtn.contains(e.target);
+        const clickedButtonsContainer = e.target === buttonsContainer || buttonsContainer.contains(e.target);
         
-        setTimeout(() => {
-            mainBtn.classList.remove('hidden');
-        }, 150);
+        if (!clickedMainBtn && !clickedButtonsContainer && buttonsContainer.classList.contains('show')) {
+            console.log('点击外部区域 → 恢复幽街按钮');
+            
+            // 隐藏功能按钮
+            buttonsContainer.classList.remove('show');
+            
+            // 显示幽街按钮
+            setTimeout(() => {
+                mainBtn.classList.remove('hidden');
+            }, 150);
+        }
     });
-});
-
-// 點擊頁面其他區域也恢復圓圈
-document.addEventListener('click', function(e) {
-    const mainBtn = document.getElementById('yojie-main-btn');
-    const buttonsContainer = document.getElementById('floating-buttons');
-    
-    if (!mainBtn.contains(e.target) && !buttonsContainer.contains(e.target)) {
-        buttonsContainer.classList.remove('show');
-        
-        setTimeout(() => {
-            mainBtn.classList.remove('hidden');
-        }, 150);
-    }
 });
 
 
@@ -13229,6 +13250,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
