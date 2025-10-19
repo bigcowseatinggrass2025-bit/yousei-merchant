@@ -12549,13 +12549,16 @@ case "玄武護法":
     }, 100);
     
     // 确保DOM完全重置后再设置新内容
-    addManagedTimeout(() => {
-        // 设置护法图片
-        guardianArrival.style.backgroundImage = `url('${guardianImage}?t=${new Date().getTime()}')`;
-        
-        // 显示护法降临效果
-        guardianArrival.classList.add(guardianClass);
-        guardianArrival.style.display = 'block';
+addManagedTimeout(() => {
+    // 🎯 修復：先徹底重置類名
+    guardianArrival.className = 'guardian-arrival';
+    
+    // 然後設置圖片（保留時間戳）
+    guardianArrival.style.backgroundImage = `url('${guardianImage}?t=${new Date().getTime()}')`;
+    
+    // 显示护法降临效果
+    guardianArrival.classList.add(guardianClass);
+    guardianArrival.style.display = 'block';
         
         // 播放音效
         playSound(guardianSound);
@@ -13228,6 +13231,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
