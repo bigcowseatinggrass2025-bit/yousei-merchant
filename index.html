@@ -8174,6 +8174,7 @@ function changeMusic() {
     const musicUrls = [
         'sounds/bgnew32.mp3',
         'sounds/XXX.mp3',
+		'sounds/love.mp3',
         'sounds/XXXX.mp3'    		
     ];
     
@@ -13501,7 +13502,7 @@ function removeGuardianEffect(playerIndex) {
 document.addEventListener('click', function(e) {
     // 确认结束游戏（确定结束按钮）
     if (e.target.id === 'confirm-end-game' || e.target.closest('#confirm-end-game')) {
-        changeBackgroundMusic('sounds/love.mp3');
+        
         // 直接执行重置游戏，不要 confirm()
         players = [];
         events = [];
@@ -13929,5 +13930,6 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
