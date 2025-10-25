@@ -793,7 +793,7 @@ function updateRewardDisplay(containerId, rewards, className) {
         option.textContent = reward;
         
         // 檢查是否為特殊獎勵（包含"免費10抽"、"80銀兩"、"擴展攤位"或"200銀兩"的項目）
-        if (reward.includes('免費10抽') || reward.includes('80銀兩') || reward.includes('擴展攤位') || reward.includes('200銀兩')) {
+        if (reward.includes('免費10抽') || reward.includes('80銀兩')  || reward.includes('刮刮樂') || reward.includes('擴展攤位') || reward.includes('200銀兩')) {
             option.classList.add('special-reward');
         }
         
@@ -1159,4 +1159,5 @@ function selectSpecialReward() {
 </body>
 
 </html>
+
 
