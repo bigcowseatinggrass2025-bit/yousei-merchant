@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>版權與聲明 - 幽街交易之旅</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+        }
+		
+
+body {
+    background: 
+        url('images/dsa2e2.png') center/cover,
+        linear-gradient(135deg, #1a2a6c, #2c3e50, #4a235a);
+    background-size: cover, 400% 400%;
+    background-attachment: fixed;
+    animation: gradientBG 15s ease infinite;
+    color: white;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .declaration-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 40px;
+            border: 2px solid gold;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.5);
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .section {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .section h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        .section li {
+            margin-bottom: 8px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .section li:before {
+            content: "✨";
+            position: absolute;
+            left: 0;
+        }
+
+        .contact-info {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-button {
+            display: block;
+            width: 200px;
+            margin: 30px auto 0;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #2c3e50;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .declaration-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+        }
+		.glow-text {
+    color: #ffd700;
+    text-shadow: 
+        0 0 5px #ffd700,
+        0 0 10px #ffd700,
+        0 0 15px #ff6b6b,
+        0 0 20px #ff6b6b;
+    animation: glowPulse 2s ease-in-out infinite alternate;
+}
+
+.rainbow-glow {
+    background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbowGlow 3s ease-in-out infinite alternate;
+    text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+@keyframes glowPulse {
+    from {
+        text-shadow: 
+            0 0 5px #ffd700,
+            0 0 10px #ffd700,
+            0 0 15px #ff6b6b,
+            0 0 20px #ff6b6b;
+    }
+    to {
+        text-shadow: 
+            0 0 10px #ffd700,
+            0 0 20px #ffd700,
+            0 0 30px #ff6b6b,
+            0 0 40px #ff6b6b;
+    }
+}
+
+@keyframes rainbowGlow {
+    0% {
+        background-position: 0% 50%;
+        text-shadow: 
+            0 0 10px rgba(255, 0, 0, 0.5),
+            0 0 20px rgba(255, 0, 0, 0.3);
+    }
+    25% {
+        background-position: 50% 50%;
+        text-shadow: 
+            0 0 10px rgba(0, 255, 0, 0.5),
+            0 0 20px rgba(0, 255, 0, 0.3);
+    }
+    50% {
+        background-position: 100% 50%;
+        text-shadow: 
+            0 0 10px rgba(0, 0, 255, 0.5),
+            0 0 20px rgba(0, 0, 255, 0.3);
+    }
+    75% {
+        background-position: 50% 50%;
+        text-shadow: 
+            0 0 10px rgba(255, 0, 255, 0.5),
+            0 0 20px rgba(255, 0, 255, 0.3);
+    }
+    100% {
+        background-position: 0% 50%;
+        text-shadow: 
+            0 0 10px rgba(255, 255, 0, 0.5),
+            0 0 20px rgba(255, 255, 0, 0.3);
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="declaration-container">
+        <div class="header">
+            <h1>📜 版權與創作聲明</h1>
+            <div class="subtitle">幽街交易之旅 - 原創桌遊擴展系統</div>
+        </div>
+
+        <!-- 原創聲明部分 -->
+        <section class="section">
+            <h2>🎨 原創內容聲明</h2>
+            <p>本作品為獨立創作，與任何官方桌遊公司無關，所有內容均為原創設計：</p>
+            <ul>
+                <li>抽卡系統 - 全新設計的卡片抽取機制</li>
+                <li>攤販小遊戲系統 - 獨家創作的互動遊戲</li>
+                <li>珍品鋪系統 - 原創的商品交易體系</li>
+                <li>拍賣行系統 - 自主開發的競價平台</li>
+                <li>彩蛋活動系統 - 獨家設計的驚喜內容</li>
+                <li>虛擬卡片系統 - 全新創作的卡牌體系</li>
+                <li>虛擬幽街貨卡系統 - 原創的貨物交易卡牌</li>
+                <li>護法成長系統 - 獨家角色培養機制</li>
+                <li>靈石通貨系統 - 自主設計的經濟體系</li>
+            </ul>
+        </section>
+
+        <!-- 版權聲明部分 -->
+        <section class="section">
+            <h2>⚖️ 版權聲明</h2>
+            <p>本作品僅供個人學習與非商業使用：</p>
+            <ul>
+                <li>所有遊戲內容均為原創，未抄襲任何現有作品</li>
+                <li>使用之音訊素材僅為個人作品使用，非商業用途</li>
+                <li>引用之資料已註明來源，如有侵權請聯繫移除</li>
+                <li>本作品未獲任何官方授權，為獨立創作項目</li>
+                <li>© 2024 幽街交易之旅 - 版權所有</li>
+            </ul>
+        </section>
+		
+		
+		<!-- 數據庫與技術服務部分 -->
+<section class="section">
+    <h2>🗄️ 數據庫與技術服務</h2>
+    <ul>
+        <li><strong>Supabase.com</strong> - 提供後端數據庫服務與即時數據同步</li>
+        <li><strong>瀏覽器本地儲存 (LocalStorage)</strong> - 提供客戶端數據持久化能力</li>
+        <li><strong>IndexedDB</strong> - 瀏覽器內建數據庫技術</li>
+        <li><strong>JSON 數據格式</strong> - 輕量級數據交換格式</li>
+        <li><strong>現代瀏覽器技術</strong> - 提供豐富的 Web API 支持</li>
+        <li><strong>JavaScript 運行環境</strong> - 客戶端腳本執行支持</li>
+    </ul>
+</section>
+
+      <!-- 特別致謝部分 -->
+<section class="section">
+    <h2>🙏 特別致謝</h2>
+    <p>感謝以下資源與工具的支持：</p>
+    <ul>
+        <!-- AI 工具 -->
+        <li><strong class="glow-text">豆包AI</strong> - 提供創作過程中的靈感與技術支持</li>
+        <li><strong class="glow-text">DeepSeek AI</strong> - 協助程式開發與問題解決</li>
+        <li><strong class="glow-text">Grok AI</strong> - 提供創意建議與內容優化</li>
+        
+        <!-- 數據庫服務 -->
+        <li><strong class="glow-text">Supabase.com</strong> - 後端數據庫服務與雲端數據儲存</li>
+        
+        <!-- 圖片與多媒體資源 -->
+        <li><strong class="glow-text">Imgur.com</strong> - 圖片託管與分享服務</li>
+        <li><strong class="glow-text">Pixabay.com</strong> - 免費高品質圖片資源</li>
+        <li><strong class="glow-text">Soundjay.com</strong> - 免費音效素材庫</li>
+        <li><strong class="glow-text">Aigei.com</strong> - 愛給網提供豐富多媒體資源</li>
+        
+        <!-- 開發工具與框架 -->
+        <li><strong class="glow-text">Uiverse.io</strong> - 精美的 UI 元件庫</li>
+        <li><strong class="glow-text">GitHub Pages</strong> - 免費的網頁託管服務</li>
+        <li><strong class="glow-text">開源技術社群</strong> - 分享寶貴的開發資源與經驗</li>
+        
+        <!-- 多媒體編輯工具 -->
+        <li><strong class="glow-text">WatermarkRemover.io</strong> - 圖片浮水印移除工具</li>
+        <li><strong class="glow-text">TTSMaker.com</strong> - 文字轉語音服務</li>
+        <li><strong class="glow-text">Clideo.com</strong> - 多媒體編輯與轉換工具</li>
+        
+        <!-- 音樂版權聲明 -->
+        <li><strong class="rainbow-glow">音樂作品</strong> - 
+            <em>「Soreo Aito Yobunara (それを愛と呼ぶなら)」</em><br>
+            <small>原版權：© 原版權持有者 / 原創作者<br>
+            本作品僅為個人創作使用，非商業用途</small>
+        </li>
+    </ul>
+</section>
+
+        <!-- 免責聲明 -->
+        <section class="section">
+            <h2>📄 免責聲明</h2>
+            <p>本作品為愛好者創作，不屬於任何商業產品：</p>
+            <ul>
+                <li>本系統為獨立開發，與任何官方組織無關</li>
+                <li>所有遊戲機制和內容均為原創設計</li>
+                <li>如有任何版權問題請通過以下方式聯繫</li>
+            </ul>
+            
+            <div class="contact-info">
+                <p>📧 聯繫方式：電子郵件地址</p>
+                <p>bigcowseatinggrass2025@gmail.com</p>
+            </div>
+        </section>
+
+        <button class="back-button" onclick="window.close()">關閉頁面</button>
+    </div>
+
+    <script>
+        // 點擊返回按鈕時關閉窗口
+        document.querySelector('.back-button').addEventListener('click', function() {
+            window.close();
+        });
+    </script>
+</body>
+</html>
