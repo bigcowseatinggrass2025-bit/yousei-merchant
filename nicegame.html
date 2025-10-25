@@ -1,0 +1,3866 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幽街商人「攤販」小遊戲系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 新增登录区域样式 */
+        .login-section {
+    padding: 30px;
+    text-align: center;
+    display: block;
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    /* 添加背景 */
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9)), 
+                url('https://imgur.com/4PrbgrW.jpg');
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px;
+    border: 2px solid #4cc9f0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+        
+        .player-select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #FFD700;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+        
+        .verifying-text {
+            color: #ff4444;
+            font-size: 1.1rem;
+            margin: 15px 0;
+            text-align: center;
+            display: none;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        .welcome-text {
+            font-size: 1.3rem;
+            margin: 20px 0;
+            text-align: center;
+            animation: welcome-glow 2s ease-in-out infinite;
+        }
+        
+        .rainbow-text {
+            background: linear-gradient(45deg, 
+                #ff0000, #ff9900, #ffff00, #00ff00, 
+                #00ffff, #0000ff, #9900ff, #ff00ff);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow-text 3s ease-in-out infinite;
+            font-weight: bold;
+        }
+        
+        .welcome-subtext {
+            font-size: 1rem;
+            color: #FFD700;
+            margin-top: 5px;
+            display: block;
+            animation: subtitle-glow 2s ease-in-out infinite alternate;
+        }
+        
+        /* 支付选择模态框 */
+        .payment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .payment-content {
+            background: linear-gradient(135deg, rgba(44, 62, 80, 0.95), rgba(52, 73, 94, 0.95));
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+            border: 2px solid #FFD700;
+            backdrop-filter: blur(10px);
+        }
+        
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .payment-option {
+            padding: 15px;
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            background: rgba(255, 215, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .payment-option:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        .payment-option.selected {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #4cc9f0;
+        }
+        
+        .payment-cost {
+            font-size: 1.2rem;
+            color: #f94144;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+		
+		/* 登录后的游戏容器背景 */
+#game-container {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3)), 
+                url('https://imgur.com/v19PloF.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    width: 100%;
+    padding: 20px;
+}
+
+
+
+        
+        /* 玩家信息显示 */
+        .player-info {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .player-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            position: relative;
+        }
+        
+        #spirit-stone-count {
+            animation: glow 2s ease-in-out infinite;
+            font-weight: bold;
+            color: #3498db;
+            text-shadow: 0 0 8px #3498db, 0 0 12px #3498db;
+        }
+        
+        /* 新增动画效果 */
+        @keyframes welcome-glow {
+            0%, 100% { 
+                text-shadow: 0 0 10px #4cc9f0, 0 0 20px #4cc9f0, 0 0 30px #4cc9f0;
+            }
+            50% { 
+                text-shadow: 0 0 15px #f72585, 0 0 30px #f72585, 0 0 45px #f72585;
+            }
+        }
+        
+        @keyframes rainbow-text {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes subtitle-glow {
+            0%, 100% { 
+                text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700;
+            }
+            50% { 
+                text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700;
+            }
+        }
+        
+        @keyframes glow {
+            0%, 100% { 
+                text-shadow: 0 0 5px #3498db, 0 0 10px #3498db;
+            }
+            50% { 
+                text-shadow: 0 0 10px #3498db, 0 0 20px #3498db, 0 0 30px #3498db;
+            }
+        }
+
+        /* 原有的所有样式保持不变 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+        }
+        
+       body {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.5), rgba(22, 33, 62, 0.5)), 
+                url('https://imgur.com/4PrbgrW.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #fff;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+       /* 天燈發光效果 */
+.lantern.lit .lantern-body {
+    box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0.8),
+                0 0 40px 20px rgba(255, 165, 0, 0.6),
+                0 0 60px 30px rgba(255, 69, 0, 0.4);
+    animation: flicker 1.5s infinite alternate;
+}
+
+@keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+        
+        /* 添加闪烁动画 */
+        @keyframes blink {
+            0%, 100% { opacity: 1; box-shadow: 0 0 20px 5px gold; }
+            50% { opacity: 0.7; box-shadow: 0 0 30px 8px gold, 0 0 40px 12px rgba(255,215,0,0.6); }
+        }
+        
+        .grid-item.active {
+            box-shadow: 0 0 15px 5px gold;
+            transform: scale(1.1);
+            z-index: 5;
+            animation: blink 0.8s infinite;
+        }
+        
+        /* 花灯容器样式 - 水平排列 */
+        .lantern-selection {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        /* 花灯样式 - 使用图片 */
+        .quiz-lantern {
+            width: 120px;
+            height: 180px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .quiz-lantern:hover {
+            transform: translateY(-5px) scale(1.05);
+        }
+        
+        .quiz-lantern-image {
+            width: 100%;
+            height: 120px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-bottom: 10px;
+        }
+        
+        .quiz-lantern-number {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: gold;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .lantern-selection {
+                gap: 20px;
+            }
+            
+            .quiz-lantern {
+                width: 100px;
+                height: 160px;
+            }
+        }
+        
+        /* 游戏消息提示样式 */
+        .game-message {
+            color: #f9c74f;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .game-message.highlight {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+		
+		.charity-give-silver {
+    background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);
+    color: white;
+}
+
+.charity-give-stone {
+    background: linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%);
+    color: white;
+}
+
+.charity-ignore {
+    background: linear-gradient(135deg, #dfe4ea 0%, #a4b0be 100%);
+    color: #2f3542;
+}
+        
+        /* 新增全局遮罩 */
+        .overlay-mask {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            text-align: center;
+        }
+        
+        .overlay-mask.active {
+            display: flex;
+        }
+        
+        .overlay-content {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #f94144;
+            max-width: 80%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid #4cc9f0;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #f72585;
+            text-shadow: 0 0 10px rgba(247, 37, 133, 0.7);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b5179e;
+            margin-bottom: 10px;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .game-card {
+            flex: 1;
+            min-width: 350px;
+            max-width: 450px;
+            background: linear-gradient(145deg, #1e2a3a, #2c3e50);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s;
+            border: 2px solid #4361ee;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(67, 97, 238, 0.4);
+        }
+        
+        .game-header {
+            background: linear-gradient(90deg, #f72585, #b5179e);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-content {
+            padding: 20px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            flex-grow: 1;
+            color: #e0e0e0;
+        }
+        
+        .game-cost {
+            text-align: center;
+            margin: 15px 0;
+            color: #f94144;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 替換原有的 .btn-try 樣式 */
+        .btn-try {
+          --glow-color: rgb(217, 176, 255);
+          --glow-spread-color: rgba(191, 123, 255, 0.781);
+          --enhanced-glow-color: rgb(231, 206, 255);
+          --btn-color: rgb(100, 61, 136);
+          
+          border: .25em solid var(--glow-color);
+          padding: 1em 3em;
+          color: var(--glow-color);
+          font-size: 15px;
+          font-weight: bold;
+          background-color: var(--btn-color);
+          border-radius: 1em;
+          outline: none;
+          box-shadow: 0 0 1em .25em var(--glow-color),
+                  0 0 4em 1em var(--glow-spread-color),
+                  inset 0 0 .75em .25em var(--glow-color);
+          text-shadow: 0 0 .5em var(--glow-color);
+          position: relative;
+          transition: all 0.3s;
+          cursor: pointer;
+          display: block;
+          width: 80%;
+          margin: 0 auto;
+        }
+        
+        .btn-try::after {
+          pointer-events: none;
+          content: "";
+          position: absolute;
+          top: 120%;
+          left: 0;
+          height: 100%;
+          width: 100%;
+          background-color: var(--glow-spread-color);
+          filter: blur(2em);
+          opacity: .7;
+          transform: perspective(1.5em) rotateX(35deg) scale(1, .6);
+        }
+        
+        .btn-try:hover:not(:disabled) {
+          color: var(--btn-color);
+          background-color: var(--glow-color);
+          box-shadow: 0 0 1em .25em var(--glow-color),
+                  0 0 4em 2em var(--glow-spread-color),
+                  inset 0 0 .75em .25em var(--glow-color);
+          transform: translateY(-2px);
+        }
+        
+        .btn-try:active {
+          box-shadow: 0 0 0.6em .25em var(--glow-color),
+                  0 0 2.5em 2em var(--glow-spread-color),
+                  inset 0 0 .5em .25em var(--glow-color);
+        }
+		
+		.avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #4361ee;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.avatar-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+        
+        .btn-try:disabled {
+          background-color: #6c757d;
+          border-color: #6c757d;
+          cursor: not-allowed;
+          opacity: 0.7;
+          box-shadow: none;
+          text-shadow: none;
+        }
+        
+        .btn-try:disabled::after {
+          display: none;
+        }
+        
+        .game-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 为每个游戏添加不同的背景 */
+        .game-area.grid-game {
+            background: linear-gradient(135deg, rgba(30, 42, 58, 0.8), rgba(44, 62, 80, 0.8)), 
+                        url('https://imgur.com/87ktWwk.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .game-area.tictactoe-game {
+            background: linear-gradient(135deg, rgba(30, 42, 58, 0.8), rgba(44, 62, 80, 0.8)), 
+                        url('https://imgur.com/wp8bDwH.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .game-area.clicker-game {
+            background: linear-gradient(135deg, rgba(30, 42, 58, 0.8), rgba(44, 62, 80, 0.8)), 
+                        url('https://imgur.com/2syHCx0.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .game-area.quiz-game {
+            background: linear-gradient(135deg, rgba(30, 42, 58, 0.8), rgba(44, 62, 80, 0.8)), 
+                        url('https://imgur.com/sTmc2eN.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .game-area.lantern-game {
+            background: linear-gradient(135deg, rgba(30, 42, 58, 0.8), rgba(44, 62, 80, 0.8)), 
+                        url('https://imgur.com/DvCBYEM.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .game-area {
+            background: linear-gradient(135deg, #1e2a3a, #2c3e50), 
+                        url('https://imgur.com/DvCBYEM.jpg'); /* 添加背景图片 */
+            background-size: cover; /* 确保背景图片覆盖整个区域 */
+            background-blend-mode: overlay; /* 使渐变和背景图片混合 */
+            background-position: center;
+            width: 90%;
+            max-width: 800px;
+            height: 70vh;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(67, 97, 238, 0.5);
+            border: 2px solid #4cc9f0;
+            position: relative;
+            overflow: hidden; /* 防止背景图片溢出 */
+        }
+        
+        .result-area {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .success-result {
+            color: #4cc9f0;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+        }
+        
+        .failure-result {
+            color: #f94144;
+            text-shadow: 0 0 10px rgba(249, 65, 68, 0.7);
+        }
+        
+        .normal-result {
+            color: #f9c74f;
+            text-shadow: 0 0 10px rgba(249, 199, 79, 0.5);
+        }
+        
+        .countdown {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #f94144;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(249, 65, 68, 0.7);
+            z-index: 101;
+        }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #b5179e;
+            border: 1px solid #7209b7;
+            position: relative;
+        }
+        
+        .close-btn {
+            display: none;
+            margin: 15px auto 0;
+            padding: 10px 25px;
+            background: linear-gradient(90deg, #f94144, #d90429);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .close-btn:hover {
+            background: linear-gradient(90deg, #d90429, #f94144);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 方格閃燈遊戲樣式 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 5px;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            margin: 20px auto;
+        }
+        
+        .grid-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s;
+            padding: 5px;
+            word-break: break-all;
+        }
+        
+        .grid-item.active {
+            box-shadow: 0 0 15px 5px gold;
+            transform: scale(1.1);
+            z-index: 5;
+        }
+        
+        /* 新增慈善事件样式 */
+        .charity-event {
+            position: fixed;
+            width: 240px;
+           background: linear-gradient(135deg, rgba(255, 222, 173, 0.03) 0%, rgba(245, 222, 179, 0.03) 100%);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 25px rgba(255, 107, 107, 0.6);
+            z-index: 9999;
+            display: none;
+            animation: floatIn 0.8s ease-out;
+            border: 2px solid #ff4757;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .charity-event.left {
+            left: 20px;
+        }
+        
+        .charity-event.right {
+            right: 20px;
+        }
+        
+        .charity-event.top {
+            top: 30%;
+        }
+        
+        .charity-event.bottom {
+            bottom: 30%;
+        }
+        
+        .charity-character {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #fff;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden; /* 添加这行防止图片溢出 */
+        }
+        
+        .charity-character img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 确保图片适应圆形区域 */
+        }
+        
+        .charity-message {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #2f3542;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .charity-options {
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .charity-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .charity-give {
+            background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);
+            color: white;
+        }
+        
+        .charity-ignore {
+            background: linear-gradient(135deg, #dfe4ea 0%, #a4b0be 100%);
+            color: #2f3542;
+        }
+        
+        .charity-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .charity-response {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #2f3542;
+            display: none;
+        }
+        
+        @keyframes floatIn {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* 游戏卡片发光效果 */
+        .game-card.highlight {
+            animation: cardGlow 2s infinite alternate;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+            border: 2px solid gold;
+        }
+        
+        @keyframes cardGlow {
+            0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+            100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.9), 0 0 40px rgba(255, 165, 0, 0.5); }
+        }
+        
+        /* 奖励翻倍提示样式 */
+        .bonus-message {
+            color: #4cd137;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 10px;
+            text-align: center;
+            text-shadow: 0 0 5px rgba(76, 209, 55, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+        
+		/* 井字遊戲樣式 */
+.tic-tac-toe {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 10px;
+    width: 300px;
+    height: 300px;
+    margin: 20px auto;
+}
+
+.cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #4361ee;
+    border-radius: 10px;
+    font-size: 2.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.cell:hover {
+    background: rgba(67, 97, 238, 0.3);
+    transform: scale(1.05);
+}
+
+.game-status {
+    font-size: 1.2rem;
+    color: #f9c74f;
+    text-align: center;
+    margin: 15px 0;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(249, 199, 79, 0.5);
+}
+
+/* 井字遊戲光效 */
+.cell.x {
+    color: #f94144;
+    text-shadow: 0 0 10px #f94144, 0 0 20px #f94144, 0 0 30px #f94144;
+    animation: x-pulse 2s infinite;
+}
+
+.cell.o {
+    color: #4cc9f0;
+    text-shadow: 0 0 10px #4cc9f0, 0 0 20px #4cc9f0, 0 0 30px #4cc9f0;
+    animation: o-pulse 2s infinite;
+}
+
+@keyframes x-pulse {
+    0%, 100% { 
+        text-shadow: 0 0 10px #f94144, 0 0 20px #f94144, 0 0 30px #f94144;
+    }
+    50% { 
+        text-shadow: 0 0 15px #ff6b6b, 0 0 30px #ff6b6b, 0 0 45px #ff6b6b;
+    }
+}
+
+@keyframes o-pulse {
+    0%, 100% { 
+        text-shadow: 0 0 10px #4cc9f0, 0 0 20px #4cc9f0, 0 0 30px #4cc9f0;
+    }
+    50% { 
+        text-shadow: 0 0 15px #90e0ef, 0 0 30px #90e0ef, 0 0 45px #90e0ef;
+    }
+}
+		
+        /* 限時點擊遊戲樣式 */
+        .clicker-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border: 2px solid #4cc9f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+        
+       .click-target {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f72585, #4361ee);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(247, 37, 133, 0.8),
+                        0 0 30px rgba(128, 0, 128, 0.6);
+            transition: transform 0.3s;
+            opacity: 0; /* 初始状态为透明 */
+            animation: fadeIn 0.8s ease-out forwards, 
+                       gentleMove 4s ease-in-out infinite,
+                       glowPulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5) rotate(0deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(360deg);
+            }
+        }
+        
+        @keyframes gentleMove {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(3px, -3px) rotate(2deg);
+            }
+            50% {
+                transform: translate(-2px, 2px) rotate(-2deg);
+            }
+            75% {
+                transform: translate(2px, 3px) rotate(1deg);
+            }
+        }
+        
+        @keyframes glowPulse {
+            0% {
+                box-shadow: 0 0 15px rgba(247, 37, 133, 0.8),
+                            0 0 30px rgba(128, 0, 128, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 25px rgba(247, 37, 133, 1),
+                            0 0 45px rgba(128, 0, 128, 0.8),
+                            0 0 60px rgba(75, 0, 130, 0.4);
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+        
+        @keyframes glow-pulse {
+            0% {
+                text-shadow: 0 0 10px #4cc9f0, 
+                             0 0 20px #4cc9f0, 
+                             0 0 30px #4cc9f0;
+            }
+            100% {
+                text-shadow: 0 0 15px #4cc9f0, 
+                             0 0 30px #4cc9f0, 
+                             0 0 45px #4cc9f0,
+                             0 0 60px #4cc9f0;
+            }
+        }
+        
+        .click-target:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 30px rgba(247, 37, 133, 1),
+                        0 0 50px rgba(128, 0, 128, 0.8),
+                        0 0 70px rgba(75, 0, 130, 0.6);
+        }
+        
+        .timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f9c74f;
+            margin: 10px 0;
+            text-shadow: 0 0 10px rgba(249, 199, 79, 0.5);
+        }
+        
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4cc9f0;
+            margin: 10px 0;
+        }
+        
+        /* 夜市猜謎遊戲樣式 */
+        .quiz-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        
+        .quiz-question {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #f9c74f;
+            line-height: 1.4;
+        }
+        
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .quiz-option {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #4361ee;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+        
+        .quiz-option:hover {
+            background: rgba(67, 97, 238, 0.3);
+            transform: translateY(-3px);
+        }
+		
+		/* 祈福天燈高度標示線 */
+.height-indicator {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    margin: 20px auto;
+    border-right: 2px dashed rgba(255, 215, 0, 0.5);
+    z-index: 1; /* 確保標示線在天燈下方 */
+}
+
+.height-line {
+    position: absolute;
+    width: 100%;
+    border-top: 2px solid;
+    left: 0;
+}
+
+.height-label {
+    position: absolute;
+    right: 10px; /* 改為右邊 */
+    top: -12px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    border: 1px solid;
+}
+
+.high-line {
+    top: 20%;
+    border-color: #ff006e;
+}
+
+.high-line .height-label {
+    color: #ff006e;
+    border-color: #ff006e;
+}
+
+.medium-line {
+    top: 50%;
+    border-color: #ff9e00;
+}
+
+.medium-line .height-label {
+    color: #ff9e00;
+    border-color: #ff9e00;
+}
+
+.low-line {
+    top: 80%;
+    border-color: #4cc9f0;
+}
+
+.low-line .height-label {
+    color: #4cc9f0;
+    border-color: #4cc9f0;
+}
+
+/* 天燈飛行動畫 */
+.lantern.success { 
+    animation: launch-slow 8s forwards;
+    animation-timing-function: ease-out;
+}
+
+.lantern.medium { 
+    animation: launch-medium-slow 8s forwards;
+    animation-timing-function: ease-out;
+}
+
+.lantern.low { 
+    animation: launch-low-slow 8s forwards;
+    animation-timing-function: ease-out;
+}
+
+.lantern.launching .lantern-body {
+    animation: gentle-sway 3s ease-in-out infinite;
+}
+
+/* 高度指示器 */
+.height-indicator {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    margin-bottom: 20px;
+    border-left: 2px dashed rgba(255, 255, 255, 0.5);
+    margin-left: 40px;
+    z-index: 5;
+}
+
+.height-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    display: flex;
+    align-items: center;
+}
+
+.height-line::before {
+    content: '';
+    flex-grow: 1;
+    height: 2px;
+    background: currentColor;
+    margin-right: 10px;
+    opacity: 0.7;
+}
+
+.height-label {
+    position: relative;
+    z-index: 10;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 15px currentColor;
+    animation: glow 2s infinite alternate;
+}
+
+/* 獎勵等級線條 */
+.low-line {
+    top: 75%;
+    color: #f94144;
+}
+
+.medium-line {
+    top: 50%;
+    color: #f9c74f;
+}
+
+.high-line {
+    top: 25%;
+    color: #4cc9f0;
+}
+
+/* 獎勵文字光效 */
+.high-line .height-label {
+    color: #4cc9f0;
+    animation: glow-blue 2s infinite alternate;
+}
+
+.medium-line .height-label {
+    color: #f9c74f;
+    animation: glow-yellow 2s infinite alternate;
+}
+
+.low-line .height-label {
+    color: #f94144;
+    animation: glow-red 2s infinite alternate;
+}
+
+/* 飛行動畫關鍵幀 */
+@keyframes launch-slow {
+    0% { 
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    20% {
+        transform: translateY(-80px) scale(1.05);
+    }
+    40% { 
+        transform: translateY(-160px) scale(1.1);
+    }
+    60% {
+        transform: translateY(-240px) scale(1.15);
+    }
+    80% {
+        transform: translateY(-320px) scale(1.2);
+    }
+    100% {
+        transform: translateY(-400px) scale(1.25);
+        opacity: 0.8;
+    }
+}
+
+@keyframes launch-medium-slow {
+    0% { 
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    20% {
+        transform: translateY(-60px) scale(1.05);
+    }
+    40% { 
+        transform: translateY(-120px) scale(1.1);
+    }
+    60% {
+        transform: translateY(-180px) scale(1.15);
+    }
+    80% {
+        transform: translateY(-240px) scale(1.2);
+    }
+    100% {
+        transform: translateY(-300px) scale(1.25);
+        opacity: 0.8;
+    }
+}
+
+@keyframes launch-low-slow {
+    0% { 
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    20% {
+        transform: translateY(-40px) scale(1.05);
+    }
+    40% { 
+        transform: translateY(-80px) scale(1.1);
+    }
+    60% {
+        transform: translateY(-120px) scale(1.15);
+    }
+    80% {
+        transform: translateY(-160px) scale(1.2);
+    }
+    100% {
+        transform: translateY(-200px) scale(1.25);
+        opacity: 0.8;
+    }
+}
+
+@keyframes gentle-sway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(3px) rotate(1deg); }
+    75% { transform: translateX(-3px) rotate(-1deg); }
+}
+
+/* 光效動畫 */
+@keyframes glow-blue {
+    0% {
+        box-shadow: 0 0 5px #4cc9f0, 0 0 10px #4cc9f0;
+    }
+    100% {
+        box-shadow: 0 0 15px #4cc9f0, 0 0 30px #4cc9f0, 0 0 45px #4cc9f0;
+    }
+}
+
+@keyframes glow-yellow {
+    0% {
+        box-shadow: 0 0 5px #f9c74f, 0 0 10px #f9c74f;
+    }
+    100% {
+        box-shadow: 0 0 15px #f9c74f, 0 0 30px #f9c74f, 0 0 45px #f9c74f;
+    }
+}
+
+@keyframes glow-red {
+    0% {
+        box-shadow: 0 0 5px #f94144, 0 0 10px #f94144;
+    }
+    100% {
+        box-shadow: 0 0 15px #f94144, 0 0 30px #f94144, 0 0 45px #f94144;
+    }
+}
+        
+/* 天燈容器 */
+.lantern-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 600px;
+    margin: 30px auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* 單個天燈樣式 */
+.lantern {
+    width: 80px;
+    height: 120px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.lantern:hover {
+    transform: translateY(-5px);
+}
+        
+        /* 天燈主體 */
+.lantern-body {
+    width: 100%;
+    height: 100px;
+    border-radius: 40% 40% 0 0;
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-weight: bold;
+    transition: all 0.5s;
+    font-size: 1.5rem;
+}
+
+/* 天燈拉線 */
+.lantern-string {
+    width: 3px;
+    height: 50px;
+    background: white;
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* 天燈模板顏色 */
+.lantern.template1 .lantern-body {
+    background: linear-gradient(to bottom, #ff595e, #ffca3a);
+}
+
+.lantern.template2 .lantern-body {
+    background: linear-gradient(to bottom, #1982c4, #8ac926);
+}
+
+.lantern.template3 .lantern-body {
+    background: linear-gradient(to bottom, #6a4c93, #f72585);
+}
+        
+        /* 为井字游戏添加光效 */
+        .cell.x {
+            color: #f94144;
+            text-shadow: 0 0 10px #f94144, 0 0 20px #f94144, 0 0 30px #f94144;
+            animation: x-pulse 2s infinite;
+        }
+        
+        .cell.o {
+            color: #4cc9f0;
+            text-shadow: 0 0 10px #4cc9f0, 0 0 20px #4cc9f0, 0 0 30px #4cc9f0;
+            animation: o-pulse 2s infinite;
+        }
+        
+        @keyframes x-pulse {
+            0%, 100% { 
+                text-shadow: 0 0 10px #f94144, 0 0 20px #f94144, 0 0 30px #f94144;
+            }
+            50% { 
+                text-shadow: 0 0 15px #ff6b6b, 0 0 30px #ff6b6b, 0 0 45px #ff6b6b;
+            }
+        }
+        
+        @keyframes o-pulse {
+            0%, 100% { 
+                text-shadow: 0 0 10px #4cc9f0, 0 0 20px #4cc9f0, 0 0 30px #4cc9f0;
+            }
+            50% { 
+                text-shadow: 0 0 15px #90e0ef, 0 0 30px #90e0ef, 0 0 45px #90e0ef;
+            }
+        }
+        
+        
+    </style>
+</head>
+<body>
+    
+    <!-- 新增慈善事件元素 -->
+    <div class="charity-event" id="charityEvent">
+        <div class="charity-character" id="charityCharacter">
+            <!-- 头像将通过JavaScript动态设置 -->
+        </div>
+        <div class="charity-message" id="charityMessage">姐姐，可以給我一點錢買冰糖葫蘆嗎？我好想吃...</div>
+        <div class="charity-options">
+    <button class="charity-btn charity-give-silver" onclick="handleCharityChoice('silver')">給錢 (4兩)</button>
+    <button class="charity-btn charity-give-stone" onclick="handleCharityChoice('stone')">給靈石 (4顆)</button>
+    <button class="charity-btn charity-ignore" onclick="handleCharityChoice(false)">不理會</button>
+</div>
+        <div class="charity-response" id="charityResponse"></div>
+    </div>
+
+    <!-- 登录区域 -->
+    <div class="login-section" id="login-section">
+        <h2 class="rainbow-text">幽街商道-攤販部分</h2>
+        <p class="welcome-subtext">請選擇您的角色開始遊戲</p>
+        
+        <select class="player-select" id="player-select">
+            <option value="">-- 選擇玩家 --</option>
+        </select>
+        
+        <div class="verifying-text" id="verifying-text">請稍後</div>
+        
+        <div class="welcome-text" id="welcome-text" style="display: none;">
+            <strong>歡迎<span id="welcome-player-name" class="rainbow-text"></span> 光臨幽街商道！</strong>
+            <br>
+            <span class="welcome-subtext">裡面有各種不同的攤販遊戲等著你</span>
+        </div>
+        
+        <button class="btn-try" id="login-btn">進入</button>
+    </div>
+    
+    <!-- 主游戏区域 - 初始隐藏 -->
+    <div id="game-container" style="display: none;">
+    <div style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:url('https://imgur.com/v19PloF.jpg') center/cover fixed; z-index:-1;"></div>
+        <!-- 玩家信息显示 -->
+        <div class="player-info" id="player-info">
+            <h2 id="current-player">玩家名稱</h2>
+            <div class="player-stats">
+                <div class="stat-item">靈石: <span id="spirit-stone-count">0</span></div>
+            </div>
+        </div>
+        
+        <header>
+            <h1>幽街商人「攤販」小遊戲系統</h1>
+            <p class="subtitle">兩位攤販主帶來了他們的遊戲，選擇一個試試手氣吧！</p>
+            <p class="subtitle">每次刷新頁面都會隨機出現兩個不同的遊戲！</p>
+        </header>
+        
+        <div class="game-container" id="gameContainer">
+            <!-- 游戏卡片会通过JavaScript动态生成 -->
+        </div>
+        
+        <div class="charity-bonus-notice" id="charityBonusNotice" style="
+            display: none;
+            color: #4cc9f0;
+            text-shadow: 0 0 10px #4cc9f0, 
+                         0 0 20px #4cc9f0, 
+                         0 0 30px #4cc9f0;
+            animation: glow-pulse 2s infinite alternate;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(76, 201, 240, 0.3);
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1.3rem;
+            line-height: 1.4;
+        ">
+            因你給予小孩買零食（花費3兩），觸發善心效果，失敗時將獲得回饋5銀兩！
+        </div> 
+        
+        <button class="close-btn" id="closePageBtn">手動關閉頁面</button>
+    </div>
+    
+    <!-- 支付选择模态框 -->
+    <div class="payment-modal" id="payment-modal">
+        <div class="payment-content">
+            <h2>選擇支付方式</h2>
+            <p>請選擇您想要使用的支付方式：</p>
+            
+            <div class="payment-options">
+                <div class="payment-option" data-type="silver">
+                    <h3>銀兩支付</h3>
+                    <p>使用銀兩支付遊戲費用</p>
+                    <div class="payment-cost">費用: <span id="silver-cost">0</span> 銀兩</div>
+                </div>
+                <div class="payment-option" data-type="spirit-stone">
+                    <h3>靈石支付</h3>
+                    <p>使用靈石支付遊戲費用</p>
+                    <div class="payment-cost">費用: <span id="stone-cost">0</span> 靈石</div>
+                </div>
+            </div>
+            
+            <button class="btn-try" id="confirm-payment">確認支付</button>
+            <button class="close-btn" id="cancel-payment">取消</button>
+        </div>
+    </div>
+    
+    <!-- 游戏屏幕 -->
+    <div class="game-screen" id="gameScreen">
+        <div class="game-area" id="gameArea">
+            <!-- 游戏内容会通过JavaScript动态生成 -->
+        </div>
+    </div>
+    
+    <!-- 新增全局遮罩 -->
+    <div class="overlay-mask" id="overlayMask">
+        <div class="overlay-content">
+            <h2>攤販遊戲已結束</h2>
+            <p>請從商會取得得獎內容</p>
+            <button class="close-btn" onclick="closeOverlay()">確定</button>
+        </div>
+    </div>
+
+    <script>
+        // 游戏数据
+		
+        const games = [
+            {
+                  id: 'grid',
+        name: '夜市好運燈',
+        cost: 10,
+		spiritCost: 15,
+        description: '50個方格中有各種獎勵，夜市好運燈會在方格間移動，停在的格子就是你的獎勵！',
+        bossTalk: '看你今天臉相，今天運氣好像特別好，最高可得獎金100兩，來吧準備開始吧',
+        rewards: [
+                    { text: "1兩", color: "#ff595e", probability: 4 },
+                    { text: "2兩", color: "#ffca3a", probability: 4 },
+                    { text: "1貨", color: "#8ac926", probability: 5 },
+                    { text: "3兩", color: "#1982c4", probability: 8 },
+                    { text: "5兩", color: "#6a4c93", probability: 10 },
+                    { text: "10兩", color: "#f72585", probability: 20 },
+                    { text: "2貨", color: "#4cc9f0", probability: 5 },
+                    { text: "50兩", color: "#ff9e00", probability: 5 },
+                    { text: "100兩", color: "#ff006e", probability: 3 }
+                ]
+            },
+             {
+        id: 'tictactoe',
+        name: '夜巿三津渡',
+        cost: 10,
+		spiritCost: 15,
+        description: '「津渡」 原指渡口，古代出行常需渡過關卡般的渡口，與老闆輪流放置"○"和"╳"，優先連成一條直線者獲勝！',
+        bossTalk: '這可是考驗智慧的遊戲，讓我看看你的實力如何'
+    },
+            {
+               id: 'clicker',
+        name: '星燈逐漏',
+        cost: 10,
+		spiritCost: 15,
+        description: '十五秒內點擊盡可能多的圓圈，超過攤販老闆的數量即可獲勝！',
+        bossTalk: '手速決定一切，讓我看看你的極限在哪裡'
+            },
+            {
+                        id: 'quiz',
+        name: '夜市猜謎',
+        cost: 10,
+		spiritCost: 15,
+        description: '回答謎語或常識問題，答對即可獲得獎勵！',
+        bossTalk: '知識就是財富，讓我考考你的智慧',
+        questions: [
+    {
+        question: "「朝辭白帝彩雲間」的下一句是？",
+        options: [
+            "千里江陵一日還",
+            "兩岸猿聲啼不住",
+            "輕舟已過萬重山",
+            "孤帆遠影碧空盡"
+        ],
+        answer: 0
+    },
+    {
+        question: "下列哪個不是四大名著？",
+        options: [
+            "紅樓夢",
+            "水滸傳",
+            "金瓶梅",
+            "三國演義"
+        ],
+        answer: 2
+    },
+    {
+        question: "「床前明月光」中的「床」指的是什麼？",
+        options: [
+            "睡覺的床",
+            "井欄",
+            "窗台",
+            "門檻"
+        ],
+        answer: 1
+    },
+    {
+        question: "十二生肖中排在龍後面的是？",
+        options: [
+            "兔",
+            "蛇",
+            "馬",
+            "羊"
+        ],
+        answer: 1
+    },
+    {
+        question: "「而立之年」指的是多少歲？",
+        options: [
+            "30歲",
+            "40歲",
+            "50歲",
+            "60歲"
+        ],
+        answer: 0
+    },
+    // 以下是新增的题目
+    {
+        question: "台灣夜市中常見的「蚵仔煎」主要源自哪個地區？",
+        options: [
+            "台南",
+            "鹿港",
+            "澎湖",
+            "台北"
+        ],
+        answer: 2
+    },
+    {
+        question: "下列哪種不是傳統台灣夜市的遊戲？",
+        options: [
+            "套圈圈",
+            "射飛鏢",
+            "彈珠台",
+            "夾娃娃"
+        ],
+        answer: 3
+    },
+    {
+        question: "「大腸包小腸」是台灣哪個地區的特色小吃？",
+        options: [
+            "台中逢甲",
+            "台北士林",
+            "高雄六合",
+            "花蓮東大門"
+        ],
+        answer: 0
+    },
+    {
+        question: "傳統台灣婚禮中，新娘出嫁時要丟什麼？",
+        options: [
+            "扇子",
+            "手帕",
+            "鮮花",
+            "紅包"
+        ],
+        answer: 0
+    },
+    {
+        question: "下列哪種不是台灣常見的夜市飲品？",
+        options: [
+            "珍珠奶茶",
+            "青草茶",
+            "木瓜牛奶",
+            "馬蹄水"
+        ],
+        answer: 3
+    },
+    {
+        question: "台灣人過年必吃的年菜「長年菜」是指什麼菜？",
+        options: [
+            "菠菜",
+            "芥菜",
+            "高麗菜",
+            "空心菜"
+        ],
+        answer: 1
+    },
+    {
+        question: "「棺材板」是台灣哪個城市的特色小吃？",
+        options: [
+            "台北",
+            "台中",
+            "台南",
+            "高雄"
+        ],
+        answer: 2
+    },
+    {
+        question: "台灣傳統習俗中，冬至要吃什麼？",
+        options: [
+            "月餅",
+            "粽子",
+            "湯圓",
+            "年糕"
+        ],
+        answer: 2
+    },
+    {
+        question: "下列哪種不是台灣夜市常見的炸物？",
+        options: [
+            "甜不辣",
+            "雞排",
+            "地瓜球",
+            "車輪餅"
+        ],
+        answer: 3
+    },
+    {
+        question: "台灣哪個夜市以「木瓜牛奶」聞名？",
+        options: [
+            "士林夜市",
+            "逢甲夜市",
+            "六合夜市",
+            "饒河夜市"
+        ],
+        answer: 2
+    },
+    {
+        question: "「割包」又常被稱為什麼？",
+        options: [
+            "虎咬豬",
+            "龍吞珠",
+            "鳳含玉",
+            "龜載寶"
+        ],
+        answer: 0
+    },
+    {
+        question: "台灣人習慣在什麼節日吃潤餅？",
+        options: [
+            "端午節",
+            "中秋節",
+            "清明節",
+            "重陽節"
+        ],
+        answer: 2
+    },
+    {
+        question: "下列哪種不是台灣傳統的早餐選擇？",
+        options: [
+            "飯糰",
+            "蛋餅",
+            "刈包",
+            "三明治"
+        ],
+        answer: 3
+    },
+    {
+        question: "「珍珠奶茶」中的「珍珠」是什麼做的？",
+        options: [
+            "西米",
+            "樹薯粉",
+            "糯米",
+            "蕨粉"
+        ],
+        answer: 1
+    },
+	            {
+                question: "古代夜市賣的日用品，竹篾編織圓圓形，用來盛放五穀糧，蓋子蓋上防塵土（打一器物）",
+                options: [
+                    "木箱",
+                    "竹籮",
+                    "陶罐",
+                    "布袋"
+                ],
+                answer: 1
+            },
+            {
+                question: "孩童玩具用泥燒，上塗彩繪樣子嬌，哨子一吹能響叫，模樣多是動物肖（打一玩具）",
+                options: [
+                    "陶哨",
+                    "木偶",
+                    "泥人",
+                    "竹笛"
+                ],
+                answer: 0
+            },
+            {
+                question: "夜市小吃甜又香，糯米磨粉做皮囊，棗泥豆沙當餡料，蒸在籠中白胖胖（打一食物）",
+                options: [
+                    "包子",
+                    "米糕",
+                    "蒸糕",
+                    "元宵"
+                ],
+                answer: 3
+            },
+            {
+                question: "古人梳妝必備物，鏡子一面框上糊，打開裡面能照影，收起小巧便攜帶（打一物品）",
+                options: [
+                    "銅鏡",
+                    "梳妝盒",
+                    "菱花鏡",
+                    "鏡匣"
+                ],
+                answer: 3
+            },
+            {
+                question: "夜市雜耍真驚奇，幾個小球手中飛，拋來接去不落空，觀眾拍手稱絕技（打一技藝）",
+                options: [
+                    "雜技",
+                    "頂碗",
+                    "拋球",
+                    "戲法"
+                ],
+                answer: 2
+            },
+            {
+                question: "古代孩童玩的棋，石子木塊當棋子，畫個方格就能下，簡單有趣又益智（打一遊戲）",
+                options: [
+                    "象棋",
+                    "圍棋",
+                    "五子棋",
+                    "跳棋"
+                ],
+                answer: 2
+            },
+            {
+                question: "夜市飲品酸又甜，梅子熬煮放冰糖，夏日解渴味道好，冰鎮之後更清涼（打一飲品）",
+                options: [
+                    "酸梅湯",
+                    "楊梅湯",
+                    "涼茶",
+                    "果汁"
+                ],
+                answer: 0
+            },
+            {
+                question: "古人雨具用竹骨，油布蒙在外面頭，撐開能擋風和雨，收攏細長便攜帶（打一物品）",
+                options: [
+                    "蓑衣",
+                    "雨傘",
+                    "斗笠",
+                    "雨披"
+                ],
+                answer: 1
+            },
+            {
+                question: "玩具小巧用線牽，竹木做成小鳥樣，拉動線繩能跳躍，彷彿飛鳥舞翩躚（打一玩具）",
+                options: [
+                    "風箏",
+                    "竹鳥",
+                    "牽線木偶",
+                    "布鷂"
+                ],
+                answer: 2
+            },
+            {
+                question: "夜市熟食味道香，豬肉切碎拌香料，麵皮包裹成卷狀，蒸熟切片蘸薑醬（打一食物）",
+                options: [
+                    "肉包",
+                    "肉卷",
+                    "餛飩",
+                    "肉糕"
+                ],
+                answer: 1
+            },
+            {
+                question: "古代計時用香燭，盤成一圈慢慢燒，刻有刻度記時間，夜間讀書離不了（打一物品）",
+                options: [
+                    "更香",
+                    "蠟燭",
+                    "漏刻",
+                    "時香"
+                ],
+                answer: 0
+            },
+            {
+                question: "兒童遊戲真簡單，地上畫格跳著玩，單腳雙腳交替跳，童年歡樂記心間（打一遊戲）",
+                options: [
+                    "跳繩",
+                    "跳房子",
+                    "踢毽子",
+                    "丟沙包"
+                ],
+                answer: 1
+            },
+            {
+                question: "夜市攤上賣的糖，形狀彎彎像月亮，顏色金黃味道甜，小孩見了都想嘗（打一食物）",
+                options: [
+                    "糖果",
+                    "糖瓜",
+                    "糖彎",
+                    "糖條"
+                ],
+                answer: 1
+            },
+            {
+                question: "古人睡覺用的枕，木頭玉石來做成，夏天枕著清涼爽，還能安神助睡眠（打一物品）",
+                options: [
+                    "布枕",
+                    "玉枕",
+                    "木枕",
+                    "石枕"
+                ],
+                answer: 1
+            },
+            {
+                question: "民間藝人拿手戲，手捏泥團變萬物，人物動物樣樣像，烤乾上色真傳奇（打一技藝）",
+                options: [
+                    "泥塑",
+                    "雕刻",
+                    "繪畫",
+                    "捏麵人"
+                ],
+                answer: 0
+            },
+            {
+                question: "古代女子貼額間，紅紙剪樣真嬌豔，裝點容顏添風韻，花燈夜市常見賣（打一飾物）",
+                options: [
+                    "花鈿",
+                    "頭花",
+                    "胭脂",
+                    "額帶"
+                ],
+                answer: 0
+            },
+            {
+                question: "夜市小吃鹹味香，麵粉調糊鍋中炸，形狀彎彎像耳朵，蘸著醋吃滋味長（打一食物）",
+                options: [
+                    "油條",
+                    "麻花",
+                    "油耳朵",
+                    "煎餅"
+                ],
+                answer: 2
+            },
+            {
+                question: "孩童玩具竹片做，中間穿線兩頭握，來回拉動會發聲，清脆悅耳像唱歌（打一玩具）",
+                options: [
+                    "竹笛",
+                    "快板",
+                    "拉線琴",
+                    "竹哨"
+                ],
+                answer: 2
+            },
+        
+            {
+                 question: "台灣哪個夜市以「藥燉排骨」聞名？",
+                 options: [
+                 "寧夏夜市",
+                 "士林夜市",
+                 "饒河夜市",
+                 "華西街夜市"
+                 ],
+                 answer: 2
+            }
+                ]
+            },
+			
+			
+            {
+                      id: 'lantern',
+        name: '祈福天燈',
+        cost: 15,
+		spiritCost: 20,
+        description: '點擊天燈讓它升起，升起的高度決定你的獎項等級！',
+        bossTalk: '心誠則靈，讓天燈帶走你的願望，帶來好運'
+    }
+];
+
+
+
+// 页面加载时随机决定是否触发慈善事件
+window.onload = function() {
+    selectedGames = selectRandomGames();
+    generateGameCards();
+    
+    // 添加手动关闭页面按钮事件
+    document.getElementById('closePageBtn').addEventListener('click', function() {
+        alert('頁面即將關閉');
+    });
+    
+};
+        
+      // 古代夜市小食及價格選項
+const foodOptions = [
+    { food: "冰糖葫蘆", cost: "5兩" },
+    { food: "糖炒栗子", cost: "6兩" },
+    { food: "芝麻糊", cost: "4兩" },
+    { food: "豆花", cost: "5兩" },
+    { food: "肉包子", cost: "6兩" },
+    { food: "綠豆湯", cost: "3兩" },
+    { food: "紅豆餅", cost: "4兩" },
+    { food: "水晶膾", cost: "5兩" },
+    { food: "烤地瓜", cost: "3兩" },
+    { food: "巧果", cost: "5兩" },
+    { food: "定勝糕", cost: "8兩" },
+    { food: "梅花湯餅", cost: "5兩" },
+    { food: "蒸酥酪", cost: "6兩" },
+    { food: "煎餅", cost: "4兩" },
+    { food: "油端子", cost: "3兩" },
+    { food: "糖畫", cost: "2兩" },
+    { food: "胡餅", cost: "5兩" },
+    { food: "蒸芋頭", cost: "3兩" },
+    { food: "粉湯", cost: "6兩" },
+    { food: "水飴", cost: "4兩" },
+    { food: "麻團", cost: "3兩" },
+    { food: "裹蒸粽", cost: "7兩" },
+    { food: "炸油糕", cost: "5兩" },
+    { food: "蒸糕", cost: "4兩" },
+    { food: "糖霜", cost: "9兩" }
+];
+    
+
+// 隨機對話選項
+const dialogueOptions = [
+    "可以給我一點錢買{food}嗎？我好想吃...",
+    "姐姐，我好想吃{food}，可以借我一點錢嗎？",
+    "那個{food}看起來好好吃，可是我沒有錢...",
+    "我好餓，好想吃{food}，可以幫幫我嗎？",
+    "{food}的香味好誘人，可以給我一點錢嗎？",
+    "我從早上就沒吃東西，好想吃{food}..."
+];
+
+const characterAvatars = {
+    girl: [
+        'https://imgur.com/nEgWYCT.png', // 古风小女孩头像1
+        'https://imgur.com/oTRJB2g.png', // 古风小女孩头像2
+        'https://imgur.com/ww8fs3e.png'  // 古风小女孩头像3
+    ],
+    boy: [
+        'https://imgur.com/tytcTOH.png', // 古风小男孩头像1
+        'https://imgur.com/7U1SQYN.png', // 古风小男孩头像2
+        'https://imgur.com/WEA2mMm.png'  // 古风小男孩头像3
+    ]
+};
+
+ // 修改慈善事件背景图片链接
+        const charityBackgrounds = [
+            'https://i.imgur.com/9Ihwu9Y.png', // 古风背景1-夜市
+            'https://i.imgur.com/AOAEbx5.png', // 古风背景2-街道
+            'https://i.imgur.com/SEoUZyY.png', // 古风背景3-灯笼
+            'https://i.imgur.com/hBTWhuf.png'  // 古风背景4-传统建筑
+        ];
+        
+        // 修改触发慈善事件函数中的背景设置部分
+        function triggerCharityEvent() {
+    charityEventTriggered = true;
+    const charityEvent = document.getElementById('charityEvent');
+    
+    // 隨機決定位置
+    const positions = ['left', 'right'];
+    const verticalPositions = ['top', 'bottom'];
+    const position = positions[Math.floor(Math.random() * positions.length)];
+    const verticalPosition = verticalPositions[Math.floor(Math.random() * verticalPositions.length)];
+    
+    // 移除可能存在的舊位置類
+    charityEvent.classList.remove('left', 'right', 'top', 'bottom');
+    // 添加新位置類
+    charityEvent.classList.add(position, verticalPosition);
+    
+    // 隨機決定是小妹妹還是小弟弟
+    const isGirl = Math.random() < 0.5;
+    const characterType = isGirl ? 'girl' : 'boy';
+    const genderText = isGirl ? '姐姐' : '哥哥';
+    
+    // 隨機選擇頭像
+    const avatars = characterAvatars[characterType];
+    const randomAvatar = avatars[Math.floor(Math.random() * avatars.length)];
+    
+    // 設定頭像
+    const characterElement = document.getElementById('charityCharacter');
+    characterElement.innerHTML = ''; // 清空原有內容
+    const avatarImg = document.createElement('img');
+    avatarImg.src = randomAvatar;
+    avatarImg.alt = isGirl ? '小女孩' : '小男孩';
+    characterElement.appendChild(avatarImg);
+    
+    // 隨機選擇背景
+    const randomBackground = charityBackgrounds[Math.floor(Math.random() * charityBackgrounds.length)];
+    
+    // 修改背景設定方式
+    charityEvent.style.background = `linear-gradient(135deg, rgba(255, 222, 173, 0.95) 0%, rgba(245, 222, 179, 0.95) 100%), url('${randomBackground}')`;
+    charityEvent.style.backgroundSize = 'cover';
+    charityEvent.style.backgroundPosition = 'center';
+    charityEvent.style.backgroundRepeat = 'no-repeat';
+
+    // 隨機選擇食物和金額
+    const randomFood = foodOptions[Math.floor(Math.random() * foodOptions.length)];
+    const randomDialogue = dialogueOptions[Math.floor(Math.random() * dialogueOptions.length)];
+    
+    document.getElementById('charityMessage').textContent = 
+        `${genderText}，${randomDialogue.replace('{food}', randomFood.food)}`;
+    
+    // 生成隨機靈石數量 (3-5顆)
+    const randomStoneCost = Math.floor(Math.random() * 14) + 2; // 2-15顆隨機
+    charityEvent.dataset.stoneCost = randomStoneCost; // 存儲隨機靈石數量
+    
+    // 更新按鈕文本顯示隨機金額和隨機靈石
+    const giveSilverButton = document.querySelector('.charity-give-silver');
+    const giveStoneButton = document.querySelector('.charity-give-stone');
+    giveSilverButton.textContent = `給錢 (${randomFood.cost})`;
+    giveStoneButton.textContent = `給靈石 (${randomStoneCost}顆)`;
+    
+    // 存儲當前隨機金額用於後續處理
+    charityEvent.dataset.cost = randomFood.cost;
+    
+    // 重置響應區域
+    document.getElementById('charityResponse').style.display = 'none';
+    charityEvent.querySelector('.charity-options').style.display = 'flex';
+    
+    // 顯示慈善事件
+    charityEvent.style.display = 'block';
+    
+    // 添加調試信息
+    console.log('慈善事件已觸發，金額：', randomFood.cost, '靈石：', randomStoneCost);
+}
+
+function handleCharityChoice(choiceType) {
+    const charityEvent = document.getElementById('charityEvent');
+    const charityResponse = document.getElementById('charityResponse');
+    const charityOptions = charityEvent.querySelector('.charity-options');
+    const charityBonusNotice = document.getElementById('charityBonusNotice');
+    
+    // 獲取存儲的隨機金額和靈石數量（移到函数开头）
+    const cost = charityEvent.dataset.cost || '4兩';
+    const stoneCost = parseInt(charityEvent.dataset.stoneCost) || 4;
+    
+    if (choiceType === 'silver' || choiceType === 'stone') {
+        // 玩家選擇給錢或給靈石
+        if (choiceType === 'stone') {
+            // 檢查靈石是否足夠
+            const currentSpiritStones = parseInt(spiritStoneCount.textContent);
+            if (currentSpiritStones < stoneCost) {
+                charityResponse.textContent = `你的靈石不夠，需要${stoneCost}顆...`;
+                charityResponse.style.display = 'block';
+                return;
+            }
+            
+            // 扣除靈石
+            const newSpiritStones = currentSpiritStones - stoneCost;
+            spiritStoneCount.textContent = newSpiritStones;
+            updateSpiritStonesInAuctionData(currentPlayer, newSpiritStones);
+            
+            charityResponse.textContent = `謝謝姐姐！用${stoneCost}顆靈石買的冰糖葫蘆特別好吃！`;
+        } else {
+            charityResponse.textContent = `謝謝姐姐！這邊有個很好玩的遊戲，我帶你去吧！`;
+        }
+        
+        charityResponse.style.display = 'block';
+        charityOptions.style.display = 'none';
+        
+        // 顯示福報效果提示
+const bonusEffects = [
+    `善有善報！你的愛心（花費${choiceType === 'stone' ? stoneCost + '靈石' : cost}）感動上天，稍後遊戲勝出獎勵將獲得兩倍福報！`,
+    `積善之家必有餘慶！你的善舉（花費${choiceType === 'stone' ? stoneCost + '靈石' : cost}）為你帶來好運，勝出可獲額外10銀兩！`,
+    `好心有好報！你的溫情（花費${choiceType === 'stone' ? stoneCost + '靈石' : cost}）感動攤主，勝出可從卡庫額外抽取兩張卡！`,
+    `善緣結善果！你的慷慨（花費${choiceType === 'stone' ? stoneCost + '靈石' : cost}）獲得回報，失敗時可免費重玩其他攤位！`,
+    `福澤庇佑！你的善心（花費${choiceType === 'stone' ? stoneCost + '靈石' : cost}）感動天地，失敗時將獲得5銀兩安慰獎！`,
+    `功德無量！你的善行（花費${choiceType === 'stone' ? stoneCost + '靈石' : cost}）積累福報，失敗時將獲得10銀兩回饋！`,
+    `吉星高照！你的溫情（花費${choiceType === 'stone' ? stoneCost + '靈石' : cost}）帶來好運，遊戲勝出將獲得2張實體刮刮樂卡！`,
+    `善緣善果！你的愛心（花費${choiceType === 'stone' ? stoneCost + '靈石' : cost}）不會白費，遊戲失敗也將獲得1張實體刮刮樂卡！`
+];
+
+        const randomEffect = bonusEffects[Math.floor(Math.random() * bonusEffects.length)];
+        charityBonusNotice.textContent = randomEffect;
+        charityBonusNotice.style.display = 'block';
+        
+        // 激活獎勵加成
+        charityBonusActive = true;
+        
+        // 添加遊戲卡片發光效果
+        document.querySelectorAll('.game-card').forEach(card => {
+            card.classList.add('highlight');
+        });
+        
+        // 3秒後隱藏慈善事件
+        setTimeout(() => {
+            charityEvent.style.display = 'none';
+        }, 3000);
+    } else {
+        // 玩家選擇不理會
+        charityResponse.textContent = "...好吧，我再去問問別人";
+        charityResponse.style.display = 'block';
+        charityOptions.style.display = 'none';
+        
+        // 隱藏善心效果提示（如果之前顯示過）
+        charityBonusNotice.style.display = 'none';
+        
+        // 3秒後隱藏慈善事件
+        setTimeout(() => {
+            charityEvent.style.display = 'none';
+        }, 2000);
+    }
+}
+        
+        // 修改显示结果函数，添加奖励加成检测
+function showResult(container, message, type) {
+    // 如果已经显示结果，不再重复显示
+    if (container.querySelector('.result-area')) return;
+    
+    // 检查是否有慈善奖励加成
+    let bonusApplied = false;
+    let originalMessage = message;
+    
+    if (charityBonusActive && type === 'success') {
+        // 提取奖励数值并翻倍
+        const rewardMatch = message.match(/(\d+)/);
+        if (rewardMatch) {
+            const originalReward = parseInt(rewardMatch[1]);
+            const doubledReward = originalReward * 2;
+            message = message.replace(originalReward, doubledReward);
+            
+            // 添加奖励加成提示
+            message += " (善心獎勵翻倍)";
+            bonusApplied = true;
+        }
+    }
+    
+    const resultArea = document.createElement('div');
+    resultArea.className = `result-area ${type}-result`;
+    resultArea.textContent = message;
+    
+    // 如果有奖励加成，添加额外提示
+    if (bonusApplied) {
+        const bonusMessage = document.createElement('div');
+        bonusMessage.className = 'bonus-message';
+        bonusMessage.textContent = '由於你懷有善心，獲得獎金加乘！';
+        bonusMessage.style.marginTop = '10px';
+        bonusMessage.style.fontSize = '1.2rem';
+        resultArea.appendChild(bonusMessage);
+    }
+    
+    container.appendChild(resultArea);
+    
+    // 添加关闭按钮
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.textContent = '關閉';
+    closeBtn.style.marginTop = '20px';
+    
+    closeBtn.onclick = function() {
+        document.getElementById('gameScreen').style.display = 'none';
+        // 启用所有按钮
+        enableAllButtons();
+        
+        // 移除游戏卡片发光效果
+        document.querySelectorAll('.game-card').forEach(card => {
+            card.classList.remove('highlight');
+        });
+    };
+    
+    container.appendChild(closeBtn);
+    
+    // 设置游戏结束状态
+    gameEnded = true;
+    
+    // 显示全局遮罩
+    setTimeout(function() {
+        document.getElementById('overlayMask').classList.add('active');
+    }, 6000);
+}
+        
+        // 已选择的游戏
+        let selectedGames = [];
+        // 按钮是否已禁用
+        let buttonsDisabled = false;
+        // 页面关闭倒计时
+        let pageCloseTimer = null;
+        // 游戏是否已结束
+        let gameEnded = false;
+        // 新增：总奖励跟踪
+        let totalRewards = { silver: 0, goods: 0 }; // 银两和货物
+        // 夜市猜谜游戏重试次数限制
+        let quizRetryCount = 0;
+        const MAX_QUIZ_RETRIES = 1; // 最多只能重试1次
+        // 慈善事件是否已触发
+        let charityEventTriggered = false;
+        // 慈善奖励是否激活
+        let charityBonusActive = false;
+        
+        // 当前玩家
+        let currentPlayer = null;
+        let selectedGame = null;
+        let selectedPaymentType = null;
+        
+        // DOM 元素
+        const loginSection = document.getElementById('login-section');
+        const gameContainer = document.getElementById('game-container');
+        const playerSelect = document.getElementById('player-select');
+        const loginBtn = document.getElementById('login-btn');
+        const verifyingText = document.getElementById('verifying-text');
+        const welcomeText = document.getElementById('welcome-text');
+        const welcomePlayerName = document.getElementById('welcome-player-name');
+        const currentPlayerEl = document.getElementById('current-player');
+        const spiritStoneCount = document.getElementById('spirit-stone-count');
+        const paymentModal = document.getElementById('payment-modal');
+        const paymentOptions = document.querySelectorAll('.payment-option');
+        const confirmPaymentBtn = document.getElementById('confirm-payment');
+        const cancelPaymentBtn = document.getElementById('cancel-payment');
+        const silverCost = document.getElementById('silver-cost');
+        const stoneCost = document.getElementById('stone-cost');
+        
+        // 初始化函数
+        function init() {
+            loadPlayers();
+            setupEventListeners();
+        }
+        
+        // 从主网页加载玩家列表
+        function loadPlayers() {
+            const mainPlayers = JSON.parse(localStorage.getItem('players')) || [];
+            playerSelect.innerHTML = '<option value="">-- 請選擇玩家 --</option>';
+            
+            mainPlayers.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.name;
+                option.textContent = player.name;
+                playerSelect.appendChild(option);
+            });
+            
+            // 如果没有玩家数据，添加一些示例玩家
+            if (mainPlayers.length === 0) {
+                const examplePlayers = ['玩家一', '玩家二', '玩家三', '玩家四'];
+                examplePlayers.forEach(playerName => {
+                    const option = document.createElement('option');
+                    option.value = playerName;
+                    option.textContent = playerName;
+                    playerSelect.appendChild(option);
+                });
+            }
+        }
+        
+        // 替换原来的 getPlayerSpiritStones 函数
+function getPlayerSpiritStones(playerName) {
+    try {
+        // 优先从主网页玩家数据获取
+        const mainPlayers = JSON.parse(localStorage.getItem('players')) || [];
+        const mainPlayer = mainPlayers.find(p => p.name === playerName);
+        
+        if (mainPlayer && mainPlayer.spiritStones !== undefined) {
+            console.log(`从主网页数据获取 ${playerName} 的灵石: ${mainPlayer.spiritStones}`);
+            return mainPlayer.spiritStones;
+        }
+        
+        // 如果主网页没有，从拍卖行数据获取
+        const auctionData = JSON.parse(localStorage.getItem('auctionData')) || { players: {} };
+        if (auctionData.players && auctionData.players[playerName]) {
+            const stones = auctionData.players[playerName].spiritStones || 0;
+            console.log(`从拍卖行数据获取 ${playerName} 的灵石: ${stones}`);
+            return stones;
+        }
+        
+        console.log(`未找到玩家 ${playerName} 的灵石数据，返回默认值0`);
+        return 0;
+    } catch (error) {
+        console.error('讀取靈石失敗:', error);
+        return 0;
+    }
+}   
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 登录按钮
+           loginBtn.addEventListener('click', function() {
+    const selectedPlayer = playerSelect.value;
+    if (!selectedPlayer) {
+        alert('請選擇玩家！');
+        return;
+    }
+    
+    console.log('=== 开始登录流程 ===');
+    console.log('选择的玩家:', selectedPlayer);
+    
+    verifyingText.style.display = 'block';
+    loginBtn.disabled = true;
+    
+    setTimeout(function() {
+        verifyingText.style.display = 'none';
+        welcomePlayerName.textContent = selectedPlayer;
+        welcomeText.style.display = 'block';
+        
+        setTimeout(function() {
+    currentPlayer = selectedPlayer;
+    currentPlayerEl.textContent = selectedPlayer;
+    
+    // 获取玩家灵石数据
+    const spiritStones = getPlayerSpiritStones(selectedPlayer);
+    spiritStoneCount.textContent = spiritStones;
+    
+    loginSection.style.display = 'none';
+    gameContainer.style.display = 'block';
+    
+    // 初始化游戏
+    selectedGames = selectRandomGames();
+    generateGameCards();
+    
+    // 30%几率触发慈善事件 - 在显示游戏卡片后3秒触发
+    if (Math.random() < 0.6) {
+        setTimeout(triggerCharityEvent, 3000);
+    }
+}, 2000);
+    }, 3000);
+});
+            
+            // 支付选项选择
+            paymentOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    paymentOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedPaymentType = this.getAttribute('data-type');
+                });
+            });
+            
+            // 在支付确认函数中调用更新
+confirmPaymentBtn.addEventListener('click', function() {
+    if (!selectedPaymentType) {
+        alert('請選擇支付方式！');
+        return;
+    }
+    
+    const game = games.find(g => g.id === selectedGame);
+    if (!game) return;
+    
+    console.log('=== 支付调试信息 ===');
+    console.log('支付方式:', selectedPaymentType);
+    console.log('游戏费用:', game.cost, '银两 或', game.spiritCost, '灵石');
+    console.log('当前玩家:', currentPlayer);
+    
+    if (selectedPaymentType === 'silver') {
+        // 银两支付 - 在实体桌游中扣除
+        paymentModal.style.display = 'none';
+        openGame(selectedGame);
+    } else if (selectedPaymentType === 'spirit-stone') {
+        // 灵石支付 - 检查是否足够
+        const currentSpiritStones = parseInt(spiritStoneCount.textContent);
+        console.log('当前灵石数量:', currentSpiritStones);
+        console.log('需要灵石数量:', game.spiritCost);
+        
+        if (currentSpiritStones < game.spiritCost) {
+            alert('靈石不足！');
+            return;
+        }
+        
+        // 扣除灵石
+        const newSpiritStones = currentSpiritStones - game.spiritCost;
+        console.log('扣除后灵石数量:', newSpiritStones);
+        
+        spiritStoneCount.textContent = newSpiritStones;
+        
+        // 更新拍卖行数据 + 主网页玩家数据
+        updateSpiritStonesInAuctionData(currentPlayer, newSpiritStones);
+        
+        paymentModal.style.display = 'none';
+        openGame(selectedGame);
+    }
+});
+            
+            // 取消支付
+            cancelPaymentBtn.addEventListener('click', function() {
+                paymentModal.style.display = 'none';
+            });
+        }
+        
+       function updateSpiritStonesInAuctionData(playerName, newSpiritStones) {
+    try {
+        // 更新拍卖行数据
+        const auctionData = JSON.parse(localStorage.getItem('auctionData')) || { players: {} };
+        
+        // 确保玩家数据存在
+        if (!auctionData.players[playerName]) {
+            auctionData.players[playerName] = {};
+        }
+		
+		
+		// 新增函数：更新主网页玩家数据中的灵石
+function updateMainPagePlayerData(playerName, newSpiritStones) {
+    try {
+        // 获取主网页的玩家数据
+        const mainPlayers = JSON.parse(localStorage.getItem('players')) || [];
+        
+        // 查找并更新对应玩家的灵石数量
+        const playerIndex = mainPlayers.findIndex(p => p.name === playerName);
+        if (playerIndex !== -1) {
+            // 如果玩家存在，更新灵石数量
+            mainPlayers[playerIndex].spiritStones = newSpiritStones;
+            localStorage.setItem('players', JSON.stringify(mainPlayers));
+            console.log(`已更新主网页中 ${playerName} 的灵石为: ${newSpiritStones}`);
+        } else {
+            console.log(`在主网页数据中未找到玩家: ${playerName}`);
+        }
+    } catch (error) {
+        console.error('更新主网页玩家数据失败:', error);
+    }
+}
+        
+        // 更新拍卖行中的灵石数量
+        auctionData.players[playerName].spiritStones = newSpiritStones;
+        localStorage.setItem('auctionData', JSON.stringify(auctionData));
+        
+        console.log(`已更新拍卖行中 ${playerName} 的灵石为: ${newSpiritStones}`);
+        
+        // 关键修改：同时更新主网页的玩家数据
+        updateMainPagePlayerData(playerName, newSpiritStones);
+        
+    } catch (error) {
+        console.error('更新灵石数据失败:', error);
+    }
+}
+        
+        // 随机选择两个游戏
+        function selectRandomGames() {
+            const shuffled = [...games].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 2);
+        }
+        
+        // 生成游戏卡片
+function generateGameCards() {
+    const gameContainer = document.getElementById('gameContainer');
+    gameContainer.innerHTML = '';
+    
+    selectedGames.forEach(game => {
+        const gameCard = document.createElement('div');
+        gameCard.className = 'game-card';
+        
+        gameCard.innerHTML = `
+            <div class="game-header">${game.name}</div>
+            <div class="game-content">
+                <div class="avatar-img">
+                    <img src="${getAvatarImage(game.id)}" alt="${game.name}">
+                </div>
+                <p class="game-description">${game.description}</p>
+                <p class="boss-talk" style="font-style: italic; color: #f9c74f; margin: 10px 0; text-align: center;">
+                    "${game.bossTalk}"
+                </p>
+                <p class="game-cost">需付銀兩: <span style="color: #f94144;">${game.cost}兩</span> 或 靈石: <span style="color: #3498db;">${game.spiritCost}顆</span></p>
+                <button class="btn-try" onclick="selectGame('${game.id}')" ${buttonsDisabled ? 'disabled' : ''}>試一手</button>
+            </div>
+        `;
+        
+        gameContainer.appendChild(gameCard);
+    });
+}
+        
+        // 选择游戏
+        function selectGame(gameId) {
+            selectedGame = gameId;
+            const game = games.find(g => g.id === gameId);
+            
+            if (game) {
+                // 显示支付选择模态框
+                silverCost.textContent = game.cost;
+                stoneCost.textContent = game.spiritCost;
+                
+                // 重置选择
+                selectedPaymentType = null;
+                paymentOptions.forEach(option => option.classList.remove('selected'));
+                
+                paymentModal.style.display = 'flex';
+            }
+        }
+        
+        // 获取头像图片URL
+        function getAvatarImage(gameId) {
+            const images = {
+                'grid': 'https://imgur.com/9yBN2su.jpg',
+                'tictactoe': 'https://imgur.com/fNHYfZA.jpg',
+                'clicker': 'https://imgur.com/COkfjIO.jpg',
+                'quiz': 'https://imgur.com/5A7JNps.jpg',
+                'lantern': 'https://imgur.com/kAp9J7b.jpg'
+            };
+            return images[gameId] || 'https://imgur.com/kNVCQ4r.jpg';
+        }
+        
+        // 原有的游戏函数保持不变
+        function openGame(gameId) {
+            // 禁用所有按钮
+            disableAllButtons();
+            
+            const gameScreen = document.getElementById('gameScreen');
+            const gameArea = document.getElementById('gameArea');
+            const game = games.find(g => g.id === gameId);
+            
+            if (game) {
+                // 清空游戏区域并移除所有背景类
+                gameArea.innerHTML = '';
+                gameArea.className = 'game-area'; // 重置类名
+                
+                // 添加特定游戏的背景类
+                gameArea.classList.add(`${gameId}-game`);
+                
+                // 添加游戏标题
+                const gameTitle = document.createElement('h2');
+                gameTitle.textContent = game.name;
+                gameTitle.style.color = '#4cc9f0';
+                gameTitle.style.marginBottom = '10px';
+                gameTitle.style.textShadow = '0 0 10px rgba(76, 201, 240, 0.7)';
+                gameArea.appendChild(gameTitle);
+                
+                // 添加老板对话
+                const bossTalk = document.createElement('p');
+                bossTalk.textContent = `"${game.bossTalk}"`;
+                bossTalk.style.color = '#f9c74f';
+                bossTalk.style.fontStyle = 'italic';
+                bossTalk.style.marginBottom = '20px';
+                bossTalk.style.textAlign = 'center';
+                gameArea.appendChild(bossTalk);
+                
+                // 根据游戏ID生成不同的游戏界面
+                switch(gameId) {
+                    case 'grid':
+                        createGridGame(gameArea, game);
+                        break;
+                    case 'tictactoe':
+                        createTicTacToeGame(gameArea);
+                        break;
+                    case 'clicker':
+                        createClickerGame(gameArea);
+                        break;
+                    case 'quiz':
+                        createQuizGame(gameArea, game);
+                        break;
+                    case 'lantern':
+                        createLanternGame(gameArea);
+                        break;
+                    default:
+                        createGridGame(gameArea, game);
+                }
+                
+                // 显示游戏屏幕
+                gameScreen.style.display = 'flex';
+            }
+        }
+        
+       // 获取头像图片URL
+function getAvatarImage(gameId) {
+    const images = {
+        'grid': 'https://imgur.com/9yBN2su.jpg',
+        'tictactoe': 'https://imgur.com/fNHYfZA.jpg',
+        'clicker': 'https://imgur.com/COkfjIO.jpg',
+        'quiz': 'https://imgur.com/5A7JNps.jpg',
+        'lantern': 'https://imgur.com/kAp9J7b.jpg'
+    };
+    return images[gameId] || 'https://imgur.com/kNVCQ4r.jpg';
+}
+        
+       // 打开游戏
+function openGame(gameId) {
+    // 禁用所有按钮
+    disableAllButtons();
+    
+    const gameScreen = document.getElementById('gameScreen');
+    const gameArea = document.getElementById('gameArea');
+    const game = games.find(g => g.id === gameId);
+    
+    if (game) {
+        // 清空游戏区域并移除所有背景类
+        gameArea.innerHTML = '';
+        gameArea.className = 'game-area'; // 重置类名
+        
+        // 添加特定游戏的背景类
+        gameArea.classList.add(`${gameId}-game`);
+        
+        // 添加游戏标题
+        const gameTitle = document.createElement('h2');
+        gameTitle.textContent = game.name;
+        gameTitle.style.color = '#4cc9f0';
+        gameTitle.style.marginBottom = '10px';
+        gameTitle.style.textShadow = '0 0 10px rgba(76, 201, 240, 0.7)';
+        gameArea.appendChild(gameTitle);
+		
+// 添加老板对话
+const bossTalk = document.createElement('p');
+bossTalk.textContent = `"${game.bossTalk}"`;
+bossTalk.style.color = '#f9c74f';
+bossTalk.style.fontStyle = 'italic';
+bossTalk.style.marginBottom = '20px';
+bossTalk.style.textAlign = 'center';
+gameArea.appendChild(bossTalk);
+                
+                // 根据游戏ID生成不同的游戏界面
+                switch(gameId) {
+                    case 'grid':
+                        createGridGame(gameArea, game);
+                        break;
+                    case 'tictactoe':
+                        createTicTacToeGame(gameArea);
+                        break;
+                    case 'clicker':
+                        createClickerGame(gameArea);
+                        break;
+                    case 'quiz':
+                        createQuizGame(gameArea, game);
+                        break;
+                    case 'lantern':
+                        createLanternGame(gameArea);
+                        break;
+                    default:
+                        createGridGame(gameArea, game);
+                }
+                
+                // 显示游戏屏幕
+                gameScreen.style.display = 'flex';
+            }
+        }
+        
+        // 创建方格闪灯游戏
+function createGridGame(container, game) {
+    const gridContainer = document.createElement('div');
+    gridContainer.className = 'grid-container';
+    
+    // 添加游戏消息显示区域（初始隐藏）
+    const messageArea = document.createElement('div');
+    messageArea.className = 'game-message';
+    messageArea.id = 'gameMessage';
+    messageArea.style.display = 'none'; // 初始隐藏
+    container.appendChild(messageArea);
+    
+    // 生成50个格子
+    const gridItems = [];
+    for (let i = 0; i < 50; i++) {
+        const item = document.createElement('div');
+        item.className = 'grid-item';
+        gridContainer.appendChild(item);
+        gridItems.push(item);
+    }
+    
+    // 分配奖励到格子
+    const rewards = [];
+    game.rewards.forEach(reward => {
+        for (let i = 0; i < reward.probability; i++) {
+            rewards.push(reward);
+        }
+    });
+    
+    // 随机打乱奖励顺序
+    for (let i = rewards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rewards[i], rewards[j]] = [rewards[j], rewards[i]];
+    }
+    
+    // 应用奖励到格子
+    gridItems.forEach((item, index) => {
+        const reward = rewards[index % rewards.length];
+        item.textContent = reward.text;
+        item.style.backgroundColor = reward.color;
+    });
+    
+    container.appendChild(gridContainer);
+    
+    // 添加开始按钮
+    const startBtn = document.createElement('button');
+    startBtn.className = 'btn-try';
+    startBtn.textContent = '開始遊戲';
+    startBtn.style.marginTop = '20px';
+    
+    let currentIndex = 0;
+    let intervalId = null;
+    let finalReward = null;
+    
+    startBtn.onclick = function() {
+        if (intervalId) return;
+        
+        startBtn.disabled = true;
+        gridItems.forEach(item => item.classList.remove('active'));
+        
+        let speed = 50;
+        let duration = 7000;
+        let elapsed = 0;
+        let finalCountdown = false;
+        let countdownSteps = 5;
+        let stopCount = 0; // 停止次数计数器
+        let maxStops = Math.floor(Math.random() * 3) + 1; // 随机1-3次停止
+        
+        function animate() {
+            if (elapsed >= duration && finalCountdown) return;
+            
+            gridItems[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + 1) % gridItems.length;
+            gridItems[currentIndex].classList.add('active');
+            
+            const progress = elapsed / duration;
+            
+            // 当时间接近结束时，开始倒计时效果
+            if (progress > 0.8 && !finalCountdown) {
+                finalCountdown = true;
+                startFinalCountdown();
+                return;
+            }
+            
+            speed = 50 + Math.floor(progress * 200);
+            elapsed += speed;
+            
+            if (elapsed < duration) {
+                setTimeout(animate, speed);
+            }
+        }
+        
+        function startFinalCountdown() {
+            // 显示倒计时提示
+            const countdownEl = document.createElement('div');
+            countdownEl.className = 'countdown-display';
+            countdownEl.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 5rem;
+                font-weight: bold;
+                color: gold;
+                text-shadow: 0 0 20px rgba(255,215,0,0.8);
+                z-index: 10;
+            `;
+            container.appendChild(countdownEl);
+            
+            // 倒计时效果
+            let count = countdownSteps;
+            countdownEl.textContent = '';
+            
+            const countdownInterval = setInterval(() => {
+                count--;
+                
+                if (count > 0) {
+                    countdownEl.textContent = '';
+                    countdownEl.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                    setTimeout(() => {
+                        countdownEl.style.transform = 'translate(-50%, -50%) scale(1)';
+                    }, 200);
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownEl.textContent = '';
+                    
+                    // 最终停顿效果
+                    setTimeout(() => {
+                        container.removeChild(countdownEl);
+                        
+                        // 最终慢速移动
+                        let finalSteps = 0;
+                        const finalMove = () => {
+                            gridItems[currentIndex].classList.remove('active');
+                            currentIndex = (currentIndex + 1) % gridItems.length;
+                            gridItems[currentIndex].classList.add('active');
+                            
+                            finalSteps++;
+                            if (finalSteps < 8) {
+                                setTimeout(finalMove, 300 + finalSteps * 100);
+                            } else {
+                                // 第一次停止
+                                stopCount++;
+                                const rewardText = gridItems[currentIndex].textContent;
+                                finalReward = game.rewards.find(r => r.text === rewardText);
+                                
+                                // 添加闪烁效果
+                                const blinkInterval = setInterval(() => {
+                                    gridItems[currentIndex].classList.toggle('active');
+                                }, 300);
+                                
+                                setTimeout(() => {
+                                    clearInterval(blinkInterval);
+                                    gridItems[currentIndex].classList.add('active');
+                                    
+                                    // 随机决定是否继续移动 (50%概率继续移动)
+                                    if (stopCount < maxStops && Math.random() < 0.5) {
+                                        // 在消息区域显示提示
+                                        messageArea.textContent = '客官!看來還沒完成停止....';
+                                        messageArea.style.display = 'flex'; // 显示消息
+                                        messageArea.classList.add('highlight');
+                                        
+                                        // 2秒后继续移动
+                                        setTimeout(() => {
+                                            messageArea.textContent = '';
+                                            messageArea.style.display = 'none'; // 隐藏消息
+                                            messageArea.classList.remove('highlight');
+                                            
+                                            // 继续移动几格
+                                            let extraSteps = Math.floor(Math.random() * 8) + 3;
+                                            const continueMove = () => {
+                                                gridItems[currentIndex].classList.remove('active');
+                                                currentIndex = (currentIndex + 1) % gridItems.length;
+                                                gridItems[currentIndex].classList.add('active');
+                                                
+                                                extraSteps--;
+                                                if (extraSteps > 0) {
+                                                    setTimeout(continueMove, 200);
+                                                } else {
+                                                    // 最终停止
+                                                    finalReward = game.rewards.find(r => 
+                                                        r.text === gridItems[currentIndex].textContent);
+                                                    showFinalResult();
+                                                }
+                                            };
+                                            
+                                            continueMove();
+                                        }, 2000);
+                                    } else {
+                                        // 最终停止
+                                        showFinalResult();
+                                    }
+                                }, 2000);
+                            }
+                        };
+                        
+                        finalMove();
+                    }, 500);
+                }
+            }, 800);
+        }
+        
+        // 显示最终结果
+        function showFinalResult() {
+            if (finalReward.text.includes("100兩")) {
+                showResult(container, `恭喜獲得${finalReward.text}！特等獎！`, 'success');
+            } else if (finalReward.text.includes("50兩")) {
+                showResult(container, `恭喜獲得${finalReward.text}！大獎！`, 'success');
+            } else if (finalReward.text.includes("貨") || finalReward.text.includes("10兩")) {
+                showResult(container, `恭喜獲得${finalReward.text}！成功！`, 'success');
+            } else {
+                showResult(container, `獲得${finalReward.text}。繼續努力！`, 'normal');
+            }
+        }
+        
+        animate();
+    };
+    
+    container.appendChild(startBtn);
+}
+        
+        // 创建井字游戏
+        function createTicTacToeGame(container) {
+            // 创建游戏状态显示
+            const statusEl = document.createElement('div');
+            statusEl.className = 'game-status';
+            statusEl.textContent = '您的回合：請選擇一個位置';
+            container.appendChild(statusEl);
+            
+            // 创建游戏板
+            const board = document.createElement('div');
+            board.className = 'tic-tac-toe';
+            
+            // 初始化游戏状态
+            let currentPlayer = 'player';
+            let gameOver = false;
+            const boardState = Array(9).fill(null);
+            
+            // 创建单元格
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                
+                cell.addEventListener('click', () => {
+                    if (gameOver || currentPlayer !== 'player' || boardState[i]) return;
+                    
+                    // 玩家下棋
+                    boardState[i] = 'X';
+                    cell.textContent = 'X';
+                    cell.classList.add('x');
+                    
+                    // 检查玩家是否获胜
+                    if (checkWinner(boardState, 'X')) {
+                        // 生成随机奖励8-20两
+                        const reward = Math.floor(Math.random() * 31) + 20;
+                        statusEl.textContent = '恭喜您獲勝了！';
+                        showResult(container, `恭喜獲勝！獲得${reward}銀兩`, 'success');
+                        gameOver = true;
+                        return;
+                    }
+                    
+                    // 检查是否平局
+                    if (isBoardFull(boardState)) {
+                        statusEl.textContent = '平局！';
+                        showResult(container, '平局！沒有獲得獎勵', 'normal');
+                        gameOver = true;
+                        return;
+                    }
+                    
+                    // 切换到电脑
+                    currentPlayer = 'computer';
+                    statusEl.textContent = '攤主思考中...';
+                    
+                    // 電腦下棋 - 使用多難度AI系統
+setTimeout(() => {
+    // 隨機選擇AI難度
+    const aiDifficulty = Math.random();
+    let computerMove;
+    
+    if (aiDifficulty < 0.3) {
+        // 簡單模式 - 隨機走法 (30%概率)
+        computerMove = getRandomMove(boardState);
+    } else if (aiDifficulty < 0.7) {
+        // 中等模式 - 基本策略 (40%概率)
+        computerMove = getMediumMove(boardState);
+    } else {
+        // 困難模式 - 高級策略 (30%概率)
+        computerMove = getHardMove(boardState);
+    }
+    
+    // 確保移動有效
+    if (computerMove !== null && boardState[computerMove] === null) {
+        boardState[computerMove] = 'O';
+        const computerCell = board.querySelector(`[data-index="${computerMove}"]`);
+        computerCell.textContent = 'O';
+        computerCell.classList.add('o');
+        
+        // 檢查電腦是否獲勝
+        if (checkWinner(boardState, 'O')) {
+            statusEl.textContent = '攤主獲勝！';
+            showResult(container, '失敗！沒有獲得獎勵', 'failure');
+            gameOver = true;
+            return;
+        }
+        
+        // 檢查是否平局
+        if (isBoardFull(boardState)) {
+            statusEl.textContent = '平局！';
+            showResult(container, '平局！沒有獲得獎勵', 'normal');
+            gameOver = true;
+            return;
+        }
+        
+        // 切換回玩家
+        currentPlayer = 'player';
+        statusEl.textContent = '您的回合：請選擇一個位置';
+    }
+}, 1000);
+                });
+                
+                board.appendChild(cell);
+            }
+            
+            container.appendChild(board);
+        }
+        
+function createClickerGame(container) {
+    const clickerContainer = document.createElement('div');
+    clickerContainer.className = 'clicker-container';
+    container.appendChild(clickerContainer);
+    
+    const timerDisplay = document.createElement('div');
+    timerDisplay.className = 'timer-display';
+    timerDisplay.textContent = '15';
+    container.appendChild(timerDisplay);
+    
+    const scoreDisplay = document.createElement('div');
+    scoreDisplay.className = 'score-display';
+    scoreDisplay.textContent = '點擊數: 0';
+    container.appendChild(scoreDisplay);
+    
+    const startBtn = document.createElement('button');
+    startBtn.className = 'btn-try';
+    startBtn.textContent = '開始遊戲';
+    startBtn.style.marginTop = '20px';
+    
+    let score = 0;
+    let timeLeft = 15;
+    let timer = null;
+    let targetInterval = null;
+    let gameActive = false;
+    
+   startBtn.onclick = function() {
+    if (gameActive) return;
+    
+    // 禁用开始按钮
+    startBtn.disabled = true;
+    
+    // 原有的游戏开始代码
+    gameActive = true;
+    score = 0;
+    timeLeft = 15;
+    scoreDisplay.textContent = '點擊數: 0';
+    timerDisplay.textContent = timeLeft;
+        
+        // 清除现有的目标
+        document.querySelectorAll('.click-target').forEach(target => target.remove());
+        
+        // 开始计时
+        timer = setInterval(() => {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+        
+        // 生成目标
+        targetInterval = setInterval(() => {
+            createTarget();
+            
+            // 最后5秒加速
+            if (timeLeft <= 5) {
+                createTarget();
+                if (timeLeft <= 2) {
+                    createTarget();
+                }
+            }
+        }, 800);
+        
+        // 初始生成几个目标
+        for (let i = 0; i < 3; i++) {
+            setTimeout(createTarget, i * 300);
+        }
+    };
+    
+ function createTarget() {
+    if (!gameActive) return;
+    
+    const target = document.createElement('div');
+    target.className = 'click-target';
+    
+    // 随机大小 (金鱼大小不一)
+    const size = Math.floor(Math.random() * 20) + 40; // 40-60px
+    target.style.width = `${size}px`;
+    target.style.height = `${size}px`;
+    
+    // 随机起始位置
+    const startX = Math.random() * (clickerContainer.offsetWidth - size);
+    const startY = Math.random() * (clickerContainer.offsetHeight - size);
+    target.style.left = `${startX}px`;
+    target.style.top = `${startY}px`;
+    
+    // 随机旋转角度
+    let currentRotation = Math.random() * 360;
+    target.style.transform = `rotate(${currentRotation}deg)`;
+    
+    // 随机移动方向和速度 (像鱼一样游动)
+    let moveX = (Math.random() - 0.5) * 6; // -3 到 3 之间的随机速度
+    let moveY = (Math.random() - 0.5) * 6; // -3 到 3 之间的随机速度
+    
+    // 确保最小速度
+    if (Math.abs(moveX) < 1) moveX = moveX < 0 ? -1.5 : 1.5;
+    if (Math.abs(moveY) < 1) moveY = moveY < 0 ? -1.5 : 1.5;
+    
+    // 添加游动动画
+    let currentX = startX;
+    let currentY = startY;
+    
+    // 每80毫秒更新一次位置，创造连续移动效果
+    const moveInterval = setInterval(() => {
+        if (!target.parentNode) {
+            clearInterval(moveInterval);
+            return;
+        }
+        
+        // 更新位置
+        currentX += moveX;
+        currentY += moveY;
+        
+        // 边界检测 - 碰到边界时改变方向
+        let directionChanged = false;
+        
+        if (currentX <= 0) {
+            moveX = Math.abs(moveX) * 0.9; // 反弹并稍微减速
+            currentX = 1;
+            directionChanged = true;
+        } else if (currentX >= clickerContainer.offsetWidth - size) {
+            moveX = -Math.abs(moveX) * 0.9; // 反弹并稍微减速
+            currentX = clickerContainer.offsetWidth - size - 1;
+            directionChanged = true;
+        }
+        
+        if (currentY <= 0) {
+            moveY = Math.abs(moveY) * 0.9; // 反弹并稍微减速
+            currentY = 1;
+            directionChanged = true;
+        } else if (currentY >= clickerContainer.offsetHeight - size) {
+            moveY = -Math.abs(moveY) * 0.9; // 反弹并稍微减速
+            currentY = clickerContainer.offsetHeight - size - 1;
+            directionChanged = true;
+        }
+        
+        // 随机改变方向（小概率）
+        if (Math.random() < 0.02) {
+            moveX += (Math.random() - 0.5) * 1.5;
+            moveY += (Math.random() - 0.5) * 1.5;
+            directionChanged = true;
+            
+            // 限制最大速度
+            moveX = Math.max(Math.min(moveX, 5), -5);
+            moveY = Math.max(Math.min(moveY, 5), -5);
+        }
+        
+        // 如果方向改变，更新旋转角度
+        if (directionChanged) {
+            // 计算移动方向的角度
+            const moveAngle = Math.atan2(moveY, moveX) * 180 / Math.PI;
+            currentRotation = moveAngle + 90; // 加90度使鱼头朝向移动方向
+            
+            // 平滑旋转
+            target.style.transition = 'transform 0.5s ease';
+            target.style.transform = `rotate(${currentRotation}deg)`;
+        }
+        
+        // 应用新位置
+        target.style.left = `${currentX}px`;
+        target.style.top = `${currentY}px`;
+        
+    }, 80); // 每80毫秒更新一次位置
+    
+    // 点击事件
+    target.onclick = function() {
+        score++;
+        scoreDisplay.textContent = `點擊數: ${score}`;
+        
+        // 清除移动间隔
+        clearInterval(moveInterval);
+        
+        // 添加点击消失效果
+        this.style.animation = 'fadeOut 0.5s forwards';
+        setTimeout(() => {
+            if (this.parentNode) {
+                this.remove();
+            }
+        }, 500);
+    };
+    
+    // 自动消失时间根据剩余时间调整
+    const disappearTime = timeLeft <= 5 ? 1000 : 1500;
+    setTimeout(() => {
+        if (target.parentNode) {
+            // 清除移动间隔
+            clearInterval(moveInterval);
+            
+            target.style.animation = 'fadeOut 0.8s forwards';
+            setTimeout(() => {
+                if (target.parentNode) {
+                    target.remove();
+                }
+            }, 800);
+        }
+    }, disappearTime);
+    
+    clickerContainer.appendChild(target);
+}
+    
+    function endGame() {
+        clearInterval(timer);
+        clearInterval(targetInterval);
+        gameActive = false;
+        
+        // 清除所有目标
+        document.querySelectorAll('.click-target').forEach(target => target.remove());
+        
+        // 电脑AI得分 (随机15-25)
+        const aiScore = Math.floor(Math.random() * 11) + 15;
+        
+        if (score > aiScore) {
+            // 生成随机奖励8-15两
+            const reward = Math.floor(Math.random() * 36) + 15;
+            showResult(container, `您得分: ${score}，攤主得分: ${aiScore}。恭喜獲勝！獲得${reward}銀兩`, 'success');
+        } else {
+            showResult(container, `您得分: ${score}，攤主得分: ${aiScore}。可惜！沒有獲得獎勵`, 'failure');
+        }
+        
+        
+    }
+    
+    container.appendChild(startBtn);
+}
+        
+        function createQuizGame(container, game) {
+            // 重置重试次数
+            quizRetryCount = 0;
+            
+            const quizContainer = document.createElement('div');
+            quizContainer.className = 'quiz-container';
+            
+            // 添加游戏说明
+            const instruction = document.createElement('p');
+            instruction.textContent = '你選擇了一個花燈，請回答其中的問題';
+            instruction.style.color = '#f9c74f';
+            instruction.style.marginBottom = '20px';
+            instruction.style.textAlign = 'center';
+            quizContainer.appendChild(instruction);
+            
+            // 创建花灯选择界面
+            const lanternSelection = document.createElement('div');
+            lanternSelection.className = 'lantern-selection';
+            
+            // 随机选择三个问题
+            const selectedQuestions = [];
+            const usedIndices = new Set();
+            
+            while (selectedQuestions.length < 3 && selectedQuestions.length < game.questions.length) {
+                const randomIndex = Math.floor(Math.random() * game.questions.length);
+                if (!usedIndices.has(randomIndex)) {
+                    selectedQuestions.push(game.questions[randomIndex]);
+                    usedIndices.add(randomIndex);
+                }
+            }
+            
+             // 创建三个花灯
+selectedQuestions.forEach((question, index) => {
+    const lantern = document.createElement('div');
+    lantern.className = `quiz-lantern`;
+    
+    const image = document.createElement('div');
+    image.className = 'quiz-lantern-image';
+    // 设置花灯图片 - 您可以根据需要替换这些图片URL
+    const lanternImages = [
+        'https://imgur.com/cLZ4Kvf.png',
+        'https://imgur.com/qocpT1O.png', 
+        'https://imgur.com/2AYBm0q.png'
+    ];
+    image.style.backgroundImage = `url('${lanternImages[index]}')`;
+    
+    const number = document.createElement('div');
+    number.className = 'quiz-lantern-number';
+    number.textContent = index + 1;
+    
+    lantern.appendChild(number);
+    lantern.appendChild(image);
+    
+    lantern.onclick = function() {
+        // 禁用所有花灯
+        document.querySelectorAll('.quiz-lantern').forEach(l => l.style.pointerEvents = 'none');
+        
+        // 显示选中的问题
+        showQuestion(quizContainer, question, game, selectedQuestions);
+    };
+    
+    lanternSelection.appendChild(lantern);
+});
+            
+            quizContainer.appendChild(lanternSelection);
+            container.appendChild(quizContainer);
+        }
+        
+          // 显示问题函数
+        function showQuestion(container, question, game, allQuestions) {
+            // 移除花灯选择界面
+            const lanternSelection = container.querySelector('.lantern-selection');
+            if (lanternSelection) {
+                container.removeChild(lanternSelection);
+            }
+            
+            // 显示问题
+            const questionEl = document.createElement('div');
+            questionEl.className = 'quiz-question';
+            questionEl.textContent = question.question;
+            container.appendChild(questionEl);
+            
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'quiz-options';
+            
+            question.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'quiz-option';
+                optionEl.textContent = option;
+                
+                optionEl.onclick = function() {
+                    // 禁用所有选项
+                    document.querySelectorAll('.quiz-option').forEach(opt => {
+                        opt.style.pointerEvents = 'none';
+                    });
+                    
+                    if (index === question.answer) {
+                        optionEl.style.backgroundColor = 'rgba(76, 201, 240, 0.5)';
+                        optionEl.style.borderColor = '#4cc9f0';
+                        
+                        // 生成随机奖励5-12两
+                        const reward = Math.floor(Math.random() * 31) + 20;
+                        setTimeout(() => {
+                            showResult(container, `回答正確！獲得${reward}銀兩`, 'success');
+                        }, 1000);
+                    } else {
+                        optionEl.style.backgroundColor = 'rgba(249, 65, 68, 0.5)';
+                        optionEl.style.borderColor = '#f94144';
+                        
+                        // 显示正确答案
+                        document.querySelectorAll('.quiz-option')[question.answer].style.backgroundColor = 'rgba(76, 201, 240, 0.5)';
+                        document.querySelectorAll('.quiz-option')[question.answer].style.borderColor = '#4cc9f0';
+                        
+                        // 检查是否还有重试机会
+                        if (quizRetryCount < MAX_QUIZ_RETRIES) {
+                            // 增加重试次数
+                            quizRetryCount++;
+                            
+                            setTimeout(() => {
+                                // 创建二次机会消息
+                                const secondChanceMsg = document.createElement('div');
+                                secondChanceMsg.className = 'second-chance-message';
+                                secondChanceMsg.textContent = `攤主:「今天心情好，免費！再給你一次機會啦！再錯就沒辦法了！」 (${quizRetryCount}/${MAX_QUIZ_RETRIES})`;
+                                container.appendChild(secondChanceMsg);
+                                
+                                // 2秒后显示新的花灯选择
+                                setTimeout(() => {
+                                    container.removeChild(secondChanceMsg);
+                                    resetQuizGame(container, game, allQuestions);
+                                }, 2000);
+                            }, 1500);
+                        } else {
+                            // 没有重试机会了，直接显示失败
+                            setTimeout(() => {
+                                showResult(container, '回答錯誤！沒有獲得獎勵', 'failure');
+                            }, 1000);
+                        }
+                    }
+                };
+                
+                optionsContainer.appendChild(optionEl);
+            });
+            
+            container.appendChild(optionsContainer);
+        }
+        
+        // 重置猜谜游戏函数
+        function resetQuizGame(container, game, previousQuestions) {
+            // 清除现有内容
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+            
+            // 添加游戏说明
+            const instruction = document.createElement('p');
+            instruction.textContent = '請選擇一個花燈，回答其中的問題';
+            instruction.style.color = '#f9c74f';
+            instruction.style.marginBottom = '20px';
+            instruction.style.textAlign = 'center';
+            container.appendChild(instruction);
+            
+            // 创建花灯选择界面
+            const lanternSelection = document.createElement('div');
+            lanternSelection.className = 'lantern-selection';
+            
+            // 过滤掉已经回答过的问题
+            const availableQuestions = game.questions.filter(q => 
+                !previousQuestions.some(pq => pq.question === q.question)
+            );
+            
+            // 选择剩余的问题（最多3个）
+            const newQuestions = [];
+            const usedIndices = new Set();
+            
+            while (newQuestions.length < 3 && newQuestions.length < availableQuestions.length) {
+                const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+                if (!usedIndices.has(randomIndex)) {
+                    newQuestions.push(availableQuestions[randomIndex]);
+                    usedIndices.add(randomIndex);
+                }
+            }
+            
+            // 如果问题不足，从已回答的问题中补充
+            if (newQuestions.length < 3) {
+                const remainingNeeded = 3 - newQuestions.length;
+                const previousCopy = [...previousQuestions];
+                
+                for (let i = 0; i < remainingNeeded && previousCopy.length > 0; i++) {
+                    const randomIndex = Math.floor(Math.random() * previousCopy.length);
+                    newQuestions.push(previousCopy[randomIndex]);
+                    previousCopy.splice(randomIndex, 1);
+                }
+            }
+            
+               // 创建三个花灯 - 修复：添加图片
+    newQuestions.forEach((question, index) => {
+        const lantern = document.createElement('div');
+        lantern.className = `quiz-lantern`;
+        
+        const image = document.createElement('div');
+        image.className = 'quiz-lantern-image';
+        // 设置花灯图片
+        const lanternImages = [
+            'https://imgur.com/cLZ4Kvf.png',
+            'https://imgur.com/qocpT1O.png', 
+            'https://imgur.com/2AYBm0q.png'
+        ];
+        image.style.backgroundImage = `url('${lanternImages[index]}')`;
+        
+        const number = document.createElement('div');
+        number.className = 'quiz-lantern-number';
+        number.textContent = index + 1;
+        
+        lantern.appendChild(number);
+        lantern.appendChild(image);
+        
+        lantern.onclick = function() {
+            // 禁用所有花灯
+            document.querySelectorAll('.quiz-lantern').forEach(l => l.style.pointerEvents = 'none');
+            
+            // 显示选中的问题
+            showQuestion(container, question, game, [...previousQuestions, ...newQuestions]);
+        };
+        
+        lanternSelection.appendChild(lantern);
+    });
+    
+    container.appendChild(lanternSelection);
+}
+        
+      function createLanternGame(container) {
+    // 創建高度標示區域
+    const heightIndicator = document.createElement('div');
+    heightIndicator.className = 'height-indicator';
+    heightIndicator.innerHTML = `
+        <div class="height-line high-line">
+            <span class="height-label">一等獎</span>
+        </div>
+        <div class="height-line medium-line">
+            <span class="height-label">二等獎</span>
+        </div>
+        <div class="height-line low-line">
+            <span class="height-label">三等獎</span>
+        </div>
+    `;
+    container.appendChild(heightIndicator);
+    
+    const lanternContainer = document.createElement('div');
+    lanternContainer.className = 'lantern-container';
+    
+    // 創建三個天燈
+    const templates = ['template1', 'template2', 'template3'];
+    
+    templates.forEach(template => {
+        const lantern = document.createElement('div');
+        lantern.className = `lantern ${template}`;
+
+        const body = document.createElement('div');
+        body.className = 'lantern-body';
+        
+        // 隨機設置天燈上的文字
+        const texts = ['福', '祿', '壽', '喜', '財'];
+        body.textContent = texts[Math.floor(Math.random() * texts.length)];
+        
+        lantern.appendChild(body);
+        
+        lantern.onclick = function() {
+            if (lantern.classList.contains('launching')) return;
+            
+            // 禁用所有天燈
+            document.querySelectorAll('.lantern').forEach(l => l.style.pointerEvents = 'none');
+            
+            // 添加發光效果 - 點火
+            lantern.classList.add('lit');
+            
+            // 隨機決定天燈飛起的高度 (添加失敗判定)
+            const result = Math.random();
+            let outcome = '';
+            
+            if (result < 0.2) {
+                // 20%概率失敗 - 天燈無法升起
+                outcome = '失敗';
+                lantern.classList.add('failure');
+                
+                // 添加失敗動畫（搖晃後墜落）
+                setTimeout(() => {
+                    // 遊戲結束
+                    showResult(container, '天燈未能升起！沒有獲得獎勵', 'failure');
+                }, 3000);
+                
+            } else if (result < 0.5) {
+                // 30%概率三等獎
+                outcome = '三';
+                lantern.classList.add('low');
+            } else if (result < 0.8) {
+                // 30%概率二等獎
+                outcome = '二';
+                lantern.classList.add('medium');
+            } else {
+                // 20%概率一等獎
+                outcome = '一';
+                lantern.classList.add('success');
+            }
+            
+            // 添加起飛動畫類（失敗情況除外）
+            if (outcome !== '失敗') {
+                lantern.classList.add('launching');
+                
+                // 遊戲結束
+                setTimeout(() => {
+                    // 根據高度顯示不同結果
+                    let message = '';
+                    let type = '';
+                    
+                    if (outcome === '一') {
+                        const reward = Math.floor(Math.random() * 51) + 30;
+                        message = `天燈到達一等獎！獲得${reward}銀兩`;
+                        type = 'success';
+                    } else if (outcome === '二') {
+                        const reward = Math.floor(Math.random() * 21) + 30;
+                        message = `天燈到達二等獎！獲得${reward}銀兩`;
+                        type = 'normal';
+                    } else {
+                        const reward = Math.floor(Math.random() * 11) + 10;
+                        message = `天燈到達三等獎！獲得${reward}銀兩`;
+                        type = 'normal';
+                    }
+                    
+                    showResult(container, message, type);
+                }, 8500);
+            }
+        };
+        
+        lanternContainer.appendChild(lantern);
+    });
+    
+    container.appendChild(lanternContainer);
+}
+        
+        
+        // 显示游戏结果
+        function showResult(container, message, type) {
+            // 如果已经显示结果，不再重复显示
+            if (container.querySelector('.result-area')) return;
+            
+            const resultArea = document.createElement('div');
+            resultArea.className = `result-area ${type}-result`;
+            resultArea.textContent = message;
+            
+            container.appendChild(resultArea);
+            
+            // 添加关闭按钮
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-btn';
+            closeBtn.textContent = '關閉';
+            closeBtn.style.marginTop = '20px';
+            
+            closeBtn.onclick = function() {
+                document.getElementById('gameScreen').style.display = 'none';
+                // 启用所有按钮
+                enableAllButtons();
+            };
+            
+            container.appendChild(closeBtn);
+            
+            // 设置游戏结束状态
+            gameEnded = true;
+            
+            // 显示全局遮罩
+            setTimeout(function() {
+    document.getElementById('overlayMask').classList.add('active');
+}, 6000); // 5000毫秒 = 3秒
+            
+           
+        }
+        
+        // 关闭遮罩
+        function closeOverlay() {
+            document.getElementById('overlayMask').classList.remove('active');
+        }
+        
+        // 禁用所有按钮
+        function disableAllButtons() {
+            buttonsDisabled = true;
+            document.querySelectorAll('.btn-try').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+        
+        // 启用所有按钮
+        function enableAllButtons() {
+            buttonsDisabled = false;
+            document.querySelectorAll('.btn-try').forEach(btn => {
+                btn.disabled = false;
+            });
+        }
+        
+        // 启动页面关闭倒计时
+function startPageCloseTimer() {
+    const countdownEl = document.createElement('div');
+    countdownEl.className = 'countdown';
+    countdownEl.textContent = '8';
+    document.body.appendChild(countdownEl);
+    
+    let seconds = 8;
+    pageCloseTimer = setInterval(() => {
+        seconds--;
+        countdownEl.textContent = seconds;
+        
+        if (seconds <= 0) {
+            clearInterval(pageCloseTimer);
+            document.body.removeChild(countdownEl);
+            // 移除了页面关闭的代码
+            // 只保留关闭遮罩
+            document.getElementById('overlayMask').classList.remove('active');
+        }
+    }, 1000);
+}
+        
+        // 检查井字游戏获胜者
+        function checkWinner(board, player) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // 横
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // 竖
+                [0, 4, 8], [2, 4, 6]             // 对角
+            ];
+            
+            return winPatterns.some(pattern => {
+                return pattern.every(index => board[index] === player);
+            });
+        }
+        
+        // 检查井字游戏是否平局
+        function isBoardFull(board) {
+            return board.every(cell => cell !== null);
+        }
+        
+		// 獲取隨機移動（簡單AI）
+function getRandomMove(board) {
+    const emptyCells = [];
+    for (let i = 0; i < 9; i++) {
+        if (board[i] === null) {
+            emptyCells.push(i);
+        }
+    }
+    return emptyCells.length > 0 ? emptyCells[Math.floor(Math.random() * emptyCells.length)] : null;
+}
+
+// 獲取中等難度移動（基本策略）
+function getMediumMove(board) {
+    // 1. 檢查是否能立即獲勝
+    for (let i = 0; i < 9; i++) {
+        if (board[i] === null) {
+            board[i] = 'O';
+            if (checkWinner(board, 'O')) {
+                board[i] = null;
+                return i;
+            }
+            board[i] = null;
+        }
+    }
+    
+    // 2. 檢查是否需要阻止玩家獲勝
+    for (let i = 0; i < 9; i++) {
+        if (board[i] === null) {
+            board[i] = 'X';
+            if (checkWinner(board, 'X')) {
+                board[i] = null;
+                return i;
+            }
+            board[i] = null;
+        }
+    }
+    
+    // 3. 優先選擇中心位置
+    if (board[4] === null) return 4;
+    
+    // 4. 優先選擇角落位置
+    const corners = [0, 2, 6, 8];
+    const availableCorners = corners.filter(i => board[i] === null);
+    if (availableCorners.length > 0) {
+        return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+    }
+    
+    // 5. 最後選擇邊緣位置
+    const edges = [1, 3, 5, 7];
+    const availableEdges = edges.filter(i => board[i] === null);
+    if (availableEdges.length > 0) {
+        return availableEdges[Math.floor(Math.random() * availableEdges.length)];
+    }
+    
+    // 備用方案：隨機選擇
+    return getRandomMove(board);
+}
+
+// 獲取困難難度移動（高級策略）
+function getHardMove(board) {
+    let bestScore = -Infinity;
+    let bestMove = null;
+    
+    for (let i = 0; i < 9; i++) {
+        if (board[i] === null) {
+            board[i] = 'O';
+            let score = minimax(board, 0, false);
+            board[i] = null;
+            
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = i;
+            }
+        }
+    }
+    
+    return bestMove;
+}
+
+// 極小化極大算法
+function minimax(board, depth, isMaximizing) {
+    // 檢查遊戲狀態
+    if (checkWinner(board, 'O')) return 10 - depth;
+    if (checkWinner(board, 'X')) return depth - 10;
+    if (isBoardFull(board)) return 0;
+    
+    if (isMaximizing) {
+        let bestScore = -Infinity;
+        for (let i = 0; i < 9; i++) {
+            if (board[i] === null) {
+                board[i] = 'O';
+                let score = minimax(board, depth + 1, false);
+                board[i] = null;
+                bestScore = Math.max(score, bestScore);
+            }
+        }
+        return bestScore;
+    } else {
+        let bestScore = Infinity;
+        for (let i = 0; i < 9; i++) {
+            if (board[i] === null) {
+                board[i] = 'X';
+                let score = minimax(board, depth + 1, true);
+                board[i] = null;
+                bestScore = Math.min(score, bestScore);
+            }
+        }
+        return bestScore;
+    }
+}
+
+        
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
