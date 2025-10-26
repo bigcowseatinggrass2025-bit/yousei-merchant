@@ -13560,11 +13560,12 @@ function playGuardianVideo(videoPath) {
 function recordGameStartTime() {
     const savedPlayers = JSON.parse(localStorage.getItem('players')) || [];
     // 如果是第一个玩家，记录开始时间
-    if (savedPlayers.length === 0) {
+    if (savedPlayers.length === 0 && !localStorage.getItem('gameStartTime')) {
         localStorage.setItem('gameStartTime', new Date().toISOString());
-        console.log('游戏开始时间已记录');
+        console.log('🎮 游戏开始时间已记录');
     }
 }
+
 
 // 执行普通卡片效果
 function executeCardEffect() {
@@ -14098,6 +14099,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
