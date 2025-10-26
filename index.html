@@ -7082,15 +7082,34 @@ function preloadEvolutionVideos() {
 document.addEventListener('DOMContentLoaded', function() {
     preloadEvolutionVideos();
 });
-	// ==================== 数据同步到Supabase ====================
+// ==================== 数据同步到Supabase ====================
 // 🎯 增强数据同步函数
 async function syncPlayerWarehouseToSupabase(player) {
     try {
         console.log('🔄 同步数据到Supabase:', player.name);
         
-        const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // 🎯 修复1：确保玩家有uniqueId
+        if (!player.uniqueId) {
+            player.uniqueId = 'p' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+            console.log('🔧 生成uniqueId:', player.uniqueId);
+            
+            // 保存回players数组
+            const allPlayers = JSON.parse(localStorage.getItem('players')) || [];
+            const playerIndex = allPlayers.findIndex(p => p.id === player.id);
+            if (playerIndex !== -1) {
+                allPlayers[playerIndex].uniqueId = player.uniqueId;
+                localStorage.setItem('players', JSON.stringify(allPlayers));
+            }
+        }
+        
+        // 🎯 修复2：使用单例Supabase客户端
+        if (!window.supabaseClient) {
+            const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
+            const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
+            window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+        
+        const supabase = window.supabaseClient;
         
         // 准备完整的仓库数据
         const warehouseData = {
@@ -7099,6 +7118,8 @@ async function syncPlayerWarehouseToSupabase(player) {
             lastSynced: new Date().toISOString(),
             totalCards: player.goodsCards ? player.goodsCards.length : 0
         };
+        
+        console.log('📦 同步数据 - player_id:', player.uniqueId, '货卡:', warehouseData.totalCards);
         
         const { data, error } = await supabase
             .from('player_warehouses')
@@ -14136,6 +14157,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
