@@ -10484,31 +10484,49 @@ function initDrunkardMusics() {
 
 
 
-// 播放酒鬼音乐
 function playDrunkardMusic(gameType) {
-    if (!soundEnabled || !drunkardAudios[gameType]) return false;
+    if (!soundEnabled) return false;
     
     stopDrunkardMusic();
     
     try {
-        drunkardAudios.currentType = gameType;
-        const audio = drunkardAudios[gameType];
-        audio.currentTime = 0;
+        let audio;
+        if (gameType === 'hint') {
+            // 提示框音樂：隨機1或2
+            const randomIndex = Math.floor(Math.random() * 2) + 1;
+            audio = document.getElementById(`drunkard-music-${randomIndex}`);
+            console.log(`播放提示框音樂: drunkard-music-${randomIndex}`);
+        } else {
+            // 遊戲框音樂：根據遊戲類型
+            if (gameType === 'quiz') {
+                audio = document.getElementById('drunkard-music-quiz');
+            } else if (gameType === 'dice') {
+                audio = document.getElementById('drunkard-music-dice');
+            } else if (gameType === 'drunkPunch') {
+                // 🆕 醉拳遊戲使用骰子遊戲音樂
+                audio = document.getElementById('drunkard-music-dice');
+                console.log(`醉拳遊戲使用骰子音樂`);
+            }
+            console.log(`播放遊戲音樂: ${gameType}`);
+        }
         
+        if (!audio) return false;
+        
+        audio.currentTime = 0;
         const playPromise = audio.play();
+        
         if (playPromise !== undefined) {
             playPromise
                 .then(() => {
-                    console.log(`${gameType} 酒鬼音乐播放成功`);
+                    console.log(`${gameType} 音樂播放成功`);
                 })
                 .catch(error => {
-                    console.log(`${gameType} 酒鬼音乐播放失败:`, error);
-                    showDrunkardPlayHint(currentPlayerForDrunkard, gameType);
+                    console.log(`${gameType} 音樂播放失败:`, error);
                 });
         }
         return true;
     } catch (error) {
-        console.log(`${gameType} 酒鬼音乐播放异常:`, error);
+        console.log(`${gameType} 音樂播放异常:`, error);
         return false;
     }
 }
@@ -12284,11 +12302,13 @@ function showDrunkardPlayHint(playerIndex, gameType) {
     `;
     
     document.body.appendChild(hintBox);
-    
+
+	playDrunkardMusic('hint'); // 提示框顯示時播放音樂
+	
     const button = hintBox.querySelector('.drunkard-start-btn');
     button.addEventListener('click', function() {
         document.body.removeChild(hintBox);
-        // 🆕 直接顯示遊戲模態框，不播放音樂
+        stopDrunkardMusic(); // 🆕 停止提示框音樂
         document.getElementById('drunkard-modal').style.display = 'flex';
     });
     
@@ -15915,6 +15935,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
