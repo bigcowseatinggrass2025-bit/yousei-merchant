@@ -4384,6 +4384,46 @@
             gap: 3px;
             margin: 5px 0;
         }
+		/* 原本的卡片容器樣式 */
+.merchant-cards, .warehouse-cards {
+    display: grid;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.merchant-cards {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.warehouse-cards {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+/* 針對只有1-2張卡片的特別處理 */
+.warehouse-cards:has(> :first-child:nth-last-child(1)) {
+    /* 只有1張卡片時 */
+    grid-template-columns: 140px;
+    justify-content: center;
+    max-width: 140px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.warehouse-cards:has(> :first-child:nth-last-child(2)) {
+    /* 只有2張卡片時 */
+    grid-template-columns: repeat(2, 140px);
+    justify-content: center;
+    max-width: 295px; /* 140*2 + 15間距 */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 3張以上保持原有樣式 */
+.warehouse-cards:has(> :first-child:nth-last-child(3)) {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    max-width: none;
+    justify-content: normal;
+}
 		
 		
 		
@@ -6169,6 +6209,207 @@
     height: 100%;
 }
 
+/* 🆕 醉拳遊戲專用樣式 - 小尺寸版本 */
+.drunk-punch-game {
+    text-align: center;
+    color: #ffd700;
+    padding: 3px 0;
+    position: relative;
+    min-height: 280px; /* 更小高度 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.drunkard-character {
+    font-size: 2.2rem; /* 更小字體 */
+    margin-bottom: 5px;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+.message-display {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #8B4513;
+    margin: 8px 0;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem; /* 更小字體 */
+    color: #ffa500;
+}
+
+.punch-display {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 12px 0 20px 0;
+    position: relative;
+    height: 90px; /* 從 80px 改為 90px */
+    z-index: 1;
+}
+
+.punch-slot {
+    width: 90px;  /* 從 65px 改為 80px */
+    height: 90px; /* 從 65px 改為 80px */
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #8B4513;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem; /* 從 1.8rem 改為 2.2rem */
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.punch-effect {
+    position: absolute;
+    font-size: 10rem; /* 從 7rem 改為 8rem */
+    z-index: 2;
+    opacity: 0;
+    transform: scale(0.3);
+    transition: all 0.5s ease;
+    filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.8));
+    pointer-events: none;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(0.3) !important;
+}
+
+.punch-effect.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) !important;
+    animation: punchImpact 0.6s ease-out;
+}
+
+@keyframes punchImpact {
+    0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.punch-slot.active {
+    border-color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.3);
+    box-shadow: 0 0 25px rgba(255, 107, 107, 0.8);
+}
+
+.dodge-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px; /* 增加間距 */
+    margin: 50px 0 12px 0;
+    padding-top: 12px;
+    position: relative;
+    z-index: 3;
+}
+
+.dodge-btn {
+    background: linear-gradient(135deg, #8B4513, #A0522D);
+    border: 2px solid #ffd700;
+    border-radius: 10px; /* 增大圓角 */
+    padding: 12px 20px; /* 增大內邊距 */
+    color: #ffd700;
+    font-size: 0.9rem; /* 稍大字體 */
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 80px; /* 增大最小寬度 */
+    position: relative;
+    z-index: 10;
+}
+
+.dodge-btn:hover:not(:disabled) {
+    transform: scale(1.08); /* 增大懸停效果 */
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.dodge-btn:disabled {
+    background: #5D4037;
+    border-color: #8D6E63;
+    color: #8D6E63;
+    cursor: not-allowed;
+    transform: scale(1);
+}
+
+.start-punch-btn {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    border: 2px solid #ffd700;
+    border-radius: 12px;
+    padding: 8px 20px;
+    color: white;
+    font-size: 0.9rem; /* 更小字體 */
+    font-weight: bold;
+    cursor: pointer;
+    margin: 12px 0 3px 0;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
+}
+
+.start-punch-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(46, 204, 113, 0.6);
+}
+
+.start-punch-btn:disabled {
+    background: #5D4037 !important;
+    border-color: #8D6E63 !important;
+    color: #8D6E63 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+.start-punch-btn:disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.start-punch-btn:not(:disabled) {
+    background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
+    border: 2px solid #ffd700 !important;
+    color: white !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
+}
+
+.punch-result {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid #ffd700;
+    margin: 10px 0;
+    text-align: center;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.punch-result .result-icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.punch-result .result-text {
+    font-size: 0.8rem;
+    color: #ffd700;
+    line-height: 1.2;
+}
+
+.large-spacer {
+    height: 40px;
+    width: 100%;
+}
+
+.buttons-section {
+    position: relative;
+    z-index: 20;
+    margin-top: 12px;
+}
 		
     </style>
 </head>
@@ -6265,14 +6506,14 @@
         </div>
     </div>
     
-<!-- 酒鬼模態框 - 加大尺寸 -->
-<div class="drunkard-modal" id="drunkard-modal" style="display: none;">
+<!-- 酒鬼模態框 - 全黑背景 -->
+<div class="drunkard-modal" id="drunkard-modal" style="display: none; background: #000000; opacity: 0; transition: opacity 5s ease-in-out;">
     <div class="drunkard-content" style="
         background: url('images/feds37.png') center/cover no-repeat;
         border: 3px solid #8B4513;
         border-radius: 20px;
-        padding: 30px;
-        max-width: 600px;
+        padding: 20px;
+        max-width: 500px;
         width: 95%;
         box-shadow: 0 0 40px rgba(139, 69, 19, 0.8);
         position: relative;
@@ -6329,32 +6570,32 @@
         "><!-- 遊戲內容會動態加載 --></div>
         
         <div class="game-controls" style="text-align: center;">
-            <button id="confirm-drunkard" class="btn-success" style="
-                background: linear-gradient(135deg, #8B4513, #A0522D);
-                border: 2px solid #FFD700;
-                border-radius: 30px;
-                padding: 18px 45px;
-                color: #FFD700;
-                font-weight: bold;
-                font-size: 1.4rem;
-                cursor: pointer;
-                box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
-                transition: all 0.3s ease;
-                margin: 10px;
-            ">🎲 確定挑戰</button>
-        </div>
+    <button id="confirm-drunkard" class="btn-success" style="
+        background: linear-gradient(135deg, #8B4513, #A0522D);
+        border: 2px solid #FFD700;
+        border-radius: 20px; /* 減小圓角 */
+        padding: 12px 30px; /* 減小內邊距 */
+        color: #FFD700;
+        font-weight: bold;
+        font-size: 1.1rem; /* 減小字體 */
+        cursor: pointer;
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); /* 減小陰影 */
+        transition: all 0.3s ease;
+        margin: 8px; /* 減小邊距 */
+    ">🎲 確定挑戰</button>
+</div>
         
         <div id="drunkard-result" class="drunkard-result" style="
-            background: rgba(0, 0, 0, 0.6);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #8B4513;
-            margin-top: 20px;
-            color: #FFD700;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.1rem;
-             display: none; 
+    background: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #8B4513;
+    margin-top: 20px;
+    color: #FFD700;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: none; /* 🆕 確保初始隱藏 */
 "></div>
         
         <div class="music-control" style="text-align: center; margin-top: 20px;">
@@ -6362,7 +6603,6 @@
         </div>
     </div>
 </div>
-
 <!-- 结束游戏确认模态框 -->
 <div class="end-game-modal" id="end-game-modal">
     <div class="end-game-content" style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('images/f324.png') center/cover; background-size: cover; background-position: center; width: 95%; max-width: 800px; height: auto; min-height: 550px; border: 2px solid gold; box-shadow: 0 0 20px gold, 0 0 40px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.3); padding: 50px;">
@@ -9930,6 +10170,297 @@ function createMerchantReminder() {
     }, 8000);
 }
 
+// 🆕 醉拳遊戲狀態
+let punchGameState = {
+    isReady: false,      // 是否已點擊確定挑戰
+    isPlaying: false,    // 是否遊戲進行中
+    punchDirection: '',
+    startTime: 0,
+    reactionTime: 0
+};
+
+// 🆕 簡單版本：初始化醉拳遊戲
+function initDrunkPunchGame() {
+    const startBtn = document.getElementById('startPunchBtn');
+    const dodgeLeft = document.getElementById('dodgeLeft');
+    const dodgeMiddle = document.getElementById('dodgeMiddle');
+    const dodgeRight = document.getElementById('dodgeRight');
+    const helpBtn = document.getElementById('helpBtn');
+    
+    // 🆕 直接綁定事件（不需要 replaceWith）
+    startBtn.addEventListener('click', startPunchGame);
+    dodgeLeft.addEventListener('click', () => dodgePunch('left'));
+    dodgeMiddle.addEventListener('click', () => dodgePunch('middle'));
+    dodgeRight.addEventListener('click', () => dodgePunch('right'));
+    
+    // 🆕 綁定說明按鈕事件
+    if (helpBtn) {
+        helpBtn.addEventListener('click', function() {
+            const table = document.getElementById('reactionTable');
+            if (table.style.display === 'none') {
+                table.style.display = 'block';
+                helpBtn.textContent = '📊 隱藏說明';
+            } else {
+                table.style.display = 'none';
+                helpBtn.textContent = '📊 查看反應等級說明';
+            }
+        });
+    }
+    
+    // 重置狀態
+    resetPunchGame();
+}
+
+// 🆕 開始醉拳遊戲
+function startPunchGame() {
+    console.log('startPunchGame called'); // 🆕 調試信息
+    
+    if (!punchGameState.isReady || punchGameState.isPlaying) {
+        console.log('Cannot start: isReady=', punchGameState.isReady, 'isPlaying=', punchGameState.isPlaying);
+        return;
+    }
+    
+    punchGameState.isPlaying = true;
+    
+    const startBtn = document.getElementById('startPunchBtn');
+    const message = document.getElementById('punch-message');
+    
+    console.log('Hiding start button and starting game'); // 🆕 調試信息
+    
+    // 🆕 隱藏準備開始按鈕
+    startBtn.style.display = 'none';
+    
+    message.textContent = '準備...酒鬼正在醞釀...';
+    enableDodgeButtons(false);
+    
+    // 🆕 1.5-3秒後隨機出拳
+    const punchDelay = Math.random() * 1500 + 1500;
+    console.log('Punch delay:', punchDelay); // 🆕 調試信息
+    
+    setTimeout(() => {
+        if (punchGameState.isPlaying) {
+            console.log('Executing random punch'); // 🆕 調試信息
+            executeRandomPunch();
+        }
+    }, punchDelay);
+}
+
+// 🆕 隨機出拳
+function executeRandomPunch() {
+    if (!punchGameState.isPlaying) return;
+    
+    const directions = ['left', 'middle', 'right'];
+    punchGameState.punchDirection = directions[Math.floor(Math.random() * directions.length)];
+    
+    const message = document.getElementById('punch-message');
+    const punchElement = document.getElementById('punch' + capitalizeFirst(punchGameState.punchDirection));
+    const punchEffect = document.getElementById('punchEffect');
+    
+    message.textContent = `酒鬼揮動${getDirectionText(punchGameState.punchDirection)}拳！`;
+    punchElement.classList.add('active');
+    
+    // 🆕 簡化位置計算，確保效果在拳頭顯示區域內
+    punchEffect.style.left = '50%';
+    punchEffect.style.top = '50%';
+    punchEffect.classList.add('show');
+    
+    enableDodgeButtons(true);
+    punchGameState.startTime = Date.now();
+}
+function dodgePunch(direction) {
+    try {
+        if (!punchGameState.isPlaying) {
+            console.log('遊戲未進行中，無法躲閃');
+            return;
+        }
+        
+        punchGameState.reactionTime = Date.now() - punchGameState.startTime;
+        const seconds = punchGameState.reactionTime / 1000;
+        
+        console.log('躲閃方向:', direction, '正確方向:', punchGameState.punchDirection, '反應時間:', seconds + '秒');
+        
+        enableDodgeButtons(false);
+        punchGameState.isPlaying = false;
+        
+        // 安全地隱藏拳頭效果
+        const punchEffect = document.getElementById('punchEffect');
+        if (punchEffect) {
+            punchEffect.classList.remove('show');
+        }
+        
+        // 計算獎勵
+        let reward = { silver: 0, goods: 0 };
+        let resultText = '';
+        let resultIcon = '';
+        let reactionLevel = ''; // 🆕 新增等級變數
+        
+        const isDirectionCorrect = direction === punchGameState.punchDirection;
+        
+        if (isDirectionCorrect) {
+            if (seconds <= 0.50) {
+                reward = { silver: 60, goods: 0 };
+                resultText = `⚡ 極限反應！${seconds.toFixed(2)}秒`;
+                resultIcon = '⚡';
+                reactionLevel = '極限反應';
+            } else if (seconds <= 0.70) {
+                reward = { silver: 35, goods: 0 };
+                resultText = `🔥 神速反應！${seconds.toFixed(2)}秒`;
+                resultIcon = '🔥';
+                reactionLevel = '神速反應';
+            } else if (seconds <= 0.90) {
+                reward = { silver: 20, goods: 0 };
+                resultText = `🎯 精準反應！${seconds.toFixed(2)}秒`;
+                resultIcon = '🎯';
+                reactionLevel = '精準反應';
+            } else if (seconds <= 1.10) {
+                reward = { silver: 10, goods: 0 };
+                resultText = `👍 快速反應！${seconds.toFixed(2)}秒`;
+                resultIcon = '👍';
+                reactionLevel = '快速反應';
+            } else if (seconds <= 1.50) {
+                reward = { silver: 10, goods: 0 };
+                resultText = `✅ 及格反應 ${seconds.toFixed(2)}秒`;
+                resultIcon = '✅';
+                reactionLevel = '及格反應';
+            } else if (seconds <= 2.00) {
+                reward = { silver: 2, goods: 0 };
+                resultText = `😅 勉強躲過 ${seconds.toFixed(2)}秒`;
+                resultIcon = '😅';
+                reactionLevel = '勉強躲過';
+            } else {
+                reward = { silver: 0, goods: 0 };
+                resultText = `🐌 太慢了！${seconds.toFixed(2)}秒`;
+                resultIcon = '🐌';
+                reactionLevel = '反應太慢';
+            }
+        } else {
+            reward = { silver: 0, goods: 0 };
+            resultText = `❌ 躲錯方向！${seconds.toFixed(2)}秒`;
+            resultIcon = '❌';
+            reactionLevel = '躲錯方向';
+        }
+        
+        console.log('獎勵計算結果:', { reward, resultText, reactionLevel });
+        
+        // 🆕 修改：傳遞秒數和等級資訊給 showPunchResult
+        showPunchResult(resultText, reward, resultIcon, seconds, reactionLevel);
+        
+        // 🆕 設置 selectedAnswer
+        selectedAnswer = {
+            type: 'drunkPunch',
+            success: isDirectionCorrect && seconds <= 2.00,
+            reward: reward,
+            reactionTime: seconds,
+            reactionLevel: reactionLevel
+        };
+        
+        // 🆕 傳遞等級給完成函數
+        finishDrunkPunchGame(reward, reactionLevel);
+        
+    } catch (error) {
+        console.error('躲閃拳擊時出錯:', error);
+    }
+}
+// 🆕 修改：顯示醉拳結果（包含等級說明和錯誤處理）
+function showPunchResult(text, reward, icon, seconds, reactionLevel) {
+    try {
+        const resultDisplay = document.getElementById('punchResult');
+        const resultIcon = document.getElementById('punchResultIcon');
+        const resultText = document.getElementById('punchResultText');
+        const levelInfoElement = document.getElementById('levelInfo');
+        
+        // 🆕 檢查元素是否存在
+        if (!resultDisplay || !resultIcon || !resultText || !levelInfoElement) {
+            console.error('醉拳遊戲結果元素未找到');
+            // 🆕 如果找不到元素，使用主結果框顯示
+            const mainResultBox = document.getElementById('drunkard-result');
+            if (mainResultBox) {
+                mainResultBox.style.display = 'block';
+                mainResultBox.innerHTML = text + (reward.silver > 0 ? ` - 獲得 ${reward.silver}兩${reward.goods > 0 ? ' + ' + reward.goods + '貨物' : ''}` : ' - 沒有獎勵');
+            }
+            return;
+        }
+        
+        resultIcon.textContent = icon;
+        resultText.textContent = text + (reward.silver > 0 ? ` - 獲得 ${reward.silver}兩${reward.goods > 0 ? ' + ' + reward.goods + '貨物' : ''}` : ' - 沒有獎勵');
+        
+        // 🆕 顯示等級說明
+        let levelDescription = '';
+        if (reactionLevel === '極限反應') {
+            levelDescription = `你剛才的速度達到 ⚡ 極限反應 等級！反應時間: 0.00-0.50秒`;
+        } else if (reactionLevel === '神速反應') {
+            levelDescription = `你剛才的速度達到 🔥 神速反應 等級！反應時間: 0.51-0.70秒`;
+        } else if (reactionLevel === '精準反應') {
+            levelDescription = `你剛才的速度達到 🎯 精準反應 等級！反應時間: 0.71-0.90秒`;
+        } else if (reactionLevel === '快速反應') {
+            levelDescription = `你剛才的速度達到 👍 快速反應 等級！反應時間: 0.91-1.10秒`;
+        } else if (reactionLevel === '及格反應') {
+            levelDescription = `你剛才的速度達到 ✅ 及格反應 等級！反應時間: 1.11-1.50秒`;
+        } else if (reactionLevel === '勉強躲過') {
+            levelDescription = `你剛才的速度達到 😅 勉強躲過 等級！反應時間: 1.51-2.00秒`;
+        } else if (reactionLevel === '反應太慢') {
+            levelDescription = `你的反應速度屬於 🐌 太慢了 等級！反應時間: 2.01+秒`;
+        } else if (reactionLevel === '躲錯方向') {
+            levelDescription = `❌ 躲錯方向！請點擊酒鬼出拳的對應方向按鈕`;
+        }
+        
+        levelInfoElement.textContent = levelDescription;
+        levelInfoElement.style.display = 'block';
+        
+        resultDisplay.style.display = 'block';
+        
+    } catch (error) {
+        console.error('顯示醉拳結果時出錯:', error);
+    }
+}
+
+// 🆕 重置醉拳遊戲
+function resetPunchGame() {
+    punchGameState = {
+        isPlaying: false,
+        punchDirection: '',
+        startTime: 0,
+        reactionTime: 0
+    };
+    
+    const startBtn = document.getElementById('startPunchBtn');
+    if (startBtn) startBtn.disabled = false;
+    
+    enableDodgeButtons(false);
+    resetPunchDisplay();
+}
+
+// 🆕 重置拳頭顯示
+function resetPunchDisplay() {
+    const left = document.getElementById('punchLeft');
+    const middle = document.getElementById('punchMiddle');
+    const right = document.getElementById('punchRight');
+    
+    if (left) left.classList.remove('active');
+    if (middle) middle.classList.remove('active');
+    if (right) right.classList.remove('active');
+}
+
+// 🆕 啟用/禁用躲閃按鈕
+function enableDodgeButtons(enabled) {
+    const left = document.getElementById('dodgeLeft');
+    const middle = document.getElementById('dodgeMiddle');
+    const right = document.getElementById('dodgeRight');
+    
+    if (left) left.disabled = !enabled;
+    if (middle) middle.disabled = !enabled;
+    if (right) right.disabled = !enabled;
+}
+
+// 🆕 工具函數
+function getDirectionText(direction) {
+    const texts = { 'left': '左', 'middle': '中', 'right': '右' };
+    return texts[direction] || direction;
+}
+
+function capitalizeFirst(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 // ========== 酒鬼音乐播放函数 ==========
 // 初始化酒鬼音乐
@@ -10886,6 +11417,10 @@ const drunkardGames = {
     },
     dice: {
         // 骰子遊戲不需要問題數據
+    },
+    drunkPunch: {
+        name: '醉拳反應',
+        description: '酒鬼要出拳了！快躲開！'
     }
 };
 
@@ -11677,10 +12212,15 @@ function getGuardianEvolutionText(guardianName) {
 // 显示酒鬼游戏播放提示
 function showDrunkardPlayHint(playerIndex, gameType) {
     const player = players[playerIndex];
-    const gameTypeName = gameType === 'quiz' ? '問答遊戲' : '骰子博弈';
-    const gameIcon = gameType === 'quiz' ? '❓' : '🎲';
     
-    // 先检查是否已存在提示框，避免重复创建
+    const gameTypeName = gameType === 'quiz' ? '問答遊戲' : 
+                        gameType === 'dice' ? '骰子博弈' : 
+                        '醉拳反應';
+    
+    const gameIcon = gameType === 'quiz' ? '❓' : 
+                    gameType === 'dice' ? '🎲' : 
+                    '👊';
+    
     const existingHint = document.querySelector('.drunkard-hint-box');
     if (existingHint) {
         document.body.removeChild(existingHint);
@@ -11689,70 +12229,69 @@ function showDrunkardPlayHint(playerIndex, gameType) {
     const hintBox = document.createElement('div');
     hintBox.className = 'drunkard-hint-box';
     hintBox.style.cssText = `
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #8B4513;
-    color: #FFD700;
-    padding: 40px;
-    border-radius: 20px;
-    border: 3px solid #FFD700;
-    z-index: 10001;
-    text-align: center;
-    min-width: 550px;
-    min-height: 400px;
-    box-shadow: 0 0 40px rgba(139, 69, 19, 0.8);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-`;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #8B4513;
+        color: #FFD700;
+        padding: 40px;
+        border-radius: 20px;
+        border: 3px solid #FFD700;
+        z-index: 10001;
+        text-align: center;
+        min-width: 550px;
+        min-height: 400px;
+        box-shadow: 0 0 40px rgba(139, 69, 19, 0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    `;
 
-hintBox.innerHTML = `
-    <video autoplay loop muted playsinline 
-        style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-1;border-radius:20px;">
-        <source src="videos/gsdf4.mp4" type="video/mp4">
-    </video>
-    
-    <div style="position:relative;z-index:2;text-align:center;">
-        <div style="font-size: 5em; margin-bottom: 30px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);">${gameIcon}🍶</div>
-        <h3 style="margin: 20px 0; color: #FFD700; font-size: 2.2rem; text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);">酒鬼出現！</h3>
-        <div style="background: rgba(0, 0, 0, 0.5); padding: 20px; border-radius: 15px; border: 2px solid #8B4513; margin: 20px 0;">
-            <p style="margin: 15px 0; font-size: 1.4em; color: #FFA500;">${player.name} 遇上了醉醺醺的酒鬼！</p>
-            <p style="margin: 15px 0; font-size: 1.3em;">酒鬼想要和你玩：<strong style="color: #FF6B6B;">${gameTypeName}</strong></p>
+    hintBox.innerHTML = `
+        <video autoplay loop muted playsinline 
+            style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-1;border-radius:20px;">
+            <source src="videos/gsdf4.mp4" type="video/mp4">
+        </video>
+        
+        <div style="position:relative;z-index:2;text-align:center;">
+            <div style="font-size: 5em; margin-bottom: 30px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);">${gameIcon}🍶</div>
+            <h3 style="margin: 20px 0; color: #FFD700; font-size: 2.2rem; text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);">酒鬼出現！</h3>
+            <div style="background: rgba(0, 0, 0, 0.5); padding: 20px; border-radius: 15px; border: 2px solid #8B4513; margin: 20px 0;">
+                <p style="margin: 15px 0; font-size: 1.4em; color: #FFA500;">${player.name} 遇上了醉醺醺的酒鬼！</p>
+                <p style="margin: 15px 0; font-size: 1.3em;">酒鬼想要和你玩：<strong style="color: #FF6B6B;">${gameTypeName}</strong></p>
+            </div>
+            <p style="margin: 25px 0; color: #FFD700; font-size: 1.2em; text-shadow: 0 0 10px rgba(255, 215, 0, 0.7); background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;">
+                 點擊下方按鈕開始 
+            </p>
+            <button class="drunkard-start-btn" style="
+                background: linear-gradient(135deg, #8B4513, #A0522D);
+                color: #FFD700;
+                border: 2px solid #FFD700;
+                padding: 20px 50px;
+                border-radius: 30px;
+                cursor: pointer;
+                margin-top: 20px;
+                font-size: 1.5rem;
+                font-weight: bold;
+                box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+                transition: all 0.3s ease;
+            ">
+                🍻 接受酒鬼的挑戰！
+            </button>
         </div>
-        <p style="margin: 25px 0; color: #FFD700; font-size: 1.2em; text-shadow: 0 0 10px rgba(255, 215, 0, 0.7); background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;">
-             點擊下方按鈕開始 
-        </p>
-        <button class="drunkard-start-btn" style="
-            background: linear-gradient(135deg, #8B4513, #A0522D);
-            color: #FFD700;
-            border: 2px solid #FFD700;
-            padding: 20px 50px;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-top: 20px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
-            transition: all 0.3s ease;
-        ">
-            🍻 接受酒鬼的挑戰！
-        </button>
-    </div>
-`;
+    `;
     
     document.body.appendChild(hintBox);
     
-    // 点击按钮后启用音效
     const button = hintBox.querySelector('.drunkard-start-btn');
     button.addEventListener('click', function() {
         document.body.removeChild(hintBox);
-        playDrunkardMusic(gameType);
+        // 🆕 直接顯示遊戲模態框，不播放音樂
+        document.getElementById('drunkard-modal').style.display = 'flex';
     });
     
-    // 添加点击背景关闭功能（可选）
     hintBox.addEventListener('click', function(e) {
         if (e.target === hintBox) {
             document.body.removeChild(hintBox);
@@ -12979,6 +13518,10 @@ function triggerDrunkardGame(playerIndex) {
     const gameTypes = Object.keys(drunkardGames);
     const randomGameType = gameTypes[Math.floor(Math.random() * gameTypes.length)];
     currentDrunkardGame = randomGameType;
+	
+	   // 🆕 同時顯示提示框和遊戲模態框
+    showDrunkardPlayHint(playerIndex, randomGameType);
+    showDrunkardModal(); // 🆕 同時顯示遊戲框
     
     // 顯示遊戲模態框
     document.getElementById('drunkard-modal').style.display = 'flex';
@@ -13003,8 +13546,8 @@ function loadDrunkardGame(gameType) {
     if (gameType === 'quiz') {
         // 問答遊戲
         const questions = drunkardGames.quiz.questions;
-currentQuestionIndex = Math.floor(Math.random() * questions.length);
-const randomQuestion = questions[currentQuestionIndex];
+        currentQuestionIndex = Math.floor(Math.random() * questions.length);
+        const randomQuestion = questions[currentQuestionIndex];
         
         gameContent.innerHTML = `
             <div class="drunkard-question">
@@ -13055,12 +13598,129 @@ const randomQuestion = questions[currentQuestionIndex];
                 selectedAnswer = parseInt(this.getAttribute('data-number'));
             });
         });
+        
+       } else if (gameType === 'drunkPunch') {
+        // 🆕 完整的醉拳遊戲 HTML，包含所有必要元素
+            gameContent.innerHTML = `
+            <div class="drunk-punch-game">
+                <div class="drunkard-character">🍺🧔</div>
+                <div class="message-display" id="punch-message">
+                    請先點擊下方"確定挑戰"按鈕
+                </div>
+                
+                <div class="punch-display">
+                    <div class="punch-slot" id="punchLeft">👊</div>
+                    <div class="punch-slot" id="punchMiddle">👊</div>
+                    <div class="punch-slot" id="punchRight">👊</div>
+                    <div class="punch-effect" id="punchEffect">👊</div>
+                </div>
+
+                <div class="large-spacer"></div>
+
+                <div class="buttons-section">
+                    <div class="dodge-buttons">
+                        <button class="dodge-btn" id="dodgeLeft" disabled>左躲</button>
+                        <button class="dodge-btn" id="dodgeMiddle" disabled>中躲</button>
+                        <button class="dodge-btn" id="dodgeRight" disabled>右躲</button>
+                    </div>
+
+                    <button class="start-punch-btn" id="startPunchBtn" disabled>
+                        ⏳ 準備開始 (請先點擊確定挑戰)
+                    </button>
+                </div>
+
+                <!-- 🆕 說明按鈕 -->
+                <button class="help-btn" id="helpBtn" style="
+                    background: rgba(139, 69, 19, 0.7);
+                    border: 1px solid #FFD700;
+                    border-radius: 8px;
+                    padding: 6px 12px;
+                    color: #FFD700;
+                    font-size: 0.8rem;
+                    cursor: pointer;
+                    margin: 10px 0;
+                ">📊 查看反應等級說明</button>
+
+                <!-- 🆕 說明表格（初始隱藏） -->
+                <div class="reaction-table" id="reactionTable" style="
+                    background: rgba(0, 0, 0, 0.8);
+                    padding: 15px;
+                    border-radius: 10px;
+                    border: 2px solid #8B4513;
+                    margin: 10px 0;
+                    display: none;
+                    text-align: left;
+                    font-size: 0.8rem;
+                ">
+                    <h4 style="color: #FFD700; text-align: center; margin-bottom: 10px;">🎯 醉拳反應等級表</h4>
+                    <table style="width: 100%; color: #FFD700; border-collapse: collapse;">
+                        <tr style="background: rgba(139, 69, 19, 0.3);">
+                            <th style="padding: 6px; border: 1px solid #8B4513;">等級</th>
+                            <th style="padding: 6px; border: 1px solid #8B4513;">反應時間</th>
+                            <th style="padding: 6px; border: 1px solid #8B4513;">獎勵</th>
+                        </tr>
+                        <tr><td>⚡ 極限反應</td><td>0.00-0.50秒</td><td>60兩</td></tr>
+                        <tr><td>🔥 神速反應</td><td>0.51-0.70秒</td><td>35兩</td></tr>
+                        <tr><td>🎯 精準反應</td><td>0.71-0.90秒</td><td>20兩</td></tr>
+                        <tr><td>👍 快速反應</td><td>0.91-1.10秒</td><td>10兩</td></tr>
+                        <tr><td>✅ 及格反應</td><td>1.11-1.50秒</td><td>10兩</td></tr>
+                        <tr><td>😅 勉強躲過</td><td>1.51-2.00秒</td><td>2兩</td></tr>
+                        <tr><td>🐌 太慢了</td><td>2.01+秒</td><td>0兩</td></tr>
+                        <tr style="background: rgba(255, 0, 0, 0.2);"><td>❌ 躲錯方向</td><td>任何時間</td><td>0兩</td></tr>
+                    </table>
+                    <p style="text-align: center; color: #FFA500; margin-top: 8px; font-size: 0.75rem;">
+                        提示：點擊對應方向的躲閃按鈕，反應越快獎勵越高！
+                    </p>
+                </div>
+
+                <div class="punch-result" id="punchResult" style="display: none;">
+                    <div class="result-icon" id="punchResultIcon">🎉</div>
+                    <div class="result-text" id="punchResultText"></div>
+                    <!-- 🆕 等級說明區域 -->
+                    <div class="level-info" id="levelInfo" style="
+                        background: rgba(255, 215, 0, 0.1);
+                        padding: 8px;
+                        border-radius: 6px;
+                        margin-top: 8px;
+                        border: 1px solid #FFD700;
+                        font-size: 0.8rem;
+                        color: #FFA500;
+                    "></div>
+                </div>
+            </div>
+        `;
+        
+        initDrunkPunchGame();
+        selectedAnswer = null;
     }
+}
+
+
+// 🆕 修改：顯示酒鬼模態框（5秒淡入效果）
+function showDrunkardModal() {
+    const modal = document.getElementById('drunkard-modal');
+    modal.style.display = 'flex';
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 3s ease-in-out'; // 🆕 改為5秒
+    
+    setTimeout(() => {
+        modal.style.opacity = '1';
+    }, 10);
+}
+
+// 🆕 修改：隱藏酒鬼模態框（5秒淡出效果）
+function hideDrunkardModal() {
+    const modal = document.getElementById('drunkard-modal');
+    modal.style.opacity = '0';
+    
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 5000); // 🆕 等待5秒淡出動畫完成
 }
 
 // 修改確認遊戲答案函數
 function confirmDrunkardGame() {
-    if (selectedAnswer === null) {
+    if (selectedAnswer === null && currentDrunkardGame !== 'drunkPunch') {
         document.getElementById('drunkard-result').textContent = '請選擇一個答案！';
         return;
     }
@@ -13075,7 +13735,7 @@ function confirmDrunkardGame() {
         
         if (selectedAnswer === correctAnswer) {
             // 答對了 - 獲得較多獎勵
-			playSound('lotteryWinSound');
+            playSound('lotteryWinSound');
             const silverReward = Math.floor(Math.random() * 50) + 1;
             const goodsReward = Math.floor(Math.random() * 2) + 1;
             
@@ -13091,7 +13751,7 @@ function confirmDrunkardGame() {
         const diceRoll = Math.floor(Math.random() * 6) + 1;
         
         if (selectedAnswer === diceRoll) {
-			playSound('lotteryWinSound');
+            playSound('lotteryWinSound');
             // 猜對了 - 獲得較少獎勵
             const silverReward = Math.floor(Math.random() * 30) + 1;
             const goodsReward = Math.floor(Math.random() * 2);
@@ -13103,46 +13763,121 @@ function confirmDrunkardGame() {
         } else {
             resultText = `❌ 猜錯了！酒鬼的骰子是 ${diceRoll} 點，他大笑著走開了...`;
         }
+        
+     } else if (currentDrunkardGame === 'drunkPunch') {
+        // 🆕 醉拳遊戲：只啟用準備開始按鈕，不隱藏確定挑戰按鈕
+        punchGameState.isReady = true;
+        const startBtn = document.getElementById('startPunchBtn');
+        const message = document.getElementById('punch-message');
+        
+        // 🆕 啟用準備開始按鈕
+        startBtn.disabled = false;
+        startBtn.innerHTML = '🍻 準備開始';
+        startBtn.style.opacity = '1';
+        startBtn.style.cursor = 'pointer';
+        
+        message.textContent = '已確認挑戰！點擊"準備開始"進入遊戲';
+        
+        // 🆕 不移除這行：不隱藏確定挑戰按鈕
+        // document.getElementById('confirm-drunkard').style.display = 'none';
+        
+        return;
     }
     
+    // 🆕 只有問答和骰子遊戲會執行到這裡
+    finishGameWithResult(player, resultText, reward);
+}
+
+// 🆕 新增：完成遊戲並顯示結果
+function finishGameWithResult(player, resultText, reward) {
     // 停止音樂
     stopDrunkardMusic();
-	
-	  // 在這裡顯示結果框
-    const resultBox = document.getElementById('drunkard-result');
-    resultBox.style.display = 'block';  // 添加這行
-    resultBox.innerHTML = resultText;
     
-
+    // 🆕 只在有結果時顯示結果框
+    const resultBox = document.getElementById('drunkard-result');
+    if (resultBox) {
+        resultBox.style.display = 'block'; // 🆕 顯示結果框
+        resultBox.innerHTML = resultText;
+    }
     
     // 添加遊戲日誌
     if (reward) {
-        addEvent(`酒鬼遊戲: ${player.name} ${currentDrunkardGame === 'quiz' ? '答對問題' : '猜中骰子'}，獲得 ${reward.silver} 兩銀子${reward.goods > 0 ? '和 ' + reward.goods + ' 個貨物' : ''}`);
+        let gameTypeText = '';
+        if (currentDrunkardGame === 'quiz') gameTypeText = '答對問題';
+        else if (currentDrunkardGame === 'dice') gameTypeText = '猜中骰子';
+        else if (currentDrunkardGame === 'drunkPunch') gameTypeText = '醉拳反應';
+        
+        addEvent(`酒鬼遊戲: ${player.name} ${gameTypeText}，獲得 ${reward.silver} 兩銀子${reward.goods > 0 ? '和 ' + reward.goods + ' 個貨物' : ''}`);
     } else {
         addEvent(`酒鬼遊戲: ${player.name} 沒有從酒鬼那裡獲得獎勵`);
     }
     
-    // 3秒後自動關閉
-    setTimeout(() => {
-        // ========== 添加停止音乐 ==========
-        stopDrunkardMusic(); // 游戏结束停止音乐
-        // ========== 停止音乐结束 ==========
-        
-        document.getElementById('drunkard-modal').style.display = 'none';
-        savePlayers();
-        renderPlayers();
-    }, 3000);
+    // 🆕 找到所有這樣的地方，修改為：
+setTimeout(() => {
+    stopDrunkardMusic();
+    hideDrunkardModal(); // 🆕 改用淡出函數
+    savePlayers();
+    renderPlayers();
+    
+    // 🆕 重置時隱藏結果框
+    if (resultBox) {
+        resultBox.style.display = 'none';
+    }
+}, 3000); // 保持3秒或改為你想要的時間
 }
 
-
-// 取消游戏
-function cancelDrunkardGame() {
-    // ========== 添加停止音乐 ==========
-    stopDrunkardMusic(); // 停止酒鬼音乐
-    // ========== 停止音乐结束 ==========
-    
-    document.getElementById('drunkard-modal').style.display = 'none';
-    addEvent(`${players[currentPlayerForDrunkard].name} 拒絕了酒鬼的遊戲`);
+// 🆕 修改：完成醉拳遊戲（日誌包含等級）
+function finishDrunkPunchGame(reward, reactionLevel = '') {
+    try {
+        const player = players[currentPlayerForDrunkard];
+        let resultText = '';
+        let logLevel = ''; // 🆕 用於日誌的等級文字
+        
+        if (reward && reward.silver > 0) {
+            playSound('lotteryWinSound');
+            player.wealth += reward.silver;
+            
+            // 🆕 根據獎勵金額判斷等級
+            if (reward.silver === 60) logLevel = '極限反應';
+            else if (reward.silver === 35) logLevel = '神速反應';
+            else if (reward.silver === 20) logLevel = '精準反應';
+            else if (reward.silver === 10) logLevel = '快速/及格反應';
+            else if (reward.silver === 2) logLevel = '勉強躲過';
+            
+            resultText = `✅ ${player.name} 成功躲開醉拳！獲得 ${reward.silver} 兩銀子${reward.goods > 0 ? '和 ' + reward.goods + ' 個貨物' : ''}`;
+            addEvent(`酒鬼遊戲: ${player.name} 醉拳${logLevel}，獲得 ${reward.silver} 兩銀子${reward.goods > 0 ? '和 ' + reward.goods + ' 個貨物' : ''}`);
+        } else {
+            resultText = `❌ ${player.name} 沒能躲開醉拳！沒有獲得獎勵`;
+            addEvent(`酒鬼遊戲: ${player.name} 醉拳反應失敗，沒有獲得獎勵`);
+        }
+        
+        // 停止音樂
+        stopDrunkardMusic();
+        
+        // 顯示結果框
+        const resultBox = document.getElementById('drunkard-result');
+        if (resultBox) {
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = resultText;
+        }
+        
+          // 🆕 7秒後淡出整個模態框
+        setTimeout(() => {
+            hideDrunkardModal(); // 🆕 使用淡出函數
+            savePlayers();
+            renderPlayers();
+            
+            // 重置遊戲狀態
+            resetPunchGame();
+            
+            if (resultBox) {
+                resultBox.style.display = 'none';
+            }
+        }, 7000);
+        
+    } catch (error) {
+        console.error('完成醉拳遊戲時出錯:', error);
+    }
 }
 
 function updatePlayerSpiritStones(playerName, stonesToAdd) {
@@ -13240,12 +13975,23 @@ function triggerDrunkardGame(playerIndex) {
     const gameTypes = Object.keys(drunkardGames);
     const randomGameType = gameTypes[Math.floor(Math.random() * gameTypes.length)];
     currentDrunkardGame = randomGameType;
+	
+	 // 🆕 同時顯示提示框和遊戲模態框
+    showDrunkardPlayHint(playerIndex, randomGameType);
+    showDrunkardModal(); // 🆕 同時顯示遊戲框
+    
+    // 🆕 修正遊戲類型顯示文字 - 添加醉拳遊戲判斷
+    const gameTypeTexts = {
+        'quiz': '問答遊戲',
+        'dice': '骰子博弈', 
+        'drunkPunch': '醉拳反應'  // 🆕 添加醉拳遊戲
+    };
     
     // 显示游戏模态框
     document.getElementById('drunkard-modal').style.display = 'flex';
     document.getElementById('drunkard-game-type').innerHTML = 
         `<p>🍺 ${player.name} 使用貨物卡時遇上了一個醉醺醺的酒鬼！</p>
-         <p>酒鬼想要玩：${randomGameType === 'quiz' ? '問答遊戲' : '骰子博弈'}</p>`;
+         <p>酒鬼想要玩：<strong>${gameTypeTexts[randomGameType]}</strong></p>`;  // 🆕 使用映射表
     
     // 加载游戏内容
     loadDrunkardGame(randomGameType);
@@ -13259,7 +14005,6 @@ function triggerDrunkardGame(playerIndex) {
     selectedAnswer = null;
     document.getElementById('drunkard-result').textContent = '';
 }
-
 
 
             
