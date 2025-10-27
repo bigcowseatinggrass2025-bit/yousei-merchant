@@ -12303,14 +12303,14 @@ function showDrunkardPlayHint(playerIndex, gameType) {
     
     document.body.appendChild(hintBox);
 
-	playDrunkardMusic('hint'); // 提示框顯示時播放音樂
 	
-    const button = hintBox.querySelector('.drunkard-start-btn');
-    button.addEventListener('click', function() {
-        document.body.removeChild(hintBox);
-        stopDrunkardMusic(); // 🆕 停止提示框音樂
-        document.getElementById('drunkard-modal').style.display = 'flex';
-    });
+	
+   button.addEventListener('click', function() {
+    document.body.removeChild(hintBox);
+    stopDrunkardMusic(); // 🆕 停止提示框音樂（如果有）
+    playDrunkardMusic(gameType); // 🆕 點擊後才播放遊戲音樂
+    document.getElementById('drunkard-modal').style.display = 'flex';
+});
     
     hintBox.addEventListener('click', function(e) {
         if (e.target === hintBox) {
@@ -15935,6 +15935,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
