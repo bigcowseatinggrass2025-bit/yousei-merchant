@@ -1,0 +1,42 @@
+name: 🏆 幽街商人數據庫保活
+
+on:
+  schedule:
+    - cron: '0 12 * * 1'
+    - cron: '0 12 * * 4'
+  
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: '執行原因'
+        required: false
+        default: '手動保活執行'
+
+jobs:
+  keep-database-alive:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📅 檢查時間
+      run: |
+        echo "開始時間: $(date)"
+        echo "台灣時間: $(TZ='Asia/Taipei' date)"
+        echo "原因: ${{ github.event.inputs.reason || '自動排程' }}"
+    
+    - name: 🎯 保活數據庫
+      run: |
+        echo "正在保活數據庫..."
+        SUPABASE_URL="https://yfjvwwkelkvnlcdyqeck.supabase.co"
+        SUPABASE_KEY="sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP"
+        
+        curl -s -o /dev/null -w "狀態: %{http_code}\n" \
+          -X GET "${SUPABASE_URL}/rest/v1/leaderboards?select=count" \
+          -H "apikey: ${SUPABASE_KEY}" \
+          -H "Content-Type: application/json"
+        
+        curl -s -o /dev/null -w "狀態: %{http_code}\n" \
+          -X GET "${SUPABASE_URL}/rest/v1/game_records?select=id&limit=1" \
+          -H "apikey: ${SUPABASE_KEY}" \
+          -H "Content-Type: application/json"
+        
+        echo "保活完成！"
