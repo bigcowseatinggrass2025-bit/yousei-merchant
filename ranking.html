@@ -1012,9 +1012,9 @@ body {
     <div class="ranking-category">
         <div class="category-header">
             <div class="category-icon">⏰</div>
-            <h3 class="category-title">堅守商魂</h3>
+            <h3 class="category-title">百年老店</h3>
         </div>
-        <div class="ranking-description">(遊戲時長最持久者)</div>
+        <div class="ranking-description">(遊戲時長最高者)</div>
         <div class="ranking-list" id="time-ranking"></div>
     </div>
 </div>
@@ -1953,7 +1953,7 @@ function formatTimestamp(timestamp) {
     updateRankingDisplay('wealth-ranking', rankings.wealth, '💰', '(局中持有最多銀兩者)');
     updateRankingDisplay('trade-ranking', rankings.trades, '🔄', '(局中成功交易最多次數者)');
     updateRankingDisplay('luck-ranking', rankings.luck, '🎯', '(局中穫得最多彩卷中獎者)');
-    updateRankingDisplay('time-ranking', rankings.time, '⏰', '(遊戲時長最持久者)');
+    updateRankingDisplay('time-ranking', rankings.time, '⏰', '(遊戲時長最高者)');
     
     const streakRanking = calculateWinStreaks();
     updateRankingDisplay('streak-ranking', streakRanking, '👑', '(擁有連續多局勝者)');
@@ -2004,12 +2004,12 @@ async function loadLatestData() {
             else if (index < 5) title = '精英商人';
             else if (index < 10) title = '資深商人';
             
-// 特殊处理堅守商魂的显示值
+// 特殊处理百年老店的显示值
 let displayValue = item.value;
 if (containerId === 'time-ranking') {
     // 使用輔助函數來解析顯示值
     displayValue = parseDuration(item.displayValue || item.value);
-    unit = ''; // 堅守商魂不需要单位
+    unit = ''; // 百年老店不需要单位
 }
             
             rankItem.innerHTML = `
@@ -2071,7 +2071,7 @@ function parseDurationForMarquee(player) {
         // 停止当前动画
         marqueeText.style.animation = 'none';
         
-        // 固定顺序：财富之王 > 交易大师 > 连胜为王 > 幸运之星 > 堅守商魂
+        // 固定顺序：财富之王 > 交易大师 > 连胜为王 > 幸运之星 > 百年老店
         const categories = [
             { 
                 name: '💰 財富之王', 
@@ -2098,7 +2098,7 @@ function parseDurationForMarquee(player) {
                 unit: '次' 
             },
             { 
-                name: '⏰ 堅守商魂', 
+                name: '⏰ 百年老店', 
                 description: '(遊戲時長最高者)',
                 data: rankings.time, 
                 unit: '' 
@@ -2116,8 +2116,8 @@ function parseDurationForMarquee(player) {
                     const player = category.data[i];
                     let displayValue = player.value;
                     
-                    // 处理堅守商魂的显示
-if (category.name === '⏰ 堅守商魂') {
+                    // 处理百年老店的显示
+if (category.name === '⏰ 百年老店') {
     // 統一處理各種數據格式
     if (typeof player.value === 'object' && player.value.displayValue) {
         // 處理 {displayValue: "19分钟", numericValue: 19} 格式
@@ -2178,11 +2178,11 @@ if (category.name === '⏰ 堅守商魂') {
             marqueeText.style.animation = 'marqueeScroll 80s linear infinite';
         }, 100);
     }
-// 只修復堅守商魂排行榜，不影響其他排行榜
+// 只修復百年老店排行榜，不影響其他排行榜
 function fixTimeRankingOnly() {
-    console.log('🔄 專注修復堅守商魂排行榜...');
+    console.log('🔄 專注修復百年老店排行榜...');
     
-    // 只清空堅守商魂數據
+    // 只清空百年老店數據
     rankings.time = [];
     
     gameRecords.forEach(record => {
@@ -2228,7 +2228,7 @@ function fixTimeRankingOnly() {
         });
     });
     
-    // 去重並排序（只影響堅守商魂）
+    // 去重並排序（只影響百年老店）
     const playerMaxTime = {};
     rankings.time.forEach(item => {
         if (!playerMaxTime[item.name] || item.value > playerMaxTime[item.name].value) {
@@ -2240,10 +2240,10 @@ function fixTimeRankingOnly() {
         .sort((a, b) => b.value - a.value)
         .slice(0, 10);
     
-    console.log('✅ 修復後的堅守商魂數據:', rankings.time);
+    console.log('✅ 修復後的百年老店數據:', rankings.time);
     
-    // 只更新堅守商魂顯示
-    updateRankingDisplay('time-ranking', rankings.time, '⏰', '(遊戲時長最持久者)');
+    // 只更新百年老店顯示
+    updateRankingDisplay('time-ranking', rankings.time, '⏰', '(遊戲時長最高者)');
     localStorage.setItem('youseiHallOfFame', JSON.stringify(rankings));
 }
 
@@ -2299,4 +2299,5 @@ function fixTimeRankingOnly() {
 </body>
 
 </html>
+
 
