@@ -1,0 +1,2473 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幽街商人 - 藏品铺</title>
+    <style>
+        /* 基础样式重置 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+        }
+
+       
+
+        
+
+       .login-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-image: url('https://imgur.com/oHmeO93.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+        .login-background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+
+        /* 页面布局与背景 */
+        body {
+            color: #f0f0f0;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+            transition: background 0.5s ease-in-out;
+        }
+
+        /* 登录时的背景 */
+        body.login-bg {
+            background: rgba(0, 0, 0, 0.7);
+        }
+		
+		  /* 新增：出售模式樣式 */
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 5px #2ecc71; }
+            50% { box-shadow: 0 0 20px #2ecc71; }
+            100% { box-shadow: 0 0 5px #2ecc71; }
+        }
+        
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 10px #e74c3c; }
+            50% { box-shadow: 0 0 25px #e74c3c; }
+            100% { box-shadow: 0 0 10px #e74c3c; }
+        }
+        
+        .inventory-item-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .sell-mode-active .inventory-item-card {
+            animation: pulse-green 2s infinite;
+        }
+
+        /* 藏品铺时的背景 */
+        body.collection-bg {
+            background: transparent;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            position: relative;
+            z-index: 1;
+        }
+		
+		/* 藏品铺背景 */
+.collection-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background-image: url('https://imgur.com/pIDcXco.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.collection-background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+        /* 标题区域 */
+        header {
+            background: linear-gradient(135deg, #2c1a1d, #3a2634, #2d1b3d);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #8a6d3b;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        rgba(138, 109, 59, 0.3), 
+        rgba(192, 156, 99, 0.4), 
+        rgba(138, 109, 59, 0.3),
+        rgba(101, 67, 33, 0.4));
+    background-size: 400% 400%;
+    animation: mysterious-glow 8s ease-in-out infinite;
+    z-index: 0;
+    opacity: 0.7;
+    filter: blur(8px);
+}
+
+        .header-glow h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(135deg, 
+        #e6d3a3, 
+        #d4b483, 
+        #c19e6b, 
+        #a88454, 
+        #8a6d3b);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: antique-gold 6s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+}
+
+        @keyframes mysterious-glow {
+    0%, 100% { 
+        background-position: 0% 50%;
+        opacity: 0.5;
+    }
+    25% { 
+        background-position: 50% 50%;
+        opacity: 0.7;
+    }
+    50% { 
+        background-position: 100% 50%;
+        opacity: 0.5;
+    }
+    75% { 
+        background-position: 50% 50%;
+        opacity: 0.7;
+    }
+}
+
+@keyframes antique-gold {
+    0%, 100% { 
+        background-position: 0% 50%;
+        text-shadow: 0 0 10px rgba(230, 211, 163, 0.5);
+    }
+    25% { 
+        background-position: 50% 50%;
+        text-shadow: 0 0 15px rgba(212, 180, 131, 0.7);
+    }
+    50% { 
+        background-position: 100% 50%;
+        text-shadow: 0 0 20px rgba(193, 158, 107, 0.8);
+    }
+    75% { 
+        background-position: 50% 50%;
+        text-shadow: 0 0 15px rgba(212, 180, 131, 0.7);
+    }
+}
+
+        .header-glow .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: #d4b483;
+            animation: subtitle-glow 2s ease-in-out infinite alternate;
+            position: relative;
+            z-index: 1;
+        }
+		
+		
+		/* 易价模态框自定义背景 */
+.bargain-modal-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    border-radius: 15px;
+    overflow: hidden;
+    background-image: url('https://i.imgur.com/tU2dNoO.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.3;
+}
+
+
+
+        /* 音效控制按钮 */
+        .sound-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #FFD700;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s;
+        }
+
+        .sound-control:hover {
+            background: rgba(255, 215, 0, 0.3);
+            transform: scale(1.1);
+        }
+
+        .sound-control.muted {
+            opacity: 0.5;
+        }
+
+        .sound-control.muted span {
+            text-decoration: line-through;
+        }
+
+        /* 动画效果 */
+        @keyframes rainbow-glow {
+            0%, 100% { 
+                opacity: 0.3;
+                background-position: 0% 50%;
+            }
+            50% { 
+                opacity: 0.8;
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes rainbow-text {
+            0%, 100% { 
+                background-position: 0% 50%;
+                text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            }
+            50% { 
+                background-position: 100% 50%;
+                text-shadow: 0 0 20px rgba(255,255,255,0.8);
+            }
+        }
+
+        @keyframes subtitle-glow {
+            from { 
+                text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700;
+            }
+            to { 
+                text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700;
+            }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; }
+            50% { text-shadow: 0 0 10px currentColor, 0 0 15px currentColor; }
+            100% { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; }
+        }
+
+        /* 登录区域 */
+        .login-section {
+            padding: 30px;
+            text-align: center;
+            display: block;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .player-select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #FFD700;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .verifying-text {
+            color: #ff4444;
+            font-size: 1.1rem;
+            margin: 15px 0;
+            text-align: center;
+            display: none;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        /* 欢迎消息样式 */
+        .welcome-text {
+            font-size: 1.3rem;
+            margin: 20px 0;
+            text-align: center;
+            animation: welcome-glow 2s ease-in-out infinite;
+        }
+
+        .rainbow-text {
+            background: linear-gradient(45deg, 
+                #ff0000, #ff9900, #ffff00, #00ff00, 
+                #00ffff, #0000ff, #9900ff, #ff00ff);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow-text 3s ease-in-out infinite;
+            font-weight: bold;
+        }
+
+        .welcome-subtext {
+            font-size: 1rem;
+            color: #FFD700;
+            margin-top: 5px;
+            display: block;
+            animation: subtitle-glow 2s ease-in-out infinite alternate;
+        }
+
+        /* 欢迎消息的发光动画 */
+        @keyframes welcome-glow {
+            0%, 100% { 
+                text-shadow: 0 0 10px rgba(255,255,255,0.5),
+                             0 0 20px rgba(255,215,0,0.3);
+            }
+            50% { 
+                text-shadow: 0 0 15px rgba(255,255,255,0.8),
+                             0 0 30px rgba(255,215,0,0.6),
+                             0 0 40px rgba(255,100,100,0.4);
+            }
+        }
+
+        /* 藏品铺内容区域 */
+        .collection-content {
+            display: none;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 为藏品铺内容添加独立的视频背景 */
+        .collection-bg-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .collection-bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+            border-radius: 0 0 15px 15px;
+        }
+
+       .collection-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* 从0.7改为0.5，让背景更清晰 */
+    z-index: -2;
+    border-radius: 0 0 15px 15px;
+}
+
+        .player-info {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .player-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        /* 发光计数器 */
+        #spirit-stone-count {
+            animation: glow 2s ease-in-out infinite;
+            font-weight: bold;
+            color: #3498db;
+            text-shadow: 0 0 8px #3498db, 0 0 12px #3498db;
+        }
+
+        /* 货架样式 */
+        .shelf-container {
+            margin: 20px 0;
+        }
+
+  .shelf {
+    background: rgba(139, 69, 19, 0.7);
+    border: 2px solid #8B4513;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+        .shelf-title {
+            text-align: center;
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+		
+		
+		/* 特殊發光效果 - 屬性總和超過15 */
+.item-card.special-glow {
+    border: 3px solid transparent;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 100, 100, 0.2), rgba(100, 100, 255, 0.2));
+    background-clip: padding-box;
+    position: relative;
+    animation: special-glow-animation 3s ease-in-out infinite alternate;
+}
+
+.item-card.special-glow::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, 
+        #ff0000, #ff9900, #ffff00, #00ff00, 
+        #00ffff, #0000ff, #9900ff, #ff00ff);
+    background-size: 400% 400%;
+    border-radius: 11px;
+    z-index: -1;
+    animation: rainbow-border 4s linear infinite;
+    filter: blur(2px);
+}
+
+.item-card.special-glow .item-name {
+    background: linear-gradient(45deg, 
+        #ff0000, #ff9900, #ffff00, #00ff00, 
+        #00ffff, #0000ff, #9900ff, #ff00ff);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbow-text 3s linear infinite;
+    font-weight: bold;
+}
+
+/* 特殊發光動畫 */
+@keyframes special-glow-animation {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5),
+                    0 0 20px rgba(255, 100, 0, 0.3),
+                    0 0 30px rgba(255, 200, 0, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.5),
+                    0 0 25px rgba(0, 200, 255, 0.3),
+                    0 0 35px rgba(100, 0, 255, 0.2);
+    }
+}
+
+@keyframes rainbow-border {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes rainbow-text {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+        /* 货品样式 */
+        .item-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .item-card:hover {
+            border-color: #FFD700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .item-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #FFD700;
+        }
+
+        .item-description {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .item-bonuses {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+
+        .item-special {
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            color: #ff9900;
+            font-style: italic;
+        }
+
+        .item-price {
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .price-silver {
+            color: #C0C0C0;
+        }
+
+        .price-spirit {
+            color: #3498db;
+        }
+
+        .buy-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
+        /* 分页控制 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(44, 62, 80, 0.95), rgba(52, 73, 94, 0.95));
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+            border: 2px solid #FFD700;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #FFD700;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* 易价对话框样式 */
+        .bargain-dialog {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .bargain-options {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .bargain-option {
+            padding: 8px 15px;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid #FFD700;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .bargain-option:hover {
+            background: rgba(255, 215, 0, 0.4);
+        }
+
+        .bargain-remaining {
+            text-align: center;
+            margin-top: 10px;
+            color: #FFD700;
+        }
+
+       /* 易價物品圖片大小調整 */
+.bargain-item-image {
+    width: 120px;  /* 從80px增加到120px */
+    height: 120px; /* 從80px增加到120px */
+    object-fit: contain;
+    border-radius: 8px;
+    border: 2px solid #8a6d3b;
+}
+
+/* 易價物品信息佈局調整 */
+.bargain-item-info {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* 從15px增加到20px */
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.bargain-item-details {
+    flex: 1;
+    text-align: left;
+}
+
+.bargain-item-details p {
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+#bargain-item-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #FFD700;
+}
+
+#bargain-item-price {
+    font-size: 1.1rem;
+    color: #3498db;
+}
+
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .shelf {
+                grid-template-columns: 1fr;
+            }
+            
+            .player-stats {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header-glow h1 {
+                font-size: 2rem;
+            }
+            
+            .bargain-options {
+                flex-direction: column;
+            }
+            
+            .bargain-item-info {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+<!-- 添加音效資源 -->
+<audio id="buttonSound">
+    <source src="sounds/butt.mp3" type="audio/mpeg">
+</audio>
+<!-- 客官稍等一下音效 -->
+<audio id="waitSound" preload="auto">
+    <source src="sounds/welcome.mp3" type="audio/mpeg">
+</audio>
+<!-- 歡迎光臨音效 -->
+<audio id="welcomeSound" preload="auto">
+    <source src="sounds/door321.mp3" type="audio/mpeg">
+</audio>
+
+
+</head>
+<body>
+    <!-- 音效控制按鈕 -->
+    <div class="sound-control" id="sound-control">
+        <span>🔊</span>
+    </div>
+    
+    <!-- 登入背景 -->
+    <div class="login-background"></div>
+    <div class="login-background-overlay"></div>
+
+    <!-- 藏品铺背景 -->
+    <div class="collection-background" style="display: none;"></div>
+    <div class="collection-background-overlay" style="display: none;"></div>
+
+    <div class="container">
+        <header class="header-glow">
+            <h1>幽街商人 - 藏品铺</h1>
+            <p class="subtitle">珍稀装备 • 靈寵坐騎 • 武器服飾</p>
+        </header>
+        
+        <!-- 登入區域 -->
+        <section class="login-section" id="login-section">
+            <h2>選擇登錄玩家</h2>
+            <select class="player-select" id="player-select">
+                <option value="">-- 請選擇玩家 --</option>
+            </select>
+            <button class="btn btn-primary" id="login-btn">進入藏品铺</button>
+            
+            <div class="verifying-text" id="verifying-text">
+                <strong>‍客官，稍等一下 </strong>
+            </div>
+            
+            <div class="welcome-text" id="welcome-text" style="display: none;">
+                <strong>喔，原來是<span id="welcome-player-name" class="rainbow-text"></span> 歡迎光臨！</strong>
+                <br>
+                <span class="welcome-subtext">正在進入藏品铺‍</span>
+            </div>
+        </section>
+        
+        <!-- 藏品铺內容 -->
+        <section class="collection-content" id="collection-content">
+            <div class="player-info">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; flex-wrap: wrap;">
+        <!-- 左側：玩家名稱 -->
+        <div>
+            <h2 id="current-player">玩家名稱</h2>
+        </div>
+        
+        <!-- 右側：靈石 + 我的倉庫按鈕 -->
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+            <div class="player-stats">
+                <div class="stat-item">靈石: <span id="spirit-stone-count">0</span></div>
+            </div>
+            <button class="btn btn-primary" id="open-inventory-btn" 
+                style="background: linear-gradient(135deg, #FFD700, #FFA500); 
+                       color: #000; 
+                       font-weight: bold; 
+                       border: none; 
+                       padding: 10px 20px; 
+                       border-radius: 6px;
+                       box-shadow: 0 4px 8px rgba(255, 165, 0, 0.3);
+                       text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+                       transition: all 0.3s;">
+                我的倉庫
+            </button>
+        </div>
+    </div>
+</div>
+            
+            <!-- 貨架區域 -->
+            <div class="shelf-container" id="shelf-container">
+                <!-- 貨架內容將在這裡動態生成 -->
+            </div>
+            
+            <!-- 分頁控制 -->
+            <div class="pagination">
+                <button class="btn btn-warning" id="prev-page">上一頁</button>
+                <span id="page-info">第 1 頁 / 共 5 頁</span>
+                <button class="btn btn-warning" id="next-page">下一頁</button>
+            </div>
+        </section>
+    </div>
+    
+    <!-- 支付選擇模態框 -->
+    <div class="modal" id="payment-modal">
+        <div class="modal-content">
+            <h2>選擇支付方式</h2>
+            <p id="payment-item-name">裝備名稱</p>
+            <div class="modal-buttons">
+                <button class="btn btn-warning" id="pay-silver-btn">使用銀兩支付</button>
+                <button class="btn btn-primary" id="pay-spirit-btn">使用靈石支付</button>
+            </div>
+            <button class="btn" id="cancel-payment-btn" style="margin-top: 15px;">取消</button>
+        </div>
+    </div>
+    
+    <!-- 靈石不足模態框 -->
+    <div class="modal" id="insufficient-modal">
+        <div class="modal-content">
+            <h2>靈石不足</h2>
+            <p>您的靈石餘額不足，無法購買此裝備。</p>
+            <button class="btn btn-primary" id="close-insufficient-btn">關閉</button>
+        </div>
+    </div>
+    
+    <!-- 購買易價模態框 -->
+    <div class="modal" id="bargain-modal">
+        <div class="modal-content">
+            <div class="bargain-modal-background"></div>
+            <h2>易價環節</h2>
+            <div class="bargain-item-info" id="bargain-item-info">
+                <img id="bargain-item-image" class="bargain-item-image" src="" alt="裝備圖片">
+                <div class="bargain-item-details">
+                    <p id="bargain-item-name">裝備名稱</p>
+                    <p id="bargain-item-price">當前價格: 100 靈石</p>
+                </div>
+            </div>
+            <div class="bargain-dialog" id="bargain-dialog">
+                <!-- 對話內容將在這裡動態生成 -->
+            </div>
+            <div class="bargain-options" id="bargain-options">
+                <!-- 易價選項將在這裡動態生成 -->
+            </div>
+            <div class="bargain-remaining" id="bargain-remaining">
+                剩餘易價機會: <span id="bargain-chances">5</span> 次
+            </div>
+            <div class="modal-buttons" id="bargain-buttons" style="display: none;">
+                <button class="btn btn-success" id="confirm-trade-btn">確認交易</button>
+                <button class="btn" id="cancel-bargain-btn">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 交易確認模態框 -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content">
+            <h2>確認交易</h2>
+            <p id="confirm-message">您確定要購買此裝備嗎？</p>
+            <div class="modal-buttons">
+                <button class="btn btn-success" id="confirm-purchase-btn">確認</button>
+                <button class="btn btn-warning" id="cancel-purchase-btn">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 交易結果模態框 -->
+    <div class="modal" id="result-modal">
+        <div class="modal-content">
+            <h2>交易結果</h2>
+            <p id="result-message">交易成功！</p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" id="close-result-btn">返回藏品铺</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ========== 新增：裝備倉庫模態框 ========== -->
+   <!-- 玩家裝備倉庫模態框 -->
+<div class="modal" id="inventory-modal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px; max-height: 80vh; overflow-y: auto; position: relative;">
+        <!-- === 新增：裝備庫專屬背景圖層 === -->
+        <div class="inventory-modal-bg" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            border-radius: 15px;
+            overflow: hidden;
+            background-image: url('https://imgur.com/oaa1594.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.8; /* 可調整透明度，0.4表示40% */
+        "></div>
+        <!-- === 背景圖層結束 === -->
+
+        <!-- 深色遮罩讓文字更清晰 -->
+        <div style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* 可調整遮罩顏色深度 */
+            z-index: -1;
+            border-radius: 15px;
+        "></div>
+        
+        <h2>玩家裝備倉庫 - <span id="inventory-player-name"></span></h2>
+            
+            <div id="sell-mode-prompt" style="display: none; background: rgba(46, 204, 113, 0.2); border: 2px solid #2ecc71; border-radius: 5px; padding: 10px; margin: 10px 0; text-align: center; color: #2ecc71;">
+                👛出售模式：請點選要出售的裝備️（綠色邊框）
+            </div>
+            
+            <div id="inventory-items-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; padding: 10px;">
+                <!-- 裝備會在這裡動態生成 -->
+            </div>
+            
+            <div id="sell-item-details" style="display: none; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <img id="sell-item-image" src="" alt="裝備圖片" style="width: 80px; height: 80px; object-fit: contain; border-radius: 5px;">
+                    <div style="flex: 1;">
+                        <h3 id="sell-item-name" style="color: #ffd700;"></h3>
+                        <div id="sell-item-stats" style="color: #ecf0f1;"></div>
+                        <div id="sell-item-special" style="color: #9b59b6; font-size: 0.9rem;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="sell-price-section" style="display: none; text-align: center; margin: 20px 0;">
+                <h3 style="color: #f39c12;">出售價格</h3>
+                <div id="sell-price-display" style="font-size: 2rem; color: #ffd700; font-weight: bold; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); margin: 10px 0;">
+                    0 兩
+                </div>
+                <div style="color: #95a5a6; font-size: 0.9rem;">
+                    (價格計算: 屬性總和 × 20 + 市場波動)
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-warning" id="start-sell-btn" style="flex: 1;">💰出售裝備</button>
+                <button class="btn btn-primary" id="confirm-sell-btn" style="flex: 1; display: none;">✅確認出售</button>
+                <button class="btn" id="cancel-sell-btn" style="flex: 1;">關閉</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ========== 新增：出售易價模態框 ========== -->
+    <div class="modal" id="sell-bargain-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="bargain-modal-background"></div>
+            <h2>裝備易價出售</h2>
+            <div class="bargain-item-info" id="sell-bargain-item-info">
+                <img id="sell-bargain-item-image" class="bargain-item-image" src="" alt="裝備圖片">
+                <div class="bargain-item-details">
+                    <p id="sell-bargain-item-name">裝備名稱</p>
+                    <p id="sell-bargain-item-price">當前價格: 100 銀兩</p>
+                </div>
+            </div>
+            <div class="bargain-dialog" id="sell-bargain-dialog"></div>
+            <div class="bargain-options" id="sell-bargain-options"></div>
+            <div class="bargain-remaining" id="sell-bargain-remaining">
+                剩餘易價機會: <span id="sell-bargain-chances">5</span> 次
+            </div>
+            <div class="modal-buttons" id="sell-bargain-buttons" style="display: none;">
+                <button class="btn btn-success" id="sell-confirm-trade-btn">確認交易</button>
+                <button class="btn" id="sell-cancel-bargain-btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 核心JavaScript代碼
+        // ============================================
+        
+       // 装备數據
+const allEquipment = {
+    weapons: [
+        { id: 101, name: "青銅匕首", type: "weapon", image: "images/weapons/h4trgv.png", bonuses: { trade: 0, wealth: 0, draw: 0.3 }, description: "鋒利的青銅匕首" },
+        { id: 102, name: "金算盤", type: "weapon", image: "images/weapons/vcxwe.png", bonuses: { trade: 0.5, wealth: 0, draw: 0 }, description: "價值連城的金算盤" },
+        { id: 103, name: "玉算盤", type: "weapon", image: "images/weapons/bt545.png", bonuses: { trade: 0.6, wealth: 0.2, draw: 0 }, description: "價值連城的玉算盤" },
+        { id: 104, name: "靈蛇劍", type: "weapon", image: "images/weapons/vdaw2.png", bonuses: { trade: 0.3, wealth: 0.4, draw: 0.1 }, special: "成功賣出貨物抽一張卡", description: "靈動如蛇的寶劍" },
+        { id: 105, name: "玄鐵寶劍", type: "weapon", image: "images/weapons/thnryh.png", bonuses: { trade: 0.3, wealth: 0.3, draw: 0.3 }, special: "成功賣出貨物抽對手一張卡", description: "玄鐵打造的絕世寶劍" },
+        // ===== 新增武器 =====
+        { id: 106, name: "鐵匕首", type: "weapon", image: "images/weapons/iron_dagger.png", bonuses: { trade: 0.1, wealth: 0.2, draw: 0.1 }, description: "普通的鐵製匕首" },
+        { id: 107, name: "短柄斧", type: "weapon", image: "images/weapons/short_axe.png", bonuses: { trade: 0.3, wealth: 0.4, draw: 0 }, description: "便於攜帶的短柄斧" },
+        { id: 108, name: "獵弓", type: "weapon", image: "images/weapons/hunting_bow.png", bonuses: { trade: 0.2, wealth: 0.5, draw: 0.1 }, description: "狩獵用的短弓" },
+        { id: 109, name: "短劍", type: "weapon", image: "images/weapons/short_sword.png", bonuses: { trade: 0.1, wealth: 0.3, draw: 0.1 }, description: "便於攜帶的短劍" },
+        { id: 110, name: "鐵棍", type: "weapon", image: "images/weapons/iron_rod.png", bonuses: { trade: 0.2, wealth: 0.3, draw: 0.2 }, description: "實用的鐵製棍棒" }
+    ],
+    armors: [
+        { id: 801, name: "商人長袍", type: "armor", image: "images/armors/merchant_robe.png", bonuses: { trade: 0.2, wealth: 0.8, draw: 0.1 }, description: "舒適的商人長袍" },
+        { id: 802, name: "錦繡華服", type: "armor", image: "images/armors/embroidered_clothes.png", bonuses: { trade: 0.2, wealth: 1.5, draw: 0.2 }, description: "華麗的錦繡服飾" },
+        { id: 803, name: "絲路商裝", type: "armor", image: "images/armors/silk_road_armor.png", bonuses: { trade: 0.3, wealth: 2, draw: 0.3 }, description: "絲路商人的專用裝備" },
+        { id: 804, name: "鎖子甲", type: "armor", image: "images/armors/chain_armor.png", bonuses: { trade: 0.1, wealth: 0.1, draw: 0.5 }, special: "來自玩家攻擊的傷害減免10%", description: "堅固的鎖子甲" },
+        { id: 805, name: "紫金袍", type: "armor", image: "images/armors/purple_gold_robe.png", bonuses: { trade: 0.2, wealth: 3, draw: 0.2 }, special: "實體貨卡買入價增加優惠減1銀兩", description: "尊貴的紫金長袍" },
+        // ===== 新增防具 =====
+        { id: 806, name: "棉布衣", type: "armor", image: "images/armors/cotton_clothes.png", bonuses: { trade: 0.1, wealth: 0.2, draw: 0 }, description: "舒適透氣的棉布衣裳" },
+        { id: 807, name: "麻布袍", type: "armor", image: "images/armors/linen_robe.png", bonuses: { trade: 0.1, wealth: 0.4, draw: 0.1 }, description: "透氣的麻布長袍" },
+        { id: 808, name: "絹絲衣", type: "armor", image: "images/armors/silk_clothes.png", bonuses: { trade: 0.1, wealth: 0.8, draw: 0.1 }, description: "輕薄的絹絲衣裳" },
+        { id: 809, name: "綢緞袍", type: "armor", image: "images/armors/satin_robe.png", bonuses: { trade: 0.2, wealth: 1, draw: 0.1 }, description: "光滑的綢緞長袍" },
+        { id: 810, name: "皮甲", type: "armor", image: "images/armors/leather_armor.png", bonuses: { trade: 0, wealth: 0.3, draw: 0.2 }, description: "輕便的皮製護甲" }
+    ],
+    accessories: [
+        { id: 301, name: "幸運符", type: "accessory", image: "images/accessories/lucky_charm.png", bonuses: { trade: 0, wealth: 0.8, draw: 0.2 }, special: "彩卷得獎時增加獎金10銀兩", description: "帶來好運的符咒" },
+        { id: 302, name: "玉佩", type: "accessory", image: "images/accessories/jade_pendant.png", bonuses: { trade: 0, wealth: 1.2, draw: 0.1 }, description: "溫潤的玉佩" },
+        { id: 303, name: "金項鍊", type: "accessory", image: "images/accessories/gold_necklace.png", bonuses: { trade: 0, wealth: 1.5, draw: 0.2 }, description: "華麗的金項鍊" },
+        { id: 304, name: "護身符", type: "accessory", image: "images/accessories/amulet.png", bonuses: { trade: 0, wealth: 1, draw: 0.5 }, special: "免疫所有關於水的環境負面事件", description: "驅邪避凶的護身符" },
+        { id: 305, name: "指環", type: "accessory", image: "images/accessories/ring.png", bonuses: { trade: 0, wealth: 2, draw: 0.5 }, special: "損失銀兩事情扣減-50%", description: "神秘的魔法指環" },
+        // ===== 新增飾品 =====
+        { id: 306, name: "銅戒指", type: "accessory", image: "images/accessories/copper_ring.png", bonuses: { trade: 0, wealth: 0.3, draw: 0.2 }, description: "簡單的銅製戒指" },
+        { id: 307, name: "銀耳環", type: "accessory", image: "images/accessories/silver_earring.png", bonuses: { trade: 0, wealth: 0.5, draw: 0.2 }, description: "精巧的銀製耳環" },
+        { id: 308, name: "檀木珠", type: "accessory", image: "images/accessories/sandalwood_bead.png", bonuses: { trade: 0, wealth: 0.4, draw: 0.3 }, description: "散發香氣的檀木珠" },
+        { id: 309, name: "瑪瑙墜", type: "accessory", image: "images/accessories/agate_pendant.png", bonuses: { trade: 0, wealth: 0.7, draw: 0.2 }, description: "色彩斑斕的瑪瑙墜子" },
+        { id: 310, name: "珊瑚飾", type: "accessory", image: "images/accessories/coral_ornament.png", bonuses: { trade: 0, wealth: 0.6, draw: 0.1 }, description: "來自海洋的珊瑚飾品" }
+    ],
+    pets: [
+        { id: 601, name: "招財貓", type: "pet", image: "images/pets/fsddf.png", bonuses: { trade: 0.5, wealth: 0.5, draw: 0.1 }, special: "每回合從商會賺得10銀兩", description: "招財進寶的靈貓" },
+        { id: 602, name: "靈狐", type: "pet", image: "images/pets/spirit_fox.png", bonuses: { trade: 0.4, wealth: 0.6, draw: 0.2 }, special: "抽卡回合多抽1張牌", description: "聰慧的靈狐" },
+        { id: 603, name: "金絲猴", type: "pet", image: "images/pets/golden_monkey.png", bonuses: { trade: 0.5, wealth: 0.3, draw: 0.3 }, special: "可使用3行動點抽取對手一卡", description: "機靈的金絲猴" },
+        { id: 604, name: "玉兔", type: "pet", image: "images/pets/jade_rabbit.png", bonuses: { trade: 0.3, wealth: 0.3, draw: 0.2 }, special: "使用4行動點抽一張卡", description: "月宮的玉兔" },
+        // 使用副網頁的數值設定
+        { id: 605, name: "牛神", type: "pet", image: "images/pets/2421ew.png", bonuses: { trade: 0.4, wealth: 2.5, draw: 0.2 }, special: "攻擊時每個行動點+5兩銀傷害", description: "小神獸" },
+        { id: 606, name: "玄武", type: "pet", image: "images/pets/bcvxw.png", bonuses: { trade: 0.8, wealth: 10, draw: 0.4 }, special: "小神獸屬性加倍", description: "小神獸" },
+        { id: 607, name: "青龍", type: "pet", image: "images/pets/bfd342r.png", bonuses: { trade: 0.7, wealth: 10, draw: 0.6 }, special: "小神獸屬性加倍", description: "小神獸" },
+        { id: 608, name: "白虎", type: "pet", image: "images/pets/3fews.png", bonuses: { trade: 0.5, wealth: 10, draw: 0.8 }, special: "小神獸屬性加倍", description: "小神獸" },
+        // 使用副網頁的數值設定
+        { id: 609, name: "朱雀", type: "pet", image: "images/pets/bgvfsd34.png", bonuses: { trade: 0.3, wealth: 0.5, draw: 0.7 }, special: "攻擊時每個行動點+5兩銀傷害", description: "小神獸" },
+        { id: 610, name: "神龍", type: "pet", image: "images/pets/fadsf3256.png", bonuses: { trade: 0.7, wealth: 15, draw: 0.7 }, special: "彩卷得獎得到雙倍獎金", description: "祥瑞的神龍" },
+        // ===== 新增寵物（古代化名稱） =====
+        { id: 611, name: "玄貓", type: "pet", image: "images/pets/xuan_cat.png", bonuses: { trade: 0.1, wealth: 5, draw: 0.1 }, description: "古代視為祥瑞的黑貓，能辟邪" },
+        { id: 612, name: "守戶犬", type: "pet", image: "images/pets/guard_dog.png", bonuses: { trade: 0.2, wealth: 3, draw: 0.1 }, description: "守護家宅的忠犬" },
+        { id: 613, name: "朱鱗魚", type: "pet", image: "images/pets/red_scale_fish.png", bonuses: { trade: 0.2, wealth: 8, draw: 0.2 }, description: "紅鱗閃爍的吉祥魚" },
+        { id: 614, name: "報喜鵲", type: "pet", image: "images/pets/happy_magpie.png", bonuses: { trade: 0.1, wealth: 6, draw: 0.2 }, description: "帶來好消息的喜鵲" },
+        { id: 615, name: "龍紋鯉", type: "pet", image: "images/pets/dragon_pattern_koi.png", bonuses: { trade: 0.2, wealth: 4, draw: 0.3 }, description: "鱗片似龍紋的珍稀鯉魚" }
+    ],
+    mounts: [
+        { id: 501, name: "駱駝", type: "mount", image: "images/mounts/3er3r.png", bonuses: { trade: 0.3, wealth: 0, draw: 0.2 }, special: "獲得免疫損失貨物事件", description: "沙漠之舟" },
+        { id: 502, name: "千里馬", type: "mount", image: "images/mounts/horse.png", bonuses: { trade: 1, wealth: 5, draw: 0 }, special: "貿易繁榮事件多抽一卡", description: "日行千里的寶馬" },
+        { id: 503, name: "白象", type: "mount", image: "images/mounts/white_elephant.png", bonuses: { trade: 3, wealth: 5, draw: 0 }, special: "商隊歸來事件！多抽一貨卡", description: "祥瑞的白象" },
+        { id: 504, name: "仙鶴", type: "mount", image: "images/mounts/crane.png", bonuses: { trade: 1, wealth: 5, draw: 0.5 }, special: "觸發全體事件！從商會取10銀兩", description: "仙風道骨的鶴" },
+        { id: 505, name: "麒麟", type: "mount", image: "images/mounts/kirin.png", bonuses: { trade: 1, wealth: 20, draw: 0.5 }, special: "免疫一切負面事情包括玩家攻擊", description: "祥瑞神獸麒麟" },
+        // ===== 新增坐騎 =====
+        { id: 506, name: "驢子", type: "mount", image: "images/mounts/donkey.png", bonuses: { trade: 0.2, wealth: 2, draw: 0 }, description: "耐勞的驢子" },
+        { id: 507, name: "騾子", type: "mount", image: "images/mounts/mule.png", bonuses: { trade: 0.2, wealth: 4, draw: 0 }, description: "強壯的騾子" },
+        { id: 508, name: "黃牛", type: "mount", image: "images/mounts/ox.png", bonuses: { trade: 0.3, wealth: 5, draw: 0 }, description: "穩健的黃牛" },
+        { id: 509, name: "駿馬", type: "mount", image: "images/mounts/steed.png", bonuses: { trade: 0.2, wealth: 1, draw: 0.1 }, description: "優良的駿馬" },
+        { id: 510, name: "麋鹿", type: "mount", image: "images/mounts/deer.png", bonuses: { trade: 0.2, wealth: 3, draw: 0.2 }, description: "靈動的麋鹿" }
+    ]
+};
+		
+		
+		
+
+     // 音效相關
+let soundEnabled = true;
+const buttonSound = document.getElementById('buttonSound');
+const waitSound = document.getElementById('waitSound');    // 客官音效
+const welcomeSound = document.getElementById('welcomeSound'); // 歡迎音效
+
+        // 播放音效
+        function playButtonSound() {
+            if (soundEnabled && buttonSound) {
+                buttonSound.currentTime = 0;
+                buttonSound.play().catch(e => console.log('音效播放失敗:', e));
+            }
+        }
+
+        // 當前狀態
+        let currentPlayer = null;
+        let currentPage = 1;
+        const itemsPerPage = 6;
+        const totalPages = 5;
+        let selectedItem = null;
+        let bargainChances = 5;
+        let originalPrice = 0;
+        let currentPrice = 0;
+        let sessionItems = JSON.parse(sessionStorage.getItem('collectionPageItems')) || null;
+
+        // ============================================
+        // 出售系統全局變量
+        // ============================================
+        let sellMode = false;
+        let selectedSellItem = null;
+        let sellOriginalPrice = 0;
+        let sellCurrentPrice = 0;
+        let sellBargainChances = 0;
+
+        const sellBargainResponses = {
+            options: [
+                "這個價格有點低，能再加點嗎？",
+                "這可是稀有裝備，值更多錢的",
+                "最近行情不錯，價格應該更高些",
+                "這價格我不太滿意",
+                "有其他人出更高的價錢"
+            ],
+               replies: {
+        "price_up": [
+            "店家遲疑了一下：「行...行吧！{price}銀兩，再多我可不要了！」",
+            "店家擦了擦汗：「這...這價夠高了！{price}銀兩，小店本小利薄啊！」",
+            "店家咬牙：「算我眼拙，{price}銀兩！這下滿意了吧？」",
+            "店家苦笑：「您真是會做生意...{price}銀兩，成交！」",
+            "店家掏出錢袋掂了掂：「罷了罷了，{price}銀兩，當交個朋友！」",
+            "店家眼神閃爍：「{price}銀兩...可別告訴其他客人這價錢！」",
+            "店家翻翻帳本：「{price}銀兩...這月又要虧本了」",
+            "店家小聲嘀咕：「{price}銀兩，這價我轉手也難賺啊」"
+        ],
+        "price_down": [
+            "店家冷笑一聲：「呵，您這是當我冤大頭？{price}銀兩，愛賣不賣！」",
+            "店家搖搖頭：「這價格太離譜，{price}銀兩，不賣就算了！」",
+            "店家擺擺手：「告辭！{price}銀兩是我最後的底線！」",
+            "店家把錢袋往櫃台一拍：「{price}銀兩！不二價！」",
+            "店家眯起眼：「這磨損...最多{price}銀兩」",
+            "店家拿起放大鏡：「喲，這裡有裂痕啊...{price}銀兩頂天了」",
+            "店家嘆氣：「最近生意淡，{price}銀兩，賣不賣隨您」",
+            "店家指著標籤：「您看，新貨才賣{price}銀兩，二手的不值這價」"
+        ],
+        "price_same": [
+            "店家眼睛一亮：「爽快！{price}銀兩，這價公道！」",
+            "店家笑道：「好！{price}銀兩，和您做生意就是痛快！」",
+            "店家立刻數錢：「成交！{price}銀兩，錢貨兩清！」",
+            "店家滿意點頭：「{price}銀兩，這買賣做得值！」",
+            "店家小心收起貨物：「{price}銀兩，合作愉快！」",
+            "店家拿出秤稱了稱銀兩：「正好{price}銀兩，您點點」",
+            "店家寫下收據：「{price}銀兩，這是收據，您收好」",
+            "店家包裝貨物：「{price}銀兩，我給您包起來」"
+        ]
+    }
+};
+
+        // ============================================
+        // DOM元素
+        // ============================================
+        const playerSelect = document.getElementById('player-select');
+        const loginBtn = document.getElementById('login-btn');
+        const loginSection = document.getElementById('login-section');
+        const collectionContent = document.getElementById('collection-content');
+        const currentPlayerElement = document.getElementById('current-player');
+        const spiritStoneCount = document.getElementById('spirit-stone-count');
+        const shelfContainer = document.getElementById('shelf-container');
+        const pageInfo = document.getElementById('page-info');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const verifyingText = document.getElementById('verifying-text');
+        const welcomeText = document.getElementById('welcome-text');
+        const welcomePlayerName = document.getElementById('welcome-player-name');
+        const soundControl = document.getElementById('sound-control');
+
+        // ============================================
+        // 核心功能函數
+        // ============================================
+
+        // 初始化玩家選擇
+        function initializePlayerSelect() {
+            playerSelect.innerHTML = '<option value="">-- 請選擇玩家 --</option>';
+            const players = getPlayersFromMainPage();
+            
+            players.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.name;
+                option.textContent = player.name;
+                playerSelect.appendChild(option);
+            });
+        }
+
+        // 獲取主頁玩家數據
+        function getPlayersFromMainPage() {
+            const players = JSON.parse(localStorage.getItem('players')) || [];
+            if (players.length === 0) {
+                return [
+                    { id: 1, name: "玩家一", spiritStones: 0, inventory: [] },
+                    { id: 2, name: "玩家二", spiritStones: 0, inventory: [] },
+                    { id: 3, name: "玩家三", spiritStones: 0, inventory: [] }
+                ];
+            }
+            
+            return players.map((player, index) => ({
+                id: index + 1,
+                name: player.name,
+                spiritStones: 0,
+                inventory: player.inventory || []
+            }));
+        }
+
+        // 從sell.html獲取靈石數據
+        function getSpiritStonesFromSellPage(playerName) {
+            try {
+                const auctionData = localStorage.getItem('auctionData');
+                if (auctionData) {
+                    const data = JSON.parse(auctionData);
+                    if (data.players && data.players[playerName]) {
+                        return data.players[playerName].spiritStones || 0;
+                    }
+                }
+                
+                const playersData = localStorage.getItem('players');
+                if (playersData) {
+                    const players = JSON.parse(playersData);
+                    const player = players.find(p => p.name === playerName);
+                    if (player && player.spiritStones !== undefined) {
+                        return player.spiritStones;
+                    }
+                }
+                
+                return 0;
+            } catch (error) {
+                console.error('獲取靈石數據失敗:', error);
+                return 0;
+            }
+        }
+
+        // 保存靈石數據到sell.html
+        function saveSpiritStonesToSellPage(playerName, newSpiritStones) {
+            try {
+                let auctionData = { players: {} };
+                const existingAuctionData = localStorage.getItem('auctionData');
+                if (existingAuctionData) {
+                    auctionData = JSON.parse(existingAuctionData);
+                    if (!auctionData.players) auctionData.players = {};
+                }
+                
+                if (!auctionData.players[playerName]) {
+                    auctionData.players[playerName] = { spiritStones: 0, inventory: [] };
+                }
+                
+                auctionData.players[playerName].spiritStones = newSpiritStones;
+                localStorage.setItem('auctionData', JSON.stringify(auctionData));
+                
+                // 同時更新主頁面玩家數據
+                updateMainPagePlayerSpiritStones(playerName, newSpiritStones);
+                
+            } catch (error) {
+                console.error('保存靈石數據失敗:', error);
+            }
+        }
+
+        // 更新主頁面玩家靈石
+        function updateMainPagePlayerSpiritStones(playerName, newSpiritStones) {
+            try {
+                const mainPlayers = JSON.parse(localStorage.getItem('players')) || [];
+                const playerIndex = mainPlayers.findIndex(p => p.name === playerName);
+                if (playerIndex !== -1) {
+                    mainPlayers[playerIndex].spiritStones = newSpiritStones;
+                    localStorage.setItem('players', JSON.stringify(mainPlayers));
+                }
+            } catch (error) {
+                console.error('更新主頁面靈石數據失敗:', error);
+            }
+        }
+
+        // 價格計算算法
+        function calculateItemPrice(item) {
+            let baseValue = 0;
+            const bonusSum = (item.bonuses.trade || 0) + (item.bonuses.wealth || 0) + (item.bonuses.draw || 0);
+            baseValue = Math.floor(bonusSum * 100);
+            
+            if (item.special) baseValue *= 1.5;
+            
+            const silverPrice = Math.min(Math.floor(baseValue * 0.8), 400);
+            const spiritPrice = Math.min(Math.floor(baseValue * 1.2), 600);
+            
+            return {
+                silver: Math.max(silverPrice, 30),
+                spirit: Math.max(spiritPrice, 10)
+            };
+        }
+
+     // 計算出售價格 - 簡單減法調整 (規則：>300減200，>200減100)
+function calculateSellPrice(item) {
+    // 1. 計算基礎價格 = (trade + wealth + draw) × 20
+    const baseValue = (item.bonuses.trade + item.bonuses.wealth + item.bonuses.draw) * 20;
+    
+    // 2. 添加隨機波動 (-1 到 30)
+    const randomFluctuation = Math.floor(Math.random() * 32) - 1;
+    
+    // 3. 計算初始價格 (保證至少為1)
+    let finalPrice = Math.max(1, Math.round(baseValue + randomFluctuation));
+    
+    // 4. 應用你的價格調整規則
+    if (finalPrice > 300) {
+        // 超過300：減200
+        finalPrice = finalPrice - 200;
+    } else if (finalPrice > 200) {
+        // 200-300之間：減100
+        finalPrice = finalPrice - 100;
+    }
+    // 200以下保持原價
+    
+    // 5. 最終保護：確保價格不低於10 (可根據需求調整)
+    finalPrice = Math.max(10, finalPrice);
+    
+    // 6. 返回最終價格
+    return finalPrice;
+}
+
+        // 生成會話物品
+        function generateSessionItems() {
+            sessionItems = {};
+            
+            for (let page = 1; page <= totalPages; page++) {
+                let equipmentType;
+                switch(page) {
+                    case 1: equipmentType = 'weapons'; break;
+                    case 2: equipmentType = 'armors'; break;
+                    case 3: equipmentType = 'accessories'; break;
+                    case 4: equipmentType = 'pets'; break;
+                    case 5: equipmentType = 'mounts'; break;
+                }
+                
+                const equipment = allEquipment[equipmentType];
+                const selectedEquipment = [];
+                const usedIndices = new Set();
+                
+                while(selectedEquipment.length < itemsPerPage && selectedEquipment.length < equipment.length) {
+                    const randomIndex = Math.floor(Math.random() * equipment.length);
+                    if (!usedIndices.has(randomIndex)) {
+                        selectedEquipment.push(equipment[randomIndex]);
+                        usedIndices.add(randomIndex);
+                    }
+                }
+                
+                sessionItems[page] = selectedEquipment;
+            }
+            
+            sessionStorage.setItem('collectionPageItems', JSON.stringify(sessionItems));
+        }
+
+        // 加載貨架頁面
+        function loadShelfPage(page) {
+            shelfContainer.innerHTML = '';
+            pageInfo.textContent = `第 ${page} 頁 / 共 ${totalPages} 頁`;
+            
+            const shelf = document.createElement('div');
+            shelf.className = 'shelf';
+            
+            let selectedEquipment = [];
+            if (sessionItems && sessionItems[page]) {
+                selectedEquipment = sessionItems[page];
+            } else {
+                let equipmentType;
+                switch(page) {
+                    case 1: equipmentType = 'weapons'; break;
+                    case 2: equipmentType = 'armors'; break;
+                    case 3: equipmentType = 'accessories'; break;
+                    case 4: equipmentType = 'pets'; break;
+                    case 5: equipmentType = 'mounts'; break;
+                }
+                
+                const equipment = allEquipment[equipmentType];
+                const usedIndices = new Set();
+                
+                while(selectedEquipment.length < itemsPerPage && selectedEquipment.length < equipment.length) {
+                    const randomIndex = Math.floor(Math.random() * equipment.length);
+                    if (!usedIndices.has(randomIndex)) {
+                        selectedEquipment.push(equipment[randomIndex]);
+                        usedIndices.add(randomIndex);
+                    }
+                }
+            }
+            
+            selectedEquipment.forEach(item => {
+                const itemCard = createItemCard(item);
+                shelf.appendChild(itemCard);
+            });
+            
+            const shelfTitle = document.createElement('div');
+            shelfTitle.className = 'shelf-title';
+            let titleText = '';
+            switch(page) {
+                case 1: titleText = '武器貨架'; break;
+                case 2: titleText = '防具貨架'; break;
+                case 3: titleText = '飾物貨架'; break;
+                case 4: titleText = '靈寵貨架'; break;
+                case 5: titleText = '坐騎貨架'; break;
+            }
+            shelfTitle.textContent = titleText;
+            
+            shelfContainer.appendChild(shelfTitle);
+            shelfContainer.appendChild(shelf);
+        }
+
+        // 創建貨品卡片
+        function createItemCard(item) {
+            const itemCard = document.createElement('div');
+            itemCard.className = 'item-card';
+            
+            const totalBonus = (item.bonuses.trade || 0) + (item.bonuses.wealth || 0) + (item.bonuses.draw || 0);
+            if (totalBonus > 10) itemCard.classList.add('special-glow');
+            
+            const prices = calculateItemPrice(item);
+            const silverPrice = prices.silver;
+            const spiritPrice = prices.spirit;
+            
+            const imgElement = document.createElement('img');
+            imgElement.className = 'item-image';
+            imgElement.alt = item.name;
+            imgElement.onerror = function() { this.style.display = 'none'; };
+            imgElement.src = item.image;
+            
+            itemCard.innerHTML = `
+                <div class="item-name">${item.name}</div>
+                <div class="item-description">${item.description}</div>
+                <div class="item-bonuses">
+                    交易: +${item.bonuses.trade} 銀兩: +${item.bonuses.wealth} 抽卡: +${item.bonuses.draw}
+                </div>
+                ${item.special ? `<div class="item-special">特殊: ${item.special}</div>` : ''}
+                <div class="item-price">
+                    <span class="price-silver">${silverPrice} 銀兩</span> | 
+                    <span class="price-spirit">${spiritPrice} 靈石</span>
+                </div>
+                <div class="buy-buttons">
+                    <button class="btn btn-warning buy-silver-btn" data-price="${silverPrice}">銀兩購買</button>
+                    <button class="btn btn-primary buy-spirit-btn" data-price="${spiritPrice}">靈石購買</button>
+                </div>
+            `;
+            
+            itemCard.insertBefore(imgElement, itemCard.firstChild);
+            
+            const silverBtn = itemCard.querySelector('.buy-silver-btn');
+            const spiritBtn = itemCard.querySelector('.buy-spirit-btn');
+            
+            silverBtn.addEventListener('click', () => {
+                selectedItem = item;
+                const prices = calculateItemPrice(item);
+                selectedItem.price = prices.silver;
+                selectedItem.originalSilverPrice = prices.silver;
+                selectedItem.originalSpiritPrice = prices.spirit;
+                selectedItem.currency = 'silver';
+                showPaymentModal();
+            });
+
+            spiritBtn.addEventListener('click', () => {
+                selectedItem = item;
+                const prices = calculateItemPrice(item);
+                selectedItem.price = prices.spirit;
+                selectedItem.originalSilverPrice = prices.silver;
+                selectedItem.originalSpiritPrice = prices.spirit;
+                selectedItem.currency = 'spirit';
+                showPaymentModal();
+            });
+            
+            return itemCard;
+        }
+
+        // ============================================
+        // 購買功能
+        // ============================================
+
+        // 顯示支付選擇模態框
+        function showPaymentModal() {
+            const paymentModal = document.getElementById('payment-modal');
+            const paymentItemName = document.getElementById('payment-item-name');
+            
+            paymentItemName.textContent = selectedItem.name;
+            paymentModal.style.display = 'flex';
+            
+            const paySilverBtn = document.getElementById('pay-silver-btn');
+            const paySpiritBtn = document.getElementById('pay-spirit-btn');
+            const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
+            
+            paySilverBtn.onclick = () => {
+                paymentModal.style.display = 'none';
+                selectedItem.currency = 'silver';
+                startBargain();
+            };
+            
+            paySpiritBtn.onclick = () => {
+                paymentModal.style.display = 'none';
+                selectedItem.currency = 'spirit';
+                startBargain();
+            };
+            
+            cancelPaymentBtn.onclick = () => {
+                paymentModal.style.display = 'none';
+                selectedItem = null;
+            };
+        }
+
+        // 開始易價環節
+        function startBargain() {
+            const bargainModal = document.getElementById('bargain-modal');
+            const bargainItemName = document.getElementById('bargain-item-name');
+            const bargainItemImage = document.getElementById('bargain-item-image');
+            const bargainItemPrice = document.getElementById('bargain-item-price');
+            const bargainDialog = document.getElementById('bargain-dialog');
+            
+            bargainChances = Math.floor(Math.random() * 5) + 1;
+            
+            if (selectedItem.currency === 'silver') {
+                const prices = calculateItemPrice(selectedItem);
+                originalPrice = prices.silver;
+            } else {
+                const prices = calculateItemPrice(selectedItem);
+                originalPrice = prices.spirit;
+            }
+            
+            currentPrice = originalPrice;
+            
+            bargainItemName.textContent = selectedItem.name;
+            bargainItemImage.src = selectedItem.image;
+            bargainItemImage.alt = selectedItem.name;
+            
+            const currencyText = selectedItem.currency === 'silver' ? '銀兩' : '靈石';
+            bargainItemPrice.textContent = `當前價格: ${currentPrice} ${currencyText}`;
+            
+            bargainDialog.innerHTML = '';
+            const welcomeMsg = document.createElement('p');
+            bargainDialog.appendChild(welcomeMsg);
+            typeWriterEffect(welcomeMsg, `商人: "歡迎光臨！這件${selectedItem.name}品質上乘，只要${currentPrice}${currencyText}，您覺得如何？"`);
+            
+            generateBargainOptions();
+            document.getElementById('bargain-chances').textContent = bargainChances;
+            document.getElementById('bargain-buttons').style.display = 'none';
+            bargainModal.style.display = 'flex';
+            
+            const cancelBargainBtn = document.getElementById('cancel-bargain-btn');
+            cancelBargainBtn.onclick = () => {
+                bargainModal.style.display = 'none';
+                selectedItem = null;
+            };
+            
+            const confirmTradeBtn = document.getElementById('confirm-trade-btn');
+            confirmTradeBtn.onclick = () => {
+                bargainModal.style.display = 'none';
+                completePurchase();
+            };
+        }
+
+        // 完成購買
+        function completePurchase() {
+            if (selectedItem.currency === 'spirit' && currentPlayer.spiritStones < currentPrice) {
+                const insufficientModal = document.getElementById('insufficient-modal');
+                insufficientModal.style.display = 'flex';
+                
+                const closeInsufficientBtn = document.getElementById('close-insufficient-btn');
+                closeInsufficientBtn.onclick = () => {
+                    insufficientModal.style.display = 'none';
+                    selectedItem = null;
+                };
+                return;
+            }
+            
+            const confirmModal = document.getElementById('confirm-modal');
+            const confirmMessage = document.getElementById('confirm-message');
+            
+            confirmMessage.textContent = `您确定要以 ${currentPrice} ${selectedItem.currency === 'silver' ? '銀兩' : '靈石'} 購買 ${selectedItem.name} 吗？`;
+            confirmModal.style.display = 'flex';
+            
+            const confirmPurchaseBtn = document.getElementById('confirm-purchase-btn');
+            const cancelPurchaseBtn = document.getElementById('cancel-purchase-btn');
+            
+            confirmPurchaseBtn.onclick = () => {
+                confirmModal.style.display = 'none';
+                
+                if (selectedItem.currency === 'spirit') {
+                    currentPlayer.spiritStones -= currentPrice;
+                    spiritStoneCount.textContent = currentPlayer.spiritStones;
+                    saveSpiritStonesToSellPage(currentPlayer.name, currentPlayer.spiritStones);
+                }
+                
+                addItemToPlayerInventory(selectedItem);
+                showTransactionResult(true);
+            };
+            
+            cancelPurchaseBtn.onclick = () => {
+                confirmModal.style.display = 'none';
+                selectedItem = null;
+            };
+        }
+
+        // 將裝備添加到玩家裝備庫
+        function addItemToPlayerInventory(item) {
+            const mainPlayers = JSON.parse(localStorage.getItem('players')) || [];
+            const playerIndex = mainPlayers.findIndex(p => p.name === currentPlayer.name);
+            
+            if (playerIndex !== -1) {
+                const equipmentCopy = {
+                    id: item.id,
+                    name: item.name,
+                    type: item.type,
+                    image: item.image,
+                    bonuses: {...item.bonuses},
+                    description: item.description,
+                    special: item.special || ""
+                };
+                
+                if (!mainPlayers[playerIndex].inventory) {
+                    mainPlayers[playerIndex].inventory = [];
+                }
+                
+                mainPlayers[playerIndex].inventory.push(equipmentCopy);
+                localStorage.setItem('players', JSON.stringify(mainPlayers));
+                currentPlayer.inventory = mainPlayers[playerIndex].inventory;
+            }
+        }
+
+        // 顯示交易結果
+        function showTransactionResult(success) {
+            const resultModal = document.getElementById('result-modal');
+            const resultMessage = document.getElementById('result-message');
+            const closeResultBtn = document.getElementById('close-result-btn');
+            
+            if (success) {
+                resultMessage.textContent = `交易成功！您已獲得 ${selectedItem.name}，已添加到您的裝備庫。`;
+            } else {
+                resultMessage.textContent = "交易失敗，請重試。";
+            }
+            
+            resultModal.style.display = 'flex';
+            
+            closeResultBtn.onclick = () => {
+                resultModal.style.display = 'none';
+                selectedItem = null;
+                loadShelfPage(currentPage);
+            };
+        }
+
+        // ============================================
+        // 裝備出售系統
+        // ============================================
+
+        // 初始化裝備倉庫功能
+        function initInventoryModal() {
+            const openInventoryBtn = document.getElementById('open-inventory-btn');
+            const inventoryModal = document.getElementById('inventory-modal');
+            const cancelSellBtn = document.getElementById('cancel-sell-btn');
+            const startSellBtn = document.getElementById('start-sell-btn');
+            const confirmSellBtn = document.getElementById('confirm-sell-btn');
+            
+            openInventoryBtn.addEventListener('click', () => {
+                openInventoryModal();
+            });
+            
+            startSellBtn.addEventListener('click', () => {
+                enterSellMode();
+            });
+            
+            confirmSellBtn.addEventListener('click', () => {
+                if (!selectedSellItem) {
+                    alert('請先選擇要出售的裝備！');
+                    return;
+                }
+                startSellBargain();
+            });
+            
+            cancelSellBtn.addEventListener('click', () => {
+                inventoryModal.style.display = 'none';
+                resetSellMode();
+            });
+        }
+
+        // 打開裝備倉庫模態框
+        function openInventoryModal() {
+            const inventoryModal = document.getElementById('inventory-modal');
+            const inventoryPlayerName = document.getElementById('inventory-player-name');
+            
+            resetSellMode();
+            inventoryPlayerName.textContent = currentPlayer.name;
+            loadPlayerInventory();
+            inventoryModal.style.display = 'flex';
+        }
+
+        // 加載玩家裝備
+        function loadPlayerInventory() {
+            const inventoryContainer = document.getElementById('inventory-items-container');
+            inventoryContainer.innerHTML = '';
+            
+            const mainPlayers = JSON.parse(localStorage.getItem('players')) || [];
+            const player = mainPlayers.find(p => p.name === currentPlayer.name);
+            
+            if (!player || !player.inventory || player.inventory.length === 0) {
+                inventoryContainer.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #7f8c8d;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">📦</div>
+                        <h3>裝備庫空空如也</h3>
+                        <p>還沒有裝備可以出售</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            player.inventory.forEach(item => {
+                const itemElement = createInventoryItemCard(item);
+                inventoryContainer.appendChild(itemElement);
+            });
+        }
+
+        // 創建裝備庫卡片
+        function createInventoryItemCard(item) {
+            const itemCard = document.createElement('div');
+            itemCard.className = 'inventory-item-card';
+            itemCard.setAttribute('data-item-id', item.id);
+            
+            const totalBonus = (item.bonuses.trade || 0) + (item.bonuses.wealth || 0) + (item.bonuses.draw || 0);
+            if (totalBonus > 10) {
+                itemCard.style.border = '2px solid #ffd700';
+                itemCard.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.3)';
+            }
+            
+            const imgElement = document.createElement('img');
+            imgElement.src = item.image;
+            imgElement.alt = item.name;
+            imgElement.style.cssText = 'width: 100%; height: 100px; object-fit: contain; margin-bottom: 10px; border-radius: 5px;';
+            imgElement.onerror = function() { this.style.display = 'none'; };
+            
+            const infoContainer = document.createElement('div');
+            infoContainer.innerHTML = `
+                <div style="font-weight: bold; color: #ffd700; margin-bottom: 5px; font-size: 1.1rem;">${item.name}</div>
+                <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 5px;">${item.description}</div>
+                <div style="font-size: 0.8rem; color: #aaa;">
+                    交易+${item.bonuses.trade} | 財富+${item.bonuses.wealth} | 抽卡+${item.bonuses.draw}
+                </div>
+                ${item.special ? `<div style="font-size: 0.75rem; color: #9b59b6; margin-top: 5px;">${item.special}</div>` : ''}
+            `;
+            
+            itemCard.appendChild(imgElement);
+            itemCard.appendChild(infoContainer);
+            
+            itemCard.addEventListener('click', function() {
+                if (sellMode) selectItemForSell(item, this);
+            });
+            
+            return itemCard;
+        }
+
+        // 進入出售模式
+        function enterSellMode() {
+            const inventoryItems = document.querySelectorAll('.inventory-item-card');
+            if (inventoryItems.length === 0) {
+                alert('沒有裝備可以出售！');
+                return;
+            }
+            
+            sellMode = true;
+            document.getElementById('sell-mode-prompt').style.display = 'block';
+            document.getElementById('start-sell-btn').style.display = 'none';
+            document.getElementById('confirm-sell-btn').style.display = 'block';
+            
+            inventoryItems.forEach(item => {
+                item.style.boxShadow = '0 0 10px #2ecc71, inset 0 0 5px #2ecc71';
+                item.style.border = '2px solid #2ecc71';
+                item.style.animation = 'pulse-green 2s infinite';
+            });
+        }
+
+        // 選擇裝備出售
+        function selectItemForSell(item, element) {
+            document.querySelectorAll('.inventory-item-card').forEach(el => {
+                el.style.boxShadow = '0 0 10px #2ecc71, inset 0 0 5px #2ecc71';
+                el.style.animation = 'pulse-green 2s infinite';
+            });
+            
+            element.style.boxShadow = '0 0 20px #e74c3c, inset 0 0 10px #e74c3c';
+            element.style.border = '2px solid #e74c3c';
+            element.style.animation = 'pulse-red 1s infinite';
+            
+            selectedSellItem = item;
+            showSellItemDetails(item);
+            
+            const price = calculateSellPrice(item);
+            sellOriginalPrice = price;
+            sellCurrentPrice = price;
+            
+            document.getElementById('sell-price-display').textContent = `${price} 兩`;
+            document.getElementById('sell-price-section').style.display = 'block';
+        }
+
+        // 顯示裝備詳情
+        function showSellItemDetails(item) {
+            const detailsDiv = document.getElementById('sell-item-details');
+            const image = document.getElementById('sell-item-image');
+            const name = document.getElementById('sell-item-name');
+            const stats = document.getElementById('sell-item-stats');
+            const special = document.getElementById('sell-item-special');
+            
+            image.src = item.image;
+            image.alt = item.name;
+            image.onerror = function() { this.style.display = 'none'; };
+            
+            name.textContent = item.name;
+            stats.innerHTML = `
+                <div style="margin-bottom: 5px;"><strong>屬性加成:</strong></div>
+                <div>交易: +${item.bonuses.trade}</div>
+                <div>財富: +${item.bonuses.wealth}</div>
+                <div>抽卡: +${item.bonuses.draw}</div>
+                <div style="margin-top: 8px;"><strong>屬性總和:</strong> ${(item.bonuses.trade + item.bonuses.wealth + item.bonuses.draw).toFixed(1)}</div>
+            `;
+            
+            if (item.special) {
+                special.textContent = `特殊效果: ${item.special}`;
+                special.style.display = 'block';
+            } else {
+                special.style.display = 'none';
+            }
+            
+            detailsDiv.style.display = 'block';
+        }
+
+        // 開始出售易價環節
+        function startSellBargain() {
+            const bargainModal = document.getElementById('sell-bargain-modal');
+            const itemName = document.getElementById('sell-bargain-item-name');
+            const itemImage = document.getElementById('sell-bargain-item-image');
+            const itemPrice = document.getElementById('sell-bargain-item-price');
+            
+            sellBargainChances = Math.floor(Math.random() * 5) + 1;
+            
+            itemName.textContent = selectedSellItem.name;
+            itemImage.src = selectedSellItem.image;
+            itemImage.alt = selectedSellItem.name;
+            itemImage.onerror = function() { this.style.display = 'none'; };
+            itemPrice.textContent = `當前價格: ${sellCurrentPrice} 銀兩`;
+            
+            const bargainDialog = document.getElementById('sell-bargain-dialog');
+            bargainDialog.innerHTML = '';
+            const welcomeMsg = document.createElement('p');
+            bargainDialog.appendChild(welcomeMsg);
+            
+            typeWriterEffect(welcomeMsg, `買家: "這件${selectedSellItem.name}看起來不錯，我出${sellCurrentPrice}銀兩，您覺得怎麼樣？"`);
+            
+            generateSellBargainOptions();
+            document.getElementById('sell-bargain-chances').textContent = sellBargainChances;
+            document.getElementById('sell-bargain-buttons').style.display = 'none';
+            bargainModal.style.display = 'flex';
+            document.getElementById('inventory-modal').style.display = 'none';
+        }
+
+        // 生成出售易價選項
+        function generateSellBargainOptions() {
+            const container = document.getElementById('sell-bargain-options');
+            container.innerHTML = '';
+            
+            const selectedOptions = [];
+            const availableOptions = [...sellBargainResponses.options];
+            
+            while (selectedOptions.length < 3 && availableOptions.length > 0) {
+                const randomIndex = Math.floor(Math.random() * availableOptions.length);
+                selectedOptions.push(availableOptions[randomIndex]);
+                availableOptions.splice(randomIndex, 1);
+            }
+            
+            selectedOptions.forEach(optionText => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'bargain-option';
+                optionElement.textContent = optionText;
+                optionElement.addEventListener('click', () => {
+                    handleSellBargainOption();
+                });
+                container.appendChild(optionElement);
+            });
+        }
+
+        // 處理出售易價選項
+        function handleSellBargainOption() {
+            const bargainDialog = document.getElementById('sell-bargain-dialog');
+            const itemPrice = document.getElementById('sell-bargain-item-price');
+            
+            sellBargainChances--;
+            document.getElementById('sell-bargain-chances').textContent = sellBargainChances;
+            
+            const priceChangePercent = (Math.random() * 35) - 15;
+            const priceChange = Math.floor(sellCurrentPrice * priceChangePercent / 100);
+            sellCurrentPrice += priceChange;
+            sellCurrentPrice = Math.max(1, sellCurrentPrice);
+            
+            itemPrice.textContent = `當前價格: ${sellCurrentPrice} 銀兩`;
+            
+            let responseType = 'price_same';
+            if (priceChange > 0) responseType = 'price_up';
+            else if (priceChange < 0) responseType = 'price_down';
+            
+            const replies = sellBargainResponses.replies[responseType];
+            const randomReply = replies[Math.floor(Math.random() * replies.length)].replace('{price}', sellCurrentPrice);
+            
+            const thinkingMsg = document.createElement('p');
+            thinkingMsg.innerHTML = '<em>💭 買家正在思考...</em>';
+            bargainDialog.appendChild(thinkingMsg);
+            
+            setTimeout(() => {
+                thinkingMsg.remove();
+                const replyElement = document.createElement('p');
+                bargainDialog.appendChild(replyElement);
+                
+                typeWriterEffect(replyElement, randomReply, () => {
+                    if (sellBargainChances <= 0) {
+                        document.getElementById('sell-bargain-options').innerHTML = '';
+                        document.getElementById('sell-bargain-buttons').style.display = 'flex';
+                    } else {
+                        setTimeout(() => {
+                            generateSellBargainOptions();
+                        }, 800);
+                    }
+                }, 50);
+            }, Math.random() * 1000 + 1000);
+        }
+
+        // 完成出售交易
+        function completeSellTransaction() {
+            removeItemFromPlayerInventory(selectedSellItem);
+            showSellResult();
+            document.getElementById('sell-bargain-modal').style.display = 'none';
+        }
+
+        // 從玩家裝備庫移除裝備
+        function removeItemFromPlayerInventory(item) {
+            const mainPlayers = JSON.parse(localStorage.getItem('players')) || [];
+            const playerIndex = mainPlayers.findIndex(p => p.name === currentPlayer.name);
+            
+            if (playerIndex !== -1 && mainPlayers[playerIndex].inventory) {
+                const itemIndex = mainPlayers[playerIndex].inventory.findIndex(
+                    invItem => invItem.id === item.id && invItem.name === item.name
+                );
+                
+                if (itemIndex !== -1) {
+                    mainPlayers[playerIndex].inventory.splice(itemIndex, 1);
+                    localStorage.setItem('players', JSON.stringify(mainPlayers));
+                    console.log(`✅ 已出售裝備: ${item.name}，價格: ${sellCurrentPrice} 銀兩`);
+                }
+            }
+        }
+
+        // 顯示出售結果
+        function showSellResult() {
+            const resultModal = document.getElementById('result-modal');
+            const resultMessage = document.getElementById('result-message');
+            
+            resultMessage.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 15px;">💰</div>
+                    <h3 style="color: #2ecc71;">出售成功！</h3>
+                    <p>您以 <strong style="color: #ffd700; font-size: 1.2rem;">${sellCurrentPrice} 銀兩</strong></p>
+                    <p>賣出了 <strong style="color: #3498db;">${selectedSellItem.name}</strong></p>
+                    <div style="margin-top: 20px; padding: 10px; background: rgba(231, 76, 60, 0.1); border-radius: 5px;">
+                        <strong>⚠️ 重要提示：</strong><br>
+                        銀兩需由實體桌遊主持人給予玩家
+                    </div>
+                </div>
+            `;
+            
+            resultModal.style.display = 'flex';
+            
+            document.getElementById('close-result-btn').onclick = () => {
+                resultModal.style.display = 'none';
+                loadPlayerInventory();
+                resetSellMode();
+                setTimeout(() => {
+                    document.getElementById('inventory-modal').style.display = 'flex';
+                }, 300);
+            };
+        }
+
+        // 重置出售模式
+        function resetSellMode() {
+            sellMode = false;
+            selectedSellItem = null;
+            sellOriginalPrice = 0;
+            sellCurrentPrice = 0;
+            sellBargainChances = 0;
+            
+            document.getElementById('sell-mode-prompt').style.display = 'none';
+            document.getElementById('sell-item-details').style.display = 'none';
+            document.getElementById('sell-price-section').style.display = 'none';
+            document.getElementById('start-sell-btn').style.display = 'block';
+            document.getElementById('confirm-sell-btn').style.display = 'none';
+            
+            document.querySelectorAll('.inventory-item-card').forEach(item => {
+                item.style.boxShadow = '';
+                item.style.border = '';
+                item.style.animation = '';
+            });
+        }
+
+        // 初始化出售易價事件
+        function initSellBargainEvents() {
+            const confirmTradeBtn = document.getElementById('sell-confirm-trade-btn');
+            const cancelBargainBtn = document.getElementById('sell-cancel-bargain-btn');
+            
+            if (!confirmTradeBtn || !cancelBargainBtn) return;
+            
+            confirmTradeBtn.addEventListener('click', () => {
+                completeSellTransaction();
+            });
+            
+            cancelBargainBtn.addEventListener('click', () => {
+                document.getElementById('sell-bargain-modal').style.display = 'none';
+                document.getElementById('inventory-modal').style.display = 'flex';
+                resetSellMode();
+            });
+        }
+
+        // ============================================
+        // 通用功能函數
+        // ============================================
+
+        // 打字機效果函數
+        function typeWriterEffect(element, text, callback, speed = 50) {
+            let i = 0;
+            element.innerHTML = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML = text.substring(0, i + 1);
+                    i++;
+                    setTimeout(type, speed);
+                    const dialog = element.parentElement;
+                    if (dialog) dialog.scrollTop = dialog.scrollHeight;
+                } else {
+                    if (callback) callback();
+                }
+            }
+            
+            type();
+        }
+
+        // 生成易價選項函數（購買用）- 修復版（加入對話顯示）
+function generateBargainOptions() {
+    const container = document.getElementById('bargain-options');
+    const bargainDialog = document.getElementById('bargain-dialog');
+    if (!container || !bargainDialog) return;
+    
+    container.innerHTML = '';
+    
+    const options = [
+        "老闆能給個優惠嗎?",
+        "老闆，能不能再便宜一點？",
+        "這個價格有點超出預算了",
+        "我是老顧客了，給個優惠吧"
+    ];
+    
+    options.forEach(optionText => {
+        const optionElement = document.createElement('div');
+        optionElement.className = 'bargain-option';
+        optionElement.textContent = optionText;
+        
+        optionElement.addEventListener('click', () => {
+            // 1. 先減少易價機會
+            bargainChances--;
+            document.getElementById('bargain-chances').textContent = bargainChances;
+            
+            // 2. 減價10%
+            currentPrice = Math.floor(currentPrice * 0.9);
+            const currencyText = selectedItem.currency === 'silver' ? '銀兩' : '靈石';
+            document.getElementById('bargain-item-price').textContent = `當前價格: ${currentPrice} ${currencyText}`;
+            
+            // 3. 顯示商人思考訊息
+            const thinkingMsg = document.createElement('p');
+            thinkingMsg.innerHTML = '<em>💭 商人正在思考...</em>';
+            bargainDialog.appendChild(thinkingMsg);
+            
+            // 4. 延遲1-2秒後顯示回覆
+            setTimeout(() => {
+                thinkingMsg.remove();
+                
+                const replyElement = document.createElement('p');
+                bargainDialog.appendChild(replyElement);
+                
+               // ========== 替換開始：增強版商人回應系統 ==========
+
+// 1. 先計算本次降價幅度，讓回應更有依據
+const discountFromOriginal = originalPrice - currentPrice;
+const discountPercent = Math.round((discountFromOriginal / originalPrice) * 100);
+const isBigDiscount = discountPercent > 25;
+const isFirstBargain = (originalPrice - currentPrice) < (originalPrice * 0.1); // 第一次還價
+
+// 2. 根據玩家選擇的對話選項，決定商人對玩家態度的判斷
+let playerTone = 'polite'; // 預設：禮貌
+if (optionText.includes('優惠') || optionText.includes('便宜')) {
+    playerTone = 'bargaining';
+} else if (optionText.includes('超出預算') || optionText.includes('太貴')) {
+    playerTone = 'complaining';
+} else if (optionText.includes('老顧客')) {
+    playerTone = 'regular';
+} else if (optionText.includes('瑕疵') || optionText.includes('問題')) {
+    playerTone = 'critical';
+}
+
+// 3. 根據「玩家態度」和「降價幅度」的組合，選擇回應池
+let responsePool = [];
+
+if (playerTone === 'bargaining') {
+    if (isBigDiscount) {
+        responsePool = [
+            `商人倒抽一口涼氣："客官，您這刀砍得也太深了！${currentPrice}${currencyText}...這是要我喝西北風啊！"`,
+            `商人連連擺手："使不得使不得！${currentPrice}${currencyText}？我連本錢都回不來！"`,
+            `商人瞪大眼睛："${currentPrice}${currencyText}？您這不是買貨，是搶劫啊！"`,
+            `商人擦著額頭的汗："這價錢傳出去，同行非得笑話我不可...${currentPrice}${currencyText}，就當我積陰德了。"`
+        ];
+    } else {
+        responsePool = [
+            `商人摸了摸下巴："${currentPrice}${currencyText}...嗯，行吧，就當開個張。"`,
+            `商人盤算了一下："好，${currentPrice}${currencyText}！不過您得答應我，下次還來關照小店。"`,
+            `商人笑道："看您是個爽快人，${currentPrice}${currencyText}，成交！"`,
+            `商人點點頭："也罷，${currentPrice}${currencyText}。這寶物跟了您，也不算埋沒。"`
+        ];
+    }
+} else if (playerTone === 'complaining') {
+    responsePool = [
+        `商人指著裝備："客官，您瞧瞧這用料、這做工！${currentPrice}${currencyText}，真的已經是良心價了。"`,
+        `商人嘆氣道："現今生意難做，成本都漲了...${currentPrice}${currencyText}，真的不能再讓了。"`,
+        `商人誠懇地說："不瞞您說，這價我已經沒什麼賺頭了。${currentPrice}${currencyText}，您考慮考慮？"`,
+        `商人壓低聲音："這樣吧，${currentPrice}${currencyText}，我再送您一小瓶保養油，如何？"`
+    ];
+} else if (playerTone === 'regular') {
+    responsePool = [
+        `商人眼睛一亮："喲！是老主顧啊！早說嘛，${currentPrice}${currencyText}，給您特別價！"`,
+        `商人熱絡地拍手："您又來啦！這次的貨色更好，${currentPrice}${currencyText}，老朋友價！"`,
+        `商人從櫃檯下拿出茶："先喝口茶。${currentPrice}${currencyText}，這價只有您有。"`,
+        `商人小聲說："給您留了件好的，${currentPrice}${currencyText}，別告訴其他客人啊。"`
+    ];
+} else if (playerTone === 'critical') {
+    responsePool = [
+        `商人拿起裝備仔細檢查："瑕疵？哪兒呢？...哦您說這個啊，這是天然紋理！不過${currentPrice}${currencyText}，給您吧。"`,
+        `商人辯解道："這叫古法製作，如今懂的人不多了...算了，${currentPrice}${currencyText}。"`,
+        `商人沒好氣地說："嫌貨才是買貨人。${currentPrice}${currencyText}，要就拿走。"`,
+        `商人翻個白眼："您眼光真高...${currentPrice}${currencyText}，最低了，不買請便。"`
+    ];
+} else { // polite 或其他
+    if (isFirstBargain) {
+        responsePool = [
+            `商人微笑："一來就這麼客氣。${currentPrice}${currencyText}，好說好說。"`,
+            `商人拱手："承蒙關照。${currentPrice}${currencyText}，祝您寶劍贈英雄。"`,
+            `商人點頭："好眼光。${currentPrice}${currencyText}，願它助您一帆風順。"`
+        ];
+    } else {
+        responsePool = [
+            `商人捋著鬍鬚："嗯...${currentPrice}${currencyText}。您是個明白人，這價公道。"`,
+            `商人爽快道："成！${currentPrice}${currencyText}！和您做生意就是痛快。"`,
+            `商人將裝備推向前："${currentPrice}${currencyText}。它是您的了，願結善緣。"`
+        ];
+    }
+}
+
+// 4. 增加少量「特殊情況」彩蛋回應（5%機率）
+if (Math.random() < 0.05) {
+    responsePool = [
+        `商人忽然盯著您看了一會："咦...您面相不凡，今日與我有緣。${currentPrice}${currencyText}，半賣半送！"`,
+        `商人看看天色："快收攤了，最後一單。${currentPrice}${currencyText}，圖個吉利！"`,
+        `商人神神秘秘地："告訴您個秘密，這裝備有點靈性...${currentPrice}${currencyText}，讓它認個好主。"`
+    ];
+}
+
+// 5. 隨機選擇一條最終回應
+const randomResponse = responsePool[Math.floor(Math.random() * responsePool.length)];
+
+// ========== 替換結束 ==========
+                
+                // 用打字機效果顯示回覆
+                typeWriterEffect(replyElement, randomResponse, () => {
+				playMerchantVoice(randomResponse); 
+                    // 5. 檢查是否還有易價機會
+                    if (bargainChances <= 0) {
+                        container.innerHTML = '';
+                        document.getElementById('bargain-buttons').style.display = 'flex';
+                    }
+                    // 如果還有機會，選項按鈕會保持可點擊狀態
+                }, 50);
+                
+            }, Math.random() * 1000 + 1000); // 隨機延遲1-2秒
+        });
+        
+        container.appendChild(optionElement);
+    });
+}
+
+// === 完整商人語音系統 ===
+const voiceMapping = {
+    // aggressive 生氣語氣
+    '客官，您這刀砍得也太深了': 'merchant/tone_angry_01.mp3',
+    '使不得使不得': 'merchant/tone_angry_02.mp3',
+    '您這不是買貨，是搶劫啊': 'merchant/tone_angry_03.mp3',
+    '這價錢傳出去，同行非得笑話我不可': 'merchant/tone_angry_04.mp3',
+    
+    // 普通討價還價
+    '嗯，行吧，就當開個張': 'merchant/tone_normal_01.mp3',
+    '下次還來關照小店': 'merchant/tone_normal_02.mp3',
+    '這寶物跟了您，也不算埋沒': 'merchant/tone_normal_03.mp3',
+    '也罷，': 'merchant/tone_normal_04.mp3',
+    
+    // happy 開心/成交語氣
+    '看您是個爽快人，成交': 'merchant/tone_happy_01.mp3',
+    '好，': 'merchant/tone_happy_02.mp3',
+    '成！': 'merchant/tone_happy_03.mp3',
+    '成交！': 'merchant/tone_happy_04.mp3',
+    
+    // complaining 抱怨/解釋語氣
+    '您瞧瞧這用料、這做工': 'merchant/tone_explain_01.mp3',
+    '現今生意難做，成本都漲了': 'merchant/tone_explain_02.mp3',
+    '這價我已經沒什麼賺頭了': 'merchant/tone_explain_03.mp3',
+    '我再送您一小瓶保養油': 'merchant/tone_explain_04.mp3',
+    
+    // regular 老顧客熱情語氣
+    '喲！是老主顧啊！早說嘛': 'merchant/tone_regular_01.mp3',
+    '您又來啦！這次的貨色更好': 'merchant/tone_regular_02.mp3',
+    '先喝口茶。': 'merchant/tone_regular_03.mp3',
+    '給您留了件好的，別告訴其他客人啊': 'merchant/tone_regular_04.mp3',
+    
+    // critical 挑剔/不耐煩語氣
+    '這是天然紋理！不過': 'merchant/tone_critical_01.mp3',
+    '這叫古法製作，如今懂的人不多了': 'merchant/tone_critical_02.mp3',
+    '嫌貨才是買貨人': 'merchant/tone_critical_03.mp3',
+    '您眼光真高...最低了，不買請便': 'merchant/tone_critical_04.mp3',
+    
+    // polite 禮貌語氣
+    '一來就這麼客氣。好說好說': 'merchant/tone_polite_01.mp3',
+    '承蒙關照。祝您寶劍贈英雄': 'merchant/tone_polite_02.mp3',
+    '好眼光。願它助您一帆風順': 'merchant/tone_polite_03.mp3',
+    '您是個明白人，這價公道': 'merchant/tone_polite_04.mp3',
+    '和您做生意就是痛快': 'merchant/tone_polite_05.mp3',
+    '它是您的了，願結善緣': 'merchant/tone_polite_06.mp3'
+};
+// 新增的神秘特殊回應語音映射
+const specialVoiceMapping = {
+    '商人忽然盯著您看了一會："咦...您面相不凡，今日與我有緣。${currentPrice}${currencyText}，半賣半送！"': 'merchant/tone_mysterious_01.mp3',
+    '商人看看天色："快收攤了，最後一單。${currentPrice}${currencyText}，圖個吉利！"': 'merchant/tone_mysterious_02.mp3',
+    '商人神神秘秘地："告訴您個秘密，這裝備有點靈性...${currentPrice}${currencyText}，讓它認個好主。"': 'merchant/tone_mysterious_03.mp3'
+};
+
+// 智能語音播放函數
+function playMerchantVoice(text) {
+    // 清除描述文字，只留對話內容
+    const cleanText = text.replace(/^[^:]*:\s*/, '').replace(/"/g, '');
+    
+    // 尋找匹配的語音檔
+    for (const [key, filePath] of Object.entries(voiceMapping)) {
+        if (cleanText.includes(key)) {
+            console.log(`🎵 播放語音: ${key} -> ${filePath}`);
+            
+            const audio = new Audio(filePath);
+            audio.volume = 0.7;
+            
+            // 延遲300ms播放，讓文字先顯示
+            setTimeout(() => {
+                audio.play().catch(e => {
+                    if (e.name === 'NotAllowedError') {
+                        console.log('提示：請先點擊頁面任意處解鎖音訊');
+                    }
+                });
+            }, 300);
+            
+            return; // 找到匹配就結束
+        }
+    }
+    
+    // 沒找到匹配的語音檔
+    console.log('未找到對應語音:', cleanText.substring(0, 20) + '...');
+}
+
+// === 系統結束 ===
+
+
+        // ============================================
+        // 事件監聽器
+        // ============================================
+
+       loginBtn.addEventListener('click', () => {
+    const selectedPlayerName = playerSelect.value;
+    if (!selectedPlayerName) {
+        alert('請選擇玩家！');
+        return;
+    }
+    
+    verifyingText.style.display = 'block';
+    
+    // ======= 1. 顯示「客官稍等一下」時播放 welcome.mp3 =======
+    if (soundEnabled) {
+        const waitSound = document.getElementById('waitSound');
+        if (waitSound) {
+            waitSound.currentTime = 0;
+            waitSound.volume = 0.7;
+            waitSound.play().catch(e => {
+                console.log('客官音效播放失敗，使用按鈕音效');
+                playButtonSound();
+            });
+        }
+    }
+    // ======= 結束 =======
+    
+    setTimeout(() => {
+        const players = getPlayersFromMainPage();
+        currentPlayer = players.find(p => p.name === selectedPlayerName);
+        
+        if (currentPlayer) {
+            currentPlayer.spiritStones = getSpiritStonesFromSellPage(currentPlayer.name);
+        }
+        
+        verifyingText.style.display = 'none';
+        welcomePlayerName.textContent = currentPlayer.name;
+        welcomeText.style.display = 'block';
+        
+        // ======= 2. 顯示「歡迎光臨」時播放 door321.mp3 =======
+        if (soundEnabled) {
+            const welcomeSound = document.getElementById('welcomeSound');
+            if (welcomeSound) {
+                welcomeSound.currentTime = 0;
+                welcomeSound.volume = 0.7;
+                welcomeSound.play().catch(e => {
+                    console.log('歡迎音效播放失敗，使用按鈕音效');
+                    playButtonSound();
+                });
+            }
+        }
+        // ======= 語音播放結束 =======
+        
+        setTimeout(() => {
+            loginSection.style.display = 'none';
+            collectionContent.style.display = 'block';
+            currentPlayerElement.textContent = currentPlayer.name;
+            spiritStoneCount.textContent = currentPlayer.spiritStones;
+            
+            document.querySelector('.login-background').style.display = 'none';
+            document.querySelector('.login-background-overlay').style.display = 'none';
+            document.querySelector('.collection-background').style.display = 'block';
+            document.querySelector('.collection-background-overlay').style.display = 'block';
+            
+            document.body.classList.remove('login-bg');
+            document.body.classList.add('collection-bg');
+            
+            generateSessionItems();
+            loadShelfPage(currentPage);
+        }, 2000);
+    }, 4000);
+});
+
+        // 分頁控制
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadShelfPage(currentPage);
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadShelfPage(currentPage);
+            }
+        });
+
+        // 音效控制
+        soundControl.addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.classList.toggle('muted');
+            playButtonSound();
+        });
+
+        // 為所有按鈕添加點擊音效
+        document.addEventListener('click', function(event) {
+            if (event.target.matches('button') && !event.target.disabled) {
+                playButtonSound();
+            }
+        });
+
+        // ============================================
+        // 頁面初始化
+        // ============================================
+
+        // 頁面加載完成時初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePlayerSelect();
+            loadShelfPage(currentPage);
+            initInventoryModal();
+            initSellBargainEvents();
+            console.log('幽街商人 - 藏品铺已初始化');
+        });
+
+    </script>
+</body>
+</html>
