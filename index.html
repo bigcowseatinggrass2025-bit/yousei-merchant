@@ -14648,14 +14648,14 @@ function triggerDrunkardGame(playerIndex) {
                 totalTrades++;
                 player.wealth = (player.wealth || 100) + 10;
 				
-				    // 添加直接获得货卡的小概率事件 (15%概率)
-    if (Math.random() < 0.15) {
+				    // 添加直接获得货卡的小概率事件 (20%概率)
+    if (Math.random() < 0.20) {
         giveGoodsCardsToPlayer(playerIndex);
         addEvent(`${player.name} 在交易時意外獲得了幽街貨物卡！`, 'special');
     }
 				
-	// 添加獲得裝備的小概率事件 (10%概率)
-if (Math.random() < 0.10) {
+	// 添加獲得裝備的小概率事件 (15%概率)
+if (Math.random() < 0.15) {
     // 確保玩家有背包
     if (!players[playerIndex].inventory) {
         players[playerIndex].inventory = [];
@@ -16564,6 +16564,7 @@ function setupRefreshButtons() {
 </body>
 
 </html>
+
 
 
 
