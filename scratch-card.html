@@ -637,28 +637,131 @@
         }
     }
 
-    // 初始化刮卡畫布
-    function initScratchCanvas() {
-        const canvas = document.getElementById('scratch-canvas');
-        const ctx = canvas.getContext('2d');
+  function initScratchCanvas() {
+    const canvas = document.getElementById('scratch-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // 設置畫布尺寸
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    
+    // 清除畫布
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 🆕 載入並繪製圖片作為刮層
+    const scratchImg = new Image();
+    scratchImg.src = 'vw452.png'; // 🎨 你的圖片
+    
+    scratchImg.onload = function() {
+        console.log('✅ 刮層圖片載入成功');
         
-        // 設置畫布尺寸
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        // 繪製圖片（調整大小適應畫布）
+        ctx.drawImage(scratchImg, 0, 0, canvas.width, canvas.height);
         
-        // 清除畫布
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // 🆕 在圖片上方添加半透明深色層（讓刮層更明顯）
+        ctx.fillStyle = 'rgba(50, 50, 50, 0.6)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // 繪製灰色刮層
+        // 🆕 添加提示文字在圖片上方（可選）
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 24px Microsoft YaHei';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        ctx.shadowBlur = 8;
+        ctx.fillText('刮開此處', canvas.width / 2, canvas.height / 2);
+        ctx.shadowBlur = 0;
+        
+        // 設置刮卡事件
+        setupScratchEvents();
+    };
+    
+    scratchImg.onerror = function() {
+        console.log('❌ 圖片載入失敗，使用預設灰色刮層');
+        
+        // 圖片載入失敗時的備用樣式（保持原有功能）
         ctx.fillStyle = '#7f8c8d';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // 繪製提示文字
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 20px Microsoft YaHei';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('刮開此處', canvas.width / 2, canvas.height / 2);
+        
+        setupScratchEvents();
+    };
+    
+    // 🆕 分離事件設置函數
+    function setupScratchEvents() {
+        // 你原有的滑鼠/觸控事件代碼保持不變
+        // 只是移動到這裡，在圖片加載完成後才設置
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        
+        function getCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+        
+        function startDrawing(e) {
+            isDrawing = true;
+            const { x, y } = getCoordinates(e);
+            lastX = x;
+            lastY = y;
+            drawDot(x, y);
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+            checkProgress(); // 檢查刮卡進度
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            
+            const { x, y } = getCoordinates(e);
+            
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = 25;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            
+            lastX = x;
+            lastY = y;
+        }
+        
+        function drawDot(x, y) {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 12, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // 綁定事件
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+        
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+    }
+}
         
         let isDrawing = false;
         let lastX = 0;
@@ -1003,6 +1106,7 @@
 </script>
 </body>
 </html>
+
 
 
 
