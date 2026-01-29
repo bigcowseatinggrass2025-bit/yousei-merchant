@@ -868,18 +868,32 @@ function forceSyncToWarehouse() {
 
     
 
-    // 初始化
-    window.addEventListener('load', loadScratchData);
-    
-    // 🆕 修复：添加storage事件监听，确保数据同步
-    window.addEventListener('storage', function(e) {
-        console.log('📦 Storage事件触发:', e.key);
-        if (e.key === 'virtualScratchCards') {
-            // 重新加载数据
-            loadScratchData();
-        }
-    });
+
+ // 初始化
+window.addEventListener('load', loadScratchData);
+
+// 🆕 修复：添加storage事件监听，确保数据同步
+window.addEventListener('storage', function(e) {
+    console.log('📦 Storage事件触发:', e.key);
+    if (e.key === 'virtualScratchCards') {
+        // 重新加载数据
+        loadScratchData();
+    }
+});
+
+// 🆕 添加在這裡！頁面離開前強制保存
+window.addEventListener('beforeunload', function() {
+    saveScratchData();
+});
+
+// 🆕 手機切換App時保存
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        saveScratchData();
+    }
+});
 </script>
 </body>
 </html>
+
 
