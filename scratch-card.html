@@ -714,12 +714,29 @@ function checkProgress() {
 
     // 🆕 修复：保存刮刮樂數據
     function saveScratchData() {
-        if (!currentScratchData) return;
+    if (!currentScratchData) return;
+    
+    console.log('🚨 正在保存數據...');
+    
+    // 🚨 關鍵修復：確保currentCard狀態同步到數組
+    if (currentCard && currentScratchData.cards) {
+        const cardIndex = currentScratchesData.cards.findIndex(c => c.id === currentCard.id);
+        if (cardIndex !== -1) {
+            currentScratchData.cards[cardIndex].isScratched = currentCard.isScratched;
+        }
+    }
+    
+    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+    allScratches[currentScratchData.id] = currentScratchData;
+    localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+    console.log('💾 数据已保存:', currentScratchData.id);
+}
+    // 檢查是否所有卡片都已刮開
+    function checkAllScratched() {
+        if (!currentScratchData || !currentScratchData.cards) return false;
         
-        const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-        allScratches[currentScratchData.id] = currentScratchData;
-        localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
-        console.log('💾 数据已保存:', currentScratchData.id);
+        const allScratched = currentScratchData.cards.every(card => card.isScratched);
+        return allScratched;
     }
 
     // 檢查是否所有卡片都已刮開
@@ -895,5 +912,6 @@ document.addEventListener('visibilitychange', function() {
 </script>
 </body>
 </html>
+
 
 
