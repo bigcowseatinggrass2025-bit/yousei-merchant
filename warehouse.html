@@ -6,7 +6,7 @@
     <title>我的幽街貨卡倉庫</title>
     <!-- 🎯 添加Supabase库引用 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         /* 手机端专用样式 */
         * {
@@ -715,6 +715,30 @@
     <button class="youjie-btn" id="youjie-btn">幽街</button>
 
     <script>
+            // 🆕 兼容层代码 - 放在所有JS代码的最前面
+    window.jsQR = function(data, width, height, options) {
+        try {
+            // 使用html5-qrcode来解析
+            const result = Html5Qrcode.decodeFromImageData(data, width, height);
+            
+            if (result && result.text) {
+                return {
+                    data: result.text,
+                    location: {
+                        topRightCorner: { x: 0, y: 0 },
+                        topLeftCorner: { x: 0, y: 0 },
+                        bottomRightCorner: { x: 0, y: 0 },
+                        bottomLeftCorner: { x: 0, y: 0 }
+                    },
+                    confidence: 1.0
+                };
+            }
+            return null;
+        } catch (error) {
+            console.log('QR扫描失败:', error);
+            return null;
+        }
+    };
         // 🎯 在脚本最顶部创建Supabase客户端
         const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_6OMKW1OxdLUhY3U3VGEYcQ_JIfFrFOP';
@@ -1742,6 +1766,7 @@ window.addEventListener('load', function() {
     </script>
 </body>
 </html>
+
 
 
 
