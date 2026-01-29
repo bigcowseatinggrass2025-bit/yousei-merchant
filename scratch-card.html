@@ -255,12 +255,30 @@
     let currentCard = null;
     let totalWinnings = 0;
 
+    // 🆕 提取刮刮乐ID的辅助函数
+    function getScratchId(param) {
+        if (param.startsWith('scratch:')) {
+            const base64Data = param.replace('scratch:', '');
+            try {
+                const decoded = JSON.parse(atob(base64Data));
+                return decoded.id;
+            } catch (e) {
+                return param;
+            }
+        } else if (param.startsWith('eyJ')) {
+            // 纯base64数据，直接作为ID
+            return param;
+        } else {
+            return param;
+        }
+    }
+
     // 🆕 修复的URL参数获取函数
     function getScratchIdFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         console.log('🔗 URL参数:', Object.fromEntries(urlParams));
         
-        // 🆕 优先检查 data 参数
+        // 优先检查 data 参数
         const dataParam = urlParams.get('data');
         if (dataParam) {
             console.log('✅ 找到data参数:', dataParam);
@@ -273,6 +291,142 @@
         return idParam;
     }
 
+    // 🆕 修复：根据刮刮乐ID生成卡片ID
+    function generateScratchCards(quantity, scratchId) {
+        console.log('🎲 生成刮刮卡，数量:', quantity, '刮刮乐ID:', scratchId);
+        const cards = [];
+        const prizes = ["多謝惠顧", "2兩", "5兩", "10兩", "50兩", "100兩"];
+        const weights = [75, 8, 7, 5, 3, 2];
+        
+        for (let i = 0; i < quantity; i++) {
+            // 🆕 使用刮刮乐ID + 索引的方式，確保ID唯一且一致
+            const cardId = `${scratchId}_card_${i}`;
+            
+            let random = Math.random() * 100;
+            let prizeIndex = 0;
+            let accumulated = 0;
+            
+            for (let j = 0; j < weights.length; j++) {
+                accumulated += weights[j];
+                if (random <= accumulated) {
+                    prizeIndex = j;
+                    break;
+                }
+            }
+            
+            cards.push({
+                id: cardId,
+                prize: prizes[prizeIndex],
+                isScratched: false,
+                claimed: false
+            });
+        }
+        
+        console.log('✅ 生成的卡片:', cards);
+        return cards;
+    }
+
+    // 🆕 修复的QR碼數據處理
+    function processQRCodeData(qrData) {
+        console.log('🎯 开始解析QR码数据:', qrData);
+        
+        try {
+            let base64Data = qrData;
+            if (qrData.startsWith('scratch:')) {
+                base64Data = qrData.replace('scratch:', '');
+                console.log('🔧 移除scratch:前缀');
+            }
+            
+            console.log('🔍 Base64数据:', base64Data);
+            
+            // 解码Base64
+            const decodedString = atob(base64Data);
+            console.log('🔍 解码后的字符串:', decodedString);
+            
+            const qrInfo = JSON.parse(decodedString);
+            console.log('✅ QR數據解析成功:', qrInfo);
+            
+            // 🆕 先檢查localStorage中是否已存在
+            const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+            let scratchData = allScratches[qrInfo.id];
+            
+            if (!scratchData) {
+                // 🆕 生成卡片時傳入刮刮乐ID
+                const cards = generateScratchCards(qrInfo.q, qrInfo.id);
+                
+                scratchData = {
+                    id: qrInfo.id,
+                    quantity: qrInfo.q,
+                    totalCost: qrInfo.c,
+                    timestamp: new Date(qrInfo.t).toISOString(),
+                    used: false,
+                    cards: cards
+                };
+                
+                // 🆕 立即保存到 localStorage
+                allScratches[qrInfo.id] = scratchData;
+                localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+                console.log('💾 新刮刮乐数据已保存到localStorage');
+            }
+            
+            // 🆕 使用 localStorage 中的数据（不是新生成的）
+            currentScratchData = scratchData;
+            
+            console.log('💾 最终使用的刮刮乐数据:', currentScratchData);
+            
+            // 计算总奖金和渲染
+            calculateTotalWinnings();
+            updatePurchaseInfo();
+            renderCards();
+            
+        } catch (error) {
+            console.error('❌ QR碼數據解析錯誤:', error);
+            showError('無效的QR碼格式: ' + error.message);
+        }
+    }
+
+    // 🆕 修复：强化版保存函数
+    function saveScratchData() {
+        if (!currentScratchData) {
+            console.log('❌ 沒有刮刮樂數據可保存');
+            return;
+        }
+        
+        console.log('💾 開始保存刮刮樂數據:', currentScratchData.id);
+        
+        try {
+            // 🆕 深拷貝數據，避免引用問題
+            const dataToSave = JSON.parse(JSON.stringify(currentScratchData));
+            
+            const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+            allScratches[dataToSave.id] = dataToSave;
+            
+            // 🆕 同步保存（不使用異步）
+            localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+            
+            // 🆕 添加保存時間戳
+            localStorage.setItem('lastScratchSave_' + dataToSave.id, Date.now().toString());
+            
+            console.log('✅ 刮刮樂數據已保存');
+            
+            // 🆕 立即驗證保存是否成功
+            const verify = JSON.parse(localStorage.getItem('virtualScratchCards'))[dataToSave.id];
+            console.log('🔍 保存驗證:', verify ? '成功' : '失敗');
+            
+        } catch (error) {
+            console.error('❌ 保存失敗:', error);
+            
+            // 🆕 備份到 sessionStorage
+            try {
+                sessionStorage.setItem('scratch_backup_' + currentScratchData.id, 
+                    JSON.stringify(currentScratchData));
+                console.log('🔄 已備份到 sessionStorage');
+            } catch (e) {
+                console.error('❌ 備份也失敗:', e);
+            }
+        }
+    }
+
     // 🆕 修复的刮刮乐数据加载函数
     function loadScratchData() {
         const scratchParam = getScratchIdFromURL();
@@ -282,25 +436,36 @@
             return;
         }
         
-        // 🆕 关键修复：优先检查 localStorage 中是否已有此刮刮乐数据
+        // 🆕 先檢查 sessionStorage 備份（刷新時可能只有這裡有數據）
+        const backupKey = 'scratch_backup_' + getScratchId(scratchParam);
+        const backupData = sessionStorage.getItem(backupKey);
+        
+        if (backupData) {
+            console.log('🔄 從sessionStorage恢復備份數據');
+            try {
+                currentScratchData = JSON.parse(backupData);
+                
+                // 🆕 恢復到 localStorage
+                const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+                allScratches[currentScratchData.id] = currentScratchData;
+                localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+                
+                // 🆕 清理備份
+                sessionStorage.removeItem(backupKey);
+                
+                console.log('✅ 備份數據恢復成功');
+                
+            } catch (e) {
+                console.error('恢復備份失敗:', e);
+            }
+        }
+        
+        // 🆕 关键修复：检查 localStorage 中是否已有此刮刮乐数据
         const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
         console.log('🔍 localStorage中的刮刮樂數量:', Object.keys(allScratches).length);
         
         // 从URL提取ID
-        let scratchId = scratchParam;
-        if (scratchParam.startsWith('scratch:')) {
-            const base64Data = scratchParam.replace('scratch:', '');
-            try {
-                const decoded = JSON.parse(atob(base64Data));
-                scratchId = decoded.id;
-                console.log('🎯 從URL解析出ID:', scratchId);
-            } catch (e) {
-                console.error('URL解析失敗:', e);
-            }
-        } else if (scratchParam.startsWith('eyJ')) {
-            // 纯base64数据，直接作为ID
-            scratchId = scratchParam;
-        }
+        let scratchId = getScratchId(scratchParam);
         
         // 🆕 如果 localStorage 中有数据，使用它（包括已使用状态）
         if (allScratches[scratchId]) {
@@ -322,7 +487,7 @@
             return;
         }
         
-        // 🆕 原有的QR碼數據格式處理（如果localStorage中没有）
+        // 🆕 如果是QR碼數據格式（新格式）
         if (scratchParam.startsWith('scratch:') || scratchParam.startsWith('eyJ')) {
             processQRCodeData(scratchParam);
             return;
@@ -345,99 +510,15 @@
             return;
         }
         
-        // 🆕 如果沒有cards，就隨機生成
+        // 🆕 如果沒有cards，就隨機生成（帶ID）
         if (!currentScratchData.cards) {
-            currentScratchData.cards = generateScratchCards(currentScratchData.quantity);
+            currentScratchData.cards = generateScratchCards(currentScratchData.quantity, currentScratchData.id);
         }
         
         // 🆕 修复：确保计算总奖金
         calculateTotalWinnings();
         updatePurchaseInfo();
         renderCards();
-    }
-
-    // 🆕 修复的QR碼數據處理
-    function processQRCodeData(qrData) {
-        console.log('🎯 开始解析QR码数据:', qrData);
-        
-        try {
-            // 🆕 处理带或不带 scratch: 前缀的数据
-            let base64Data = qrData;
-            if (qrData.startsWith('scratch:')) {
-                base64Data = qrData.replace('scratch:', '');
-                console.log('🔧 移除scratch:前缀');
-            }
-            
-            console.log('🔍 Base64数据:', base64Data);
-            
-            // 🆕 解码Base64
-            const decodedString = atob(base64Data);
-            console.log('🔍 解码后的字符串:', decodedString);
-            
-            const qrInfo = JSON.parse(decodedString);
-            console.log('✅ QR數據解析成功:', qrInfo);
-            
-            // 生成刮刮樂卡片
-            const cards = generateScratchCards(qrInfo.q);
-            console.log('🎴 生成的卡片:', cards);
-            
-            // 創建刮刮樂數據
-            currentScratchData = {
-                id: qrInfo.id,
-                quantity: qrInfo.q,
-                totalCost: qrInfo.c,
-                timestamp: new Date(qrInfo.t).toISOString(),
-                used: false,
-                cards: cards
-            };
-            
-            console.log('💾 最终刮刮乐数据:', currentScratchData);
-            
-            // 🆕 关键修复：立即保存到 localStorage
-            saveScratchData();
-            console.log('💾 数据已保存到localStorage');
-            
-            // 🆕 修复：确保计算总奖金
-            calculateTotalWinnings();
-            updatePurchaseInfo();
-            renderCards();
-            
-        } catch (error) {
-            console.error('❌ QR碼數據解析錯誤:', error);
-            showError('無效的QR碼格式: ' + error.message);
-        }
-    }
-
-    // 🆕 根據數量生成隨機卡片
-    function generateScratchCards(quantity) {
-        console.log('🎲 生成刮刮卡，数量:', quantity);
-        const cards = [];
-        const prizes = ["多謝惠顧", "2兩", "5兩", "10兩", "50兩", "100兩"];
-        const weights = [75, 8, 7, 5, 3, 2];
-        
-        for (let i = 0; i < quantity; i++) {
-            let random = Math.random() * 100;
-            let prizeIndex = 0;
-            let accumulated = 0;
-            
-            for (let j = 0; j < weights.length; j++) {
-                accumulated += weights[j];
-                if (random <= accumulated) {
-                    prizeIndex = j;
-                    break;
-                }
-            }
-            
-            cards.push({
-                id: `card_${i + 1}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-                prize: prizes[prizeIndex],
-                isScratched: false,
-                claimed: false
-            });
-        }
-        
-        console.log('✅ 生成的卡片:', cards);
-        return cards;
     }
 
     // 🆕 更新購買信息顯示
@@ -645,52 +726,65 @@
         canvas.addEventListener('touchend', stopDrawing);
     }
 
-   // 檢查刮卡進度
-function checkProgress() {
-    const canvas = document.getElementById('scratch-canvas');
-    const ctx = canvas.getContext('2d');
-    
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-    let transparentPixels = 0;
-    let totalPixels = 0;
-    
-    for (let i = 3; i < pixels.length; i += 4) {
-        if (pixels[i] === 0) {
-            transparentPixels++;
-        }
-        totalPixels++;
-    }
-    
-    const scratchPercent = (transparentPixels / totalPixels) * 100;
-    
-    if (currentCard && scratchPercent >= 60 && !currentCard.isScratched) {
-        // ✅ 關鍵修復：同步更新到數組
-        const cardIndex = currentScratchData.cards.findIndex(c => c.id === currentCard.id);
-        if (cardIndex !== -1) {
-            currentScratchData.cards[cardIndex].isScratched = true;
+    // 檢查刮卡進度
+    function checkProgress() {
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+        let transparentPixels = 0;
+        let totalPixels = 0;
+        
+        for (let i = 3; i < pixels.length; i += 4) {
+            if (pixels[i] === 0) {
+                transparentPixels++;
+            }
+            totalPixels++;
         }
         
-        currentCard.isScratched = true;
-        saveScratchData();
-        showScratchResult();
+        const scratchPercent = (transparentPixels / totalPixels) * 100;
+        
+        if (currentCard && scratchPercent >= 60 && !currentCard.isScratched) {
+            console.log('✅ 刮卡完成，开始保存数据...');
+            
+            // ✅ 確保同步到數組
+            const cardIndex = currentScratchData.cards.findIndex(c => c.id === currentCard.id);
+            if (cardIndex !== -1) {
+                currentScratchData.cards[cardIndex].isScratched = true;
+                console.log('📝 數組中的卡片已更新');
+            }
+            
+            // ✅ 更新單一卡片變數
+            currentCard.isScratched = true;
+            
+            // ✅ 立即同步保存
+            saveScratchData();
+            
+            // ✅ 觸發同步事件
+            localStorage.setItem('scratchCardLastUpdate', Date.now().toString());
+            
+            showScratchResult();
+        }
     }
-}
+
     // 顯示刮卡結果
     function showScratchResult() {
+        if (!currentCard) return;
+        
         document.getElementById('result-prize').textContent = currentCard.prize;
         document.getElementById('scratch-container').style.display = 'none';
         document.getElementById('scratch-result').style.display = 'block';
         
-        // 🆕 修复：重新计算总奖金
+        // ✅ 這裡不需要再次保存，因為 checkProgress() 已經保存過了
+        // 但是重新計算獎金
         calculateTotalWinnings();
         updateTotalWinnings();
-        saveScratchData();
         
-        // 🆕 修复：立即更新界面状态
-        setTimeout(() => {
-            renderCards();
-        }, 100);
+        // ✅ 直接更新界面（不延遲）
+        renderCards();
+        
+        console.log('🎉 刮卡結果顯示完成');
     }
 
     // 關閉刮卡結果
@@ -710,22 +804,6 @@ function checkProgress() {
         document.getElementById('error-message').textContent = message;
         document.getElementById('error-message').style.display = 'block';
         document.getElementById('cards-container').innerHTML = '';
-    }
-
-function saveScratchData() {
-        if (!currentScratchData) return;
-        
-        const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
-        allScratches[currentScratchData.id] = currentScratchData;
-        localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
-        console.log('💾 数据已保存:', currentScratchData.id);
-    }
-    // 檢查是否所有卡片都已刮開
-    function checkAllScratched() {
-        if (!currentScratchData || !currentScratchData.cards) return false;
-        
-        const allScratched = currentScratchData.cards.every(card => card.isScratched);
-        return allScratched;
     }
 
     // 檢查是否所有卡片都已刮開
@@ -792,7 +870,7 @@ function saveScratchData() {
         console.log('🎯 開始兌獎流程');
         
         if (!currentScratchData) {
-            console.error('❌ 没有刮刮乐数据');
+            console.error('❌ 沒有刮刮樂數據');
             return;
         }
         
@@ -843,64 +921,89 @@ function saveScratchData() {
             // 不重置頁面，保持當前狀態
             renderCards();
         }, 300);
-        // 🆕 在這裡添加 - 强制同步状态到仓库页面
-    forceSyncToWarehouse();
-}
-   
+    }
 
-    // 🆕 强制同步状态到仓库页面
-function forceSyncToWarehouse() {
-    console.log('🔄 强制同步状态到仓库页面');
-    
-    // 方法1: 触发storage事件
-    localStorage.setItem('scratchCardLastUpdate', Date.now().toString());
-    
-    // 方法2: 直接设置仓库页面的标记
-    localStorage.setItem('scratchCardForceRefresh', Date.now().toString());
-    
-    // 方法3: 使用BroadcastChannel（如果支持）
-    if (typeof BroadcastChannel !== 'undefined') {
-        try {
-            const channel = new BroadcastChannel('scratch_card_updates');
-            channel.postMessage({ type: 'STATUS_CHANGED', timestamp: Date.now() });
-        } catch (e) {
-            console.log('BroadcastChannel不支持:', e);
+    // 🆕 強制同步狀態到倉庫頁面
+    function forceSyncToWarehouse() {
+        console.log('🔄 強制同步狀態到倉庫頁面');
+        
+        // 方法1: 觸發storage事件
+        localStorage.setItem('scratchCardLastUpdate', Date.now().toString());
+        
+        // 方法2: 直接設置倉庫頁面的標記
+        localStorage.setItem('scratchCardForceRefresh', Date.now().toString());
+        
+        // 方法3: 使用BroadcastChannel（如果支持）
+        if (typeof BroadcastChannel !== 'undefined') {
+            try {
+                const channel = new BroadcastChannel('scratch_card_updates');
+                channel.postMessage({ type: 'STATUS_CHANGED', timestamp: Date.now() });
+            } catch (e) {
+                console.log('BroadcastChannel不支持:', e);
+            }
         }
+        
+        console.log('✅ 狀態同步完成');
     }
-    
-    console.log('✅ 状态同步完成');
-}
 
+    // 🆕 頁面卸載保護
+    function setupPageUnloadProtection() {
+        let isUnloading = false;
+        
+        // 頁面即將卸載
+        window.addEventListener('beforeunload', function(e) {
+            if (!isUnloading && currentScratchData) {
+                isUnloading = true;
+                console.log('⚠️ 頁面即將卸載，強制保存數據');
+                
+                // 同步保存
+                try {
+                    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+                    allScratches[currentScratchData.id] = currentScratchData;
+                    localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+                    
+                    // 添加驗證
+                    const verify = JSON.parse(localStorage.getItem('virtualScratchCards'))[currentScratchData.id];
+                    console.log('🔍 卸載前保存驗證:', verify ? '成功' : '失敗');
+                } catch (error) {
+                    console.error('卸載保存失敗:', error);
+                }
+            }
+        });
+        
+        // 定時保存備份（每10秒）
+        setInterval(() => {
+            if (currentScratchData && !isUnloading) {
+                try {
+                    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+                    allScratches[currentScratchData.id] = currentScratchData;
+                    localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+                    console.log('⏰ 定時備份保存完成');
+                } catch (e) {
+                    console.error('定時備份失敗:', e);
+                }
+            }
+        }, 10000);
+    }
 
-    
-
-
- // 初始化
-window.addEventListener('load', loadScratchData);
-
-// 🆕 修复：添加storage事件监听，确保数据同步
-window.addEventListener('storage', function(e) {
-    console.log('📦 Storage事件触发:', e.key);
-    if (e.key === 'virtualScratchCards') {
-        // 重新加载数据
+    // 初始化
+    window.addEventListener('load', function() {
         loadScratchData();
-    }
-});
+        setupPageUnloadProtection(); // 🆕 添加頁面卸載保護
+    });
 
-// 🆕 添加在這裡！頁面離開前強制保存
-window.addEventListener('beforeunload', function() {
-    saveScratchData();
-});
-
-// 🆕 手機切換App時保存
-document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-        saveScratchData();
-    }
-});
+    // 🆕 修复：添加storage事件监听，确保数据同步
+    window.addEventListener('storage', function(e) {
+        console.log('📦 Storage事件触发:', e.key);
+        if (e.key === 'virtualScratchCards') {
+            // 重新加载数据
+            loadScratchData();
+        }
+    });
 </script>
 </body>
 </html>
+
 
 
 
