@@ -712,18 +712,25 @@ function checkProgress() {
         document.getElementById('cards-container').innerHTML = '';
     }
 
-    // 🆕 修复：保存刮刮樂數據
-    function saveScratchData() {
+// 🆕 修复：保存刮刮樂數據
+function saveScratchData() {
     if (!currentScratchData) return;
     
     console.log('🚨 正在保存數據...');
     
     // 🚨 關鍵修復：確保currentCard狀態同步到數組
     if (currentCard && currentScratchData.cards) {
-        const cardIndex = currentScratchesData.cards.findIndex(c => c.id === currentCard.id);
+        const cardIndex = currentScratchData.cards.findIndex(c => c.id === currentCard.id); // ✅ 修正這裡
         if (cardIndex !== -1) {
             currentScratchData.cards[cardIndex].isScratched = currentCard.isScratched;
         }
+    }
+    
+    const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
+    allScratches[currentScratchData.id] = currentScratchData;
+    localStorage.setItem('virtualScratchCards', JSON.stringify(allScratches));
+    console.log('💾 数据已保存:', currentScratchData.id);
+}
     }
     
     const allScratches = JSON.parse(localStorage.getItem('virtualScratchCards') || '{}');
@@ -912,6 +919,7 @@ document.addEventListener('visibilitychange', function() {
 </script>
 </body>
 </html>
+
 
 
 
