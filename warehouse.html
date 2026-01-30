@@ -1636,85 +1636,56 @@ function applyGuardianEffect(guardianName) {
     
     console.log(`✨ 應用護法特效: ${guardianName}`);
     
-// 1. 更新標題
-const headerTitle = document.querySelector('.header h1');
-if (headerTitle) {
-    // 顯示簡化的護法名稱（去掉"護法"二字）
-    const shortGuardianName = guardianName.replace('護法', '');
+    // 1. 只更新標題 ✅
+    const headerTitle = document.querySelector('.header h1');
+    if (headerTitle) {
+        const shortGuardianName = guardianName.replace('護法', '');
+        headerTitle.innerHTML = `
+            📱 幽街貨卡倉庫
+            <div style="
+                color: gold;
+                font-size: 1rem;
+                margin-top: 5px;
+                text-shadow: 0 0 10px gold;
+            ">
+                🛡️ 護法神保護中(${shortGuardianName})
+            </div>
+        `;
+    }
     
-    headerTitle.innerHTML = `
-        📱 幽街貨卡倉庫
-        <div style="
-            color: gold;
-            font-size: 1rem;
-            margin-top: 5px;
-            text-shadow: 0 0 10px gold;
-            animation: glow 2s infinite alternate;
-        ">
-            🛡️ 護法神保護中(${shortGuardianName})
-        </div>
-    `;
-}
+    // 2. 設置背景 ✅
+    const guardianBgMap = {
+        "牛神護法": "bull_bg.png",
+        "白虎護法": "tiger_bg.png",
+        "青龍護法": "dragon_bg.png", 
+        "朱雀護法": "phoenix_bg.png",
+        "玄武護法": "turtle_bg.png"
+    };
     
-  
+    const bgFilename = guardianBgMap[guardianName];
+    if (bgFilename) {
+        console.log(`🖼️ 設置背景: ${bgFilename}`);
+        document.body.style.backgroundImage = `
+            linear-gradient(rgba(26, 42, 58, 0.7), rgba(44, 62, 80, 0.7)),
+            url("./images/guardian_bg/${bgFilename}")
+        `;
+    }
     
-    // 3. 護法對應的背景圖片
-const guardianBgMap = {
-    "牛神護法": "bull_bg.png",
-    "白虎護法": "tiger_bg.png", 
-    "青龍護法": "dragon_bg.png",
-    "朱雀護法": "phoenix_bg.png",
-    "玄武護法": "turtle_bg.png"
-};
-
-const bgFilename = guardianBgMap[guardianName];
-if (bgFilename) {
-    console.log(`🖼️ 嘗試載入護法背景: ${bgFilename}`);
-    
-    // 直接設置背景，不檢查（先讓它生效）
-    const newBackground = `
-        linear-gradient(rgba(26, 42, 58, 0.7), rgba(44, 62, 80, 0.7)),
-        url("./images/guardian_bg/${bgFilename}")
-    `;
-    
-    console.log('🎨 新背景樣式:', newBackground);
-    
-    // 立即設置背景
-    document.body.style.backgroundImage = newBackground;
-    document.body.style.backgroundSize = 'cover';
-    document.body.style.backgroundRepeat = 'no-repeat';
-    document.body.style.backgroundPosition = 'center center';
-    document.body.style.backgroundAttachment = 'fixed';
-    
-    console.log('✅ 背景已設置');
-}
-    
-    // 4. 添加CSS動畫
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes glow {
-        0% { 
-            text-shadow: 0 0 5px gold;
-            transform: scale(1);
+    // 3. 添加動畫 ✅
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes guardian-glow {
+            0% { text-shadow: 0 0 5px gold; }
+            100% { text-shadow: 0 0 20px gold, 0 0 30px orange; }
         }
-        100% { 
-            text-shadow: 0 0 20px gold, 0 0 30px orange;
-            transform: scale(1.05);
+        .header h1 div {
+            animation: guardian-glow 2s infinite alternate;
         }
-    }
+    `;
+    document.head.appendChild(style);
     
-    /* 簡單的閃爍效果 */
-    @keyframes pulse {
-        0%, 100% { opacity: 0.8; }
-        50% { opacity: 1; }
-    }
-    
-    .header h1 div {
-        animation: glow 2s infinite alternate, pulse 3s infinite;
-    }
-`;
-document.head.appendChild(style);
-
+    console.log(`✅ ${guardianName} 護法特效已應用`);
+}
 // 顯示測試數據
 function displayTestData() {
     const testCards = getTestWarehouseCards();
@@ -2678,4 +2649,5 @@ function displayTestData() {
         });
     </script>
 </body>
+
 </html>
