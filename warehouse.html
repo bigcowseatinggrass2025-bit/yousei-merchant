@@ -923,6 +923,49 @@
 
     <script>
         // ==================== 全局變量和常量 ====================
+
+
+	// 全螢幕函數
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        // 進入全螢幕
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+        fullscreenBtn.innerHTML = '📱';
+        fullscreenBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+    } else {
+        // 退出全螢幕
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+        fullscreenBtn.innerHTML = '📱';
+        fullscreenBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
+    }
+}
+
+// 綁定點擊事件
+fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+// 添加到頁面
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.appendChild(fullscreenBtn);
+});
+
+// 監聽全螢幕變化
+document.addEventListener('fullscreenchange', function() {
+    const isFullscreen = !!document.fullscreenElement;
+    console.log('全螢幕狀態:', isFullscreen ? '開啟' : '關閉');
+});
         
         // 🎯 在脚本最顶部创建Supabase客户端
         const SUPABASE_URL = 'https://yfjvwwkelkvnlcdyqeck.supabase.co';
@@ -2987,4 +3030,5 @@ document.getElementById('close-detail').addEventListener('click', function() {
 </body>
 
 </html>
+
 
