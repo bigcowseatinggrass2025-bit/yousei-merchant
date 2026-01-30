@@ -1433,7 +1433,8 @@ window.showMysteryCardDetail = function(card) {
     return count;
 }
         
-        function renderEquipment(equipment) {
+       // 🆕 渲染裝備視圖
+function renderEquipment(equipment) {
     const container = document.getElementById('cards-container');
     
     // 🆕 檢查數據
@@ -1454,6 +1455,16 @@ window.showMysteryCardDetail = function(card) {
         { key: 'pet', name: '靈寵' },
         { key: 'mount', name: '座騎' }
     ];
+    
+    // 裝備類型中文映射
+    const typeChineseMap = {
+        'weapon': '武器',
+        'armor': '護甲',
+        'accessory': '飾品',
+        'pet': '靈寵',
+        'mount': '座騎',
+        'item': '道具'
+    };
     
     // 計算背包物品數量
     const inventoryCount = equipment.inventory ? equipment.inventory.length : 0;
@@ -1494,7 +1505,7 @@ window.showMysteryCardDetail = function(card) {
                         <div class="equipment-slot-view" onclick="showEquipmentDetail(${JSON.stringify(item).replace(/"/g, '&quot;')})">
                             <div class="slot-type">背包</div>
                             <div class="equipment-name">${item.name}</div>
-                            ${item.type ? `<div class="equipment-bonuses">類型: ${item.type}</div>` : ''}
+                            ${item.type ? `<div class="equipment-bonuses">類型: ${typeChineseMap[item.type] || item.type}</div>` : ''}
                         </div>
                     `).join('')}
                 </div>
@@ -1508,63 +1519,85 @@ window.showMysteryCardDetail = function(card) {
         </div>
     `;
 }
-        
-        // 🆕 渲染空的裝備狀態
-        function renderEmptyEquipment() {
-            const container = document.getElementById('cards-container');
-            
-            container.innerHTML = `
-                <div class="empty-state">
-                    <p>🛡️ 沒有裝備</p>
-                    <p>在遊戲中獲取更多裝備吧！</p>
-                </div>
-            `;
+
+// 🆕 顯示裝備詳情（全局函數）
+window.showEquipmentDetail = function(equipment) {
+    document.getElementById('detail-title').textContent = equipment.name;
+    
+    const goodsTags = document.getElementById('detail-goods');
+    
+    // 🆕 類型中文映射
+    const typeChineseMap = {
+        'weapon': '武器',
+        'armor': '護甲', 
+        'accessory': '飾品',
+        'pet': '靈寵',
+        'mount': '座騎',
+        'item': '道具'
+    };
+    
+    // 🆕 獲取類型中文名稱
+    const equipmentType = equipment.type || 'item';
+    const typeChinese = typeChineseMap[equipmentType] || equipmentType;
+    
+    let typeHtml = '';
+    if (equipment.type) {
+        typeHtml = `
+            <div style="margin-bottom: 12px;">
+                <div style="color: #ffd700; margin-bottom: 5px;">📦 裝備類型</div>
+                <div>${typeChinese}</div>
+            </div>
+        `;
+    }
+    
+    let bonusesHtml = '';
+    if (equipment.bonuses) {
+        bonusesHtml = `
+            <div style="margin-bottom: 12px;">
+                <div style="color: #ffd700; margin-bottom: 5px;">📊 屬性加成</div>
+                <div>交易加成: +${equipment.bonuses.trade || 0}</div>
+                <div>銀兩加成: +${equipment.bonuses.wealth || 0}</div>
+                <div>抽卡加成: +${equipment.bonuses.draw || 0}</div>
+            </div>
+        `;
+    }
+    
+    let specialHtml = '';
+    if (equipment.special) {
+        specialHtml = `
+            <div style="margin-bottom: 12px;">
+                <div style="color: #ffd700; margin-bottom: 5px;">✨ 特殊效果</div>
+                <div>${equipment.special}</div>
+            </div>
+        `;
+    }
+    
+    // 🆕 修正：隱藏原有的"貨物:"標籤並顯示正確內容
+    const detailGoodsContainer = document.querySelector('.detail-goods');
+    if (detailGoodsContainer) {
+        const goodsLabel = detailGoodsContainer.querySelector('div:first-child');
+        if (goodsLabel && goodsLabel.textContent.includes('貨物:')) {
+            goodsLabel.textContent = '裝備詳情:';
         }
-        
-        // 🆕 顯示裝備詳情（全局函數）
-        window.showEquipmentDetail = function(equipment) {
-            document.getElementById('detail-title').textContent = equipment.name;
-            
-            const goodsTags = document.getElementById('detail-goods');
-            
-            let bonusesHtml = '';
-            if (equipment.bonuses) {
-                bonusesHtml = `
-                    <div style="margin-bottom: 10px;">
-                        <div style="color: #ffd700; margin-bottom: 5px;">📊 屬性加成</div>
-                        <div>交易加成: +${equipment.bonuses.trade || 0}</div>
-                        <div>銀兩加成: +${equipment.bonuses.wealth || 0}</div>
-                        <div>抽卡加成: +${equipment.bonuses.draw || 0}</div>
-                    </div>
-                `;
-            }
-            
-            let specialHtml = '';
-            if (equipment.special) {
-                specialHtml = `
-                    <div style="margin-bottom: 10px;">
-                        <div style="color: #ffd700; margin-bottom: 5px;">✨ 特殊效果</div>
-                        <div>${equipment.special}</div>
-                    </div>
-                `;
-            }
-            
-            goodsTags.innerHTML = `
-                <div>
-                    ${bonusesHtml}
-                    ${specialHtml}
-                    <div style="color: #bbb; font-size: 0.9rem;">
-                        ${equipment.description || '無描述'}
-                    </div>
-                </div>
-            `;
-            
-            // 隱藏價格資訊（裝備不需要）
-            document.getElementById('detail-buy-price').parentElement.style.display = 'none';
-            document.getElementById('detail-sell-price').parentElement.style.display = 'none';
-            
-            document.getElementById('detail-panel').style.display = 'block';
-        };
+    }
+    
+    goodsTags.innerHTML = `
+        <div>
+            ${typeHtml}
+            ${bonusesHtml}
+            ${specialHtml}
+            <div style="color: #bbb; font-size: 0.9rem; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                ${equipment.description || '無描述'}
+            </div>
+        </div>
+    `;
+    
+    // 隱藏價格資訊（裝備不需要）
+    document.getElementById('detail-buy-price').parentElement.style.display = 'none';
+    document.getElementById('detail-sell-price').parentElement.style.display = 'none';
+    
+    document.getElementById('detail-panel').style.display = 'block';
+};
         
         // ==================== 倉庫功能（原有功能保持不變） ====================
         
@@ -2954,3 +2987,4 @@ document.getElementById('close-detail').addEventListener('click', function() {
 </body>
 
 </html>
+
