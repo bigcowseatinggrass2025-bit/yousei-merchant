@@ -924,8 +924,30 @@
     <script>
         // ==================== 全局變量和常量 ====================
 
+	// ==================== 全螢幕功能 ====================
 
-	// 全螢幕函數
+// 創建全螢幕按鈕
+const fullscreenBtn = document.createElement('button');
+fullscreenBtn.innerHTML = '📱';
+fullscreenBtn.title = '全螢幕模式';
+fullscreenBtn.style.cssText = `
+    position: fixed;
+    bottom: 160px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    border: none;
+    border-radius: 50%;
+    color: #1a2a3a;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    font-weight: bold;
+`;
+
+// 全螢幕函數
 function toggleFullscreen() {
     if (!document.fullscreenElement) {
         // 進入全螢幕
@@ -3030,5 +3052,6 @@ document.getElementById('close-detail').addEventListener('click', function() {
 </body>
 
 </html>
+
 
 
